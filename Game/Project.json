@@ -1,0 +1,8 @@
+{
+  "Name": "Rhenium.Examples.Game",
+  "Version": "1.0.0",
+  "Src": ["./Src"],
+  "Res": ["./Res"],
+  "Dependencies": {},
+  "DefaultEntry": "Rhenium.Examples.Game.Main"
+}
