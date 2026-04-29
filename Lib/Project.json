@@ -1,0 +1,8 @@
+{
+  "Name": "Rhenium.Lib",
+  "Version": "1.0.0",
+  "AllowC": true,
+  "Src": ["./Src"],
+  "Res": ["./Res"],
+  "Dependencies": {}
+}
