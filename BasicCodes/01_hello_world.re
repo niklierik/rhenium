@@ -1,3 +1,8 @@
+#Default
 entry HelloWorld {
-    Console.WriteLine("Hello");
+    Console.WriteLine("Hello!");
+}
+
+entry HiWorld {
+    Console.WriteLine("Hi!");
 }
