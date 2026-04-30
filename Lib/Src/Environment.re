@@ -1,8 +1,7 @@
 namespace Rhenium.Lib;
 
 group Environment {
-    const NewLine = C_EOL;
-       
+    const NewLine = C_EOL;       
 }
 
 c_decl

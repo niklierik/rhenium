@@ -15,14 +15,13 @@ c_decl class String(
         return data;
     }
 
-    c_decl
-        fun Equals(other: Ref<String>): Boolean 
-    as Rhenium_Lib_String_Equals;
-    
-    c_decl 
-        fun Compare(other: Ref<String>): I32 
-    as Rhenium_Lib_String_Compare;
+    fun Equals(other: Ref<String>): Boolean {
+        return CompareRaw(this, other, Culture.DefaultCulture);
+    }
 
+    fun Equals(other: Ref<String>, culture: Ref<Culture>): Boolean {
+        return CompareRaw(this, other, culture);
+    }
 
     #c_return_as_pointer_parameter("out_target")
     c_decl
@@ -51,27 +50,8 @@ c_decl class String(
         static fun CompareRaw(
             self: Ptr<Character>, 
             other: Ptr<Character>, 
-            collator: Ptr<StringCollator>
+            culture: Ref<Culture>
         ): I32 
     as Rhenium_Lib_String_Compare_Raw;
 }
 as Rhenium_Lib_String;
-
-c_decl type StringCollator as UCollator;
-
-c_decl property DefaultCollator(): Ref<StringCollator> as Rhenium_Lib_DefaultCollator; 
-c_decl fun DestroyDefaultCollator() as Rhenium_Lib_DestroyDefaultCollator; 
-
-delete {
-    DestroyDefaultCollator();
-}
-
-c_decl type StringCaseMap as UCaseMap;
-
-c_decl property DefaultCaseMap(): Ref<StringCaseMap> as Rhenium_Lib_DefaultCaseMap; 
-c_decl fun DestroyDefaultCaseMap() as Rhenium_Lib_DestroyDefaultCaseMap; 
-
-delete {
-    DestroyDefaultCollator();
-    DestroyDefaultCaseMap();
-}
