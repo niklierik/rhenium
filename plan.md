@@ -9,6 +9,7 @@
 - C (C23)
 - CMake
 - ICU (https://github.com/unicode-org/icu)
+- CLI (https://github.com/daniele77/cli)
 
 ## Felépítés
 
