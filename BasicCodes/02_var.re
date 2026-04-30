@@ -22,4 +22,13 @@ entry Main {
 
     const signedLong: I64 = -2^63;
     const unsignedLong: U64 = 2^64;
+
+    const character: Character = 'a';
+    const logical: Boolean = character == 'a';
+
+    // more about strings later
+    const string: Ref<String> = "Hello";
+
+    // change variables freely
+    Console.WriteLine(f"Value of {nameof(float)}: {float}");
 }
