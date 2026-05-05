@@ -13,7 +13,7 @@ repositories {
 dependencies {
     testImplementation(platform("org.junit:junit-bom:5.10.0"))
     testImplementation("org.junit.jupiter:junit-jupiter")
-    antlr("org.antlr:antlr4:4.5")
+    antlr("org.antlr:antlr4:4.13.2")
 }
 
 tasks.test {
@@ -22,6 +22,6 @@ tasks.test {
 
 tasks.generateGrammarSource {
     maxHeapSize = "64m"
-    outputDirectory=File(outputDirectory.toString()+"/me/eriknikli/lang/grammar" )
+    outputDirectory = File(outputDirectory.toString() + "/me/eriknikli/lang/grammar")
     arguments = arguments + listOf("-visitor", "-long-messages")
 }
