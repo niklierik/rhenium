@@ -3,7 +3,10 @@ plugins {
 }
 
 group = "me.eriknikli"
-version = "unspecified"
+
+val rheniumVersion: String by project
+
+version = rheniumVersion
 
 repositories {
     mavenCentral()

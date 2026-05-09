@@ -3,7 +3,11 @@ plugins {
 }
 
 group = "me.eriknikli"
-version = "unspecified"
+
+
+val rheniumVersion: String by project
+
+version = rheniumVersion
 
 repositories {
     mavenCentral()
@@ -11,6 +15,7 @@ repositories {
 
 dependencies {
     testImplementation(kotlin("test"))
+    implementation(project(":parser"))
 }
 
 tasks.test {
