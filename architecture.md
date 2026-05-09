@@ -18,7 +18,7 @@ flowchart TD
         staticheck["Statikus elemző (Lint)"]
     end
 
-    semanticAnaylzer-->validatedAst(("Validált<br>AST"))-->transpiler["Transpiler"]
+    semanticAnaylzer--"Eredeti AST dekorálása"-->actionTree(("Action Tree<br>Kontextussal dekorált AST"))-->transpiler["Transpiler"]
     transpiler-->c(("C forráskód"))
     c-->compiler["Build<br>(CMake & clang / gcc)"]
     compiler-->binary(("Futtatható<br>bináris"))
