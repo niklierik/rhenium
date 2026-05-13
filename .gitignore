@@ -45,3 +45,4 @@ bin/
 .DS_Store
 
 parser/src/main/gen/
+**.tokens

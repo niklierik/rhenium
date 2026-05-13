@@ -5,11 +5,22 @@ plugins {
 
     // Apply the Application plugin to add support for building an executable JVM application.
     application
+    id("org.jetbrains.kotlin.kapt")
 }
 
 dependencies {
+    val daggerVersion = "2.56.2"
+
     // Project "app" depends on project "utils". (Project paths are separated with ":", so ":utils" refers to the top-level "utils" project.)
     implementation(project(":common"))
+    implementation(project(":parser"))
+    implementation(project(":ast"))
+    implementation(project(":semantic-analyzer"))
+    implementation(project(":transpiler"))
+    implementation("com.google.dagger:dagger:$daggerVersion")
+    kapt("com.google.dagger:dagger-compiler:$daggerVersion")
+    implementation("org.antlr:antlr4-runtime:4.13.2")
+    implementation("io.github.joelromanpr:commandline-ktx:1.0.0")
 }
 
 application {

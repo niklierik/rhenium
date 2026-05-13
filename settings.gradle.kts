@@ -10,11 +10,12 @@ plugins {
     id("org.gradle.toolchains.foojay-resolver-convention") version "0.8.0"
 }
 
+rootProject.name = "rhenium"
+
 include(":app")
 include(":common")
 
-rootProject.name = "rhenium"
-include("parser")
-include("ast-builder")
-include("semantic-analyzer")
-include("transpiler")
+include(":parser")
+include(":ast")
+include(":semantic-analyzer")
+include(":transpiler")

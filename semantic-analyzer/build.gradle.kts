@@ -14,6 +14,7 @@ repositories {
 
 dependencies {
     testImplementation(kotlin("test"))
+    implementation("com.google.dagger:dagger:2.56.2")
 }
 
 tasks.test {

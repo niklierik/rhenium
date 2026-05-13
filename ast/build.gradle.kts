@@ -16,6 +16,8 @@ repositories {
 dependencies {
     testImplementation(kotlin("test"))
     implementation(project(":parser"))
+    implementation("com.google.dagger:dagger:2.56.2")
+    implementation("org.antlr:antlr4-runtime:4.13.2")
 }
 
 tasks.test {
