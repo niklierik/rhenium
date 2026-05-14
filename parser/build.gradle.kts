@@ -23,9 +23,18 @@ tasks.test {
     useJUnitPlatform()
 }
 
+tasks.compileJava {
+    dependsOn(tasks.generateGrammarSource)
+}
+
+tasks.jar {
+    from(sourceSets.main.get().output)
+}
+
 tasks.generateGrammarSource {
     arguments = arguments + listOf(
         "-visitor",
+        "-no-listener",
         "-long-messages",
         // This tells the ANTLR tool what package statement to write inside the files
         "-package", "me.eriknikli.rhenium.parser"

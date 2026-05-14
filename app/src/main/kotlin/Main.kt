@@ -15,5 +15,6 @@ fun main(args: Array<String>) {
 
     val factory = DaggerRheniumCompilerFactory.create()
     val compiler = factory.makeCompiler()
+    compiler.compile(CompilerOptions(path))
 
 }
