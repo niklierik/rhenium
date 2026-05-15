@@ -1,5 +1,8 @@
 lexer grammar RheniumLexer;
 
+EQUALS: '=';
+LET: 'let';
+
 SEMICOLON: ';';
 
 OPEN_BRACKET: '(';
@@ -20,6 +23,7 @@ U32: 'U32';
 U16: 'U16';
 U8: 'U8';
 
+ID: [a-zA-Z_][a-zA-Z0-9_]*;
 FLOAT: SIGN? NUMBERPART? DECIMAL NUMBERPART;
 SIGNED_INT: SIGN NUMBERPART;
 UNSIGNED_INT: NUMBERPART;

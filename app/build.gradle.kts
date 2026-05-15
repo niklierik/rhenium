@@ -15,7 +15,8 @@ dependencies {
     implementation(project(":common"))
     implementation(project(":parser"))
     implementation(project(":ast"))
-    implementation(project(":semantic-analyzer"))
+    implementation(project(":semanticAnalyzer"))
+    implementation(project(":semanticContext"))
     implementation(project(":transpiler"))
     implementation("com.google.dagger:dagger:$daggerVersion")
     kapt("com.google.dagger:dagger-compiler:$daggerVersion")
@@ -26,7 +27,7 @@ dependencies {
 application {
     // Define the Fully Qualified Name for the application main class
     // (Note that Kotlin compiles `App.kt` to a class with FQN `com.example.app.AppKt`.)
-    mainClass = "me.eriknikli.app.AppKt"
+    mainClass = "me.eriknikli.rhenium.MainKt"
 }
 
 

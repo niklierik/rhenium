@@ -14,8 +14,8 @@ rootProject.name = "rhenium"
 
 include(":app")
 include(":common")
-
 include(":parser")
 include(":ast")
-include(":semantic-analyzer")
+include(":semanticAnalyzer")
 include(":transpiler")
+include(":semanticContext")

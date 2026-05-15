@@ -5,7 +5,16 @@ options {
 }
 
 root:
-    literal* EOF;
+    statement* EOF;
+
+statement:
+    varDeclarationStatement;
+
+varDeclarationStatement:
+    LET ID EQUALS expression SEMICOLON;
+
+expression:
+    literal;
 
 literal:
     typedLiteral

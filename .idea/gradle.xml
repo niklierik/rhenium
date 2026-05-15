@@ -25,7 +25,8 @@
             <option value="$PROJECT_DIR$/buildSrc" />
             <option value="$PROJECT_DIR$/common" />
             <option value="$PROJECT_DIR$/parser" />
-            <option value="$PROJECT_DIR$/semantic-analyzer" />
+            <option value="$PROJECT_DIR$/semanticAnalyzer" />
+            <option value="$PROJECT_DIR$/semanticContext" />
             <option value="$PROJECT_DIR$/transpiler" />
           </set>
         </option>

@@ -21,6 +21,7 @@ dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter-params:5.10.0")
 
     implementation(project(":parser"))
+    implementation(project(":semanticContext"))
     testImplementation(project(":parser"))
 
     implementation("org.antlr:antlr4-runtime:4.13.2")

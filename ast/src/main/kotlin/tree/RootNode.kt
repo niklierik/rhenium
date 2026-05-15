@@ -1,7 +1,7 @@
 package me.eriknikli.rhenium.ast.tree
 
-import me.eriknikli.rhenium.ast.tree.expressions.literals.Literal
+import me.eriknikli.rhenium.ast.tree.statements.Statement
 
 data class RootNode(
-    val literals: List<Literal<*>>
-)
+    val statements: List<Statement>
+) : AstNode
