@@ -1,8 +1,8 @@
-package me.eriknikli.rhenium.semanticContext.types
+package me.eriknikli.rhenium.semanticContext.scope.types
 
 enum class SignedIntType(
     private val index: Int,
-    override val cTypeName: String
+    override val cName: String
 ) : ExpressionType {
     I64(0, "int64_t"), I32(1, "int32_t"), I16(2, "int16_t"), I8(3, "int8_t");
 
@@ -10,7 +10,7 @@ enum class SignedIntType(
         if (target !is SignedIntType) {
             return false
         }
-        return index < target.index
+        return index >= target.index
     }
 
     override fun canAssignToExplicit(target: ExpressionType): Boolean {
@@ -20,7 +20,7 @@ enum class SignedIntType(
 
 enum class UnsignedIntType(
     private val index: Int,
-    override val cTypeName: String
+    override val cName: String
 ) : ExpressionType {
     U64(0, "uint64_t"),
     U32(1, "uint32_t"),
@@ -31,7 +31,7 @@ enum class UnsignedIntType(
         if (target !is UnsignedIntType) {
             return false
         }
-        return index < target.index
+        return index >= target.index
     }
 
     override fun canAssignToExplicit(target: ExpressionType): Boolean {
@@ -41,7 +41,7 @@ enum class UnsignedIntType(
 
 enum class FloatType(
     private val index: Int,
-    override val cTypeName: String
+    override val cName: String
 ) : ExpressionType {
     F64(0, "float64_t"),
     F32(1, "float32_t");
@@ -50,7 +50,7 @@ enum class FloatType(
         if (target !is FloatType) {
             return false
         }
-        return index < target.index
+        return index >= target.index
     }
 
     override fun canAssignToExplicit(target: ExpressionType): Boolean {

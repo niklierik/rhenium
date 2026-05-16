@@ -1,4 +1,6 @@
 package me.eriknikli.rhenium.semanticContext.tree.statements
 
-interface StatementContext {
+import me.eriknikli.rhenium.semanticContext.tree.Context
+
+interface StatementContext : Context {
 }

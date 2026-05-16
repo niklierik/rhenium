@@ -1,9 +1,9 @@
 package me.eriknikli.rhenium.semanticAnalyzer.expressions
 
 import me.eriknikli.rhenium.ast.tree.expressions.literals.*
-import me.eriknikli.rhenium.semanticContext.types.FloatType
-import me.eriknikli.rhenium.semanticContext.types.SignedIntType
-import me.eriknikli.rhenium.semanticContext.types.UnsignedIntType
+import me.eriknikli.rhenium.semanticContext.scope.types.FloatType
+import me.eriknikli.rhenium.semanticContext.scope.types.SignedIntType
+import me.eriknikli.rhenium.semanticContext.scope.types.UnsignedIntType
 import javax.inject.Inject
 import javax.inject.Singleton
 

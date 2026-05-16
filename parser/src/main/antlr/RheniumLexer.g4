@@ -1,8 +1,23 @@
 lexer grammar RheniumLexer;
 
-EQUALS: '=';
 LET: 'let';
+CONST: 'const';
+THIS: 'this';
 
+EQUALSEQUALS: '==';
+EQUALS: '=';
+
+PLUSPLUS: '++';
+PLUS: '+';
+MINUSMINUS: '--';
+MINUS: '-';
+STAR: '*';
+SLASH: '/';
+PERCENT: '%';
+HAT: '^';
+BANG: '!';
+
+COLON: ':';
 SEMICOLON: ';';
 
 OPEN_BRACKET: '(';

@@ -1,5 +1,6 @@
 package me.eriknikli.rhenium.ast.visitors.statements
 
+import me.eriknikli.rhenium.ast.tree.expressions.Identifier
 import me.eriknikli.rhenium.ast.tree.statements.Statement
 import me.eriknikli.rhenium.ast.tree.statements.vars.VarDeclarationStatement
 import me.eriknikli.rhenium.ast.visitors.expressions.IExpressionVisitor
@@ -21,8 +22,18 @@ class StatementVisitor
     lateinit var expressionVisitor: IExpressionVisitor
 
     override fun visitVarDeclarationStatement(ctx: RheniumParser.VarDeclarationStatementContext): Statement {
-        val name = ctx.ID().text
+        val mutable = ctx.LET() != null
+
+        val name = ctx.name.text
+
+        val expectedTypeNode = ctx.expectedType
+        var expectedType: Identifier? = null
+        if (expectedTypeNode != null) {
+            expectedType = expressionVisitor.visitTypeName(expectedTypeNode)
+        }
+
         val expression = expressionVisitor.visitExpression(ctx.expression())
-        return VarDeclarationStatement(true, name, expression)
+
+        return VarDeclarationStatement(mutable, name, expectedType, expression)
     }
 }

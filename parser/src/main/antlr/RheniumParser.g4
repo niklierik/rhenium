@@ -8,17 +8,46 @@ root:
     statement* EOF;
 
 statement:
-    varDeclarationStatement;
+    varDeclarationStatement
+    | varAssignmentStatement
+    | expressionStatement;
 
 varDeclarationStatement:
-    LET ID EQUALS expression SEMICOLON;
+    (LET | CONST) name=ID (COLON expectedType=typeName)? EQUALS expression SEMICOLON;
+
+typeName:
+    identifier
+    | unsignedTypes
+    | signedTypes
+    | floatTypes;
+
+varAssignmentStatement:
+    leftValue EQUALS expression SEMICOLON;
+
+expressionStatement:
+    expression SEMICOLON;
 
 expression:
-    literal;
+    primary #primaryExp
+    | leftValue #leftValueExp
+    | op = (PLUS | MINUS | BANG) expression #unaryExp
+    | expression HAT expression #powExp
+    | expression op = (STAR | SLASH | PERCENT) expression #mulExp
+    | expression op = (PLUS | MINUS) expression #addExp;
+
+primary:
+    OPEN_BRACKET expression CLOSE_BRACKET #groupPrimitive
+    | literal #literalPrimitive;
+
+leftValue:
+    identifier;
 
 literal:
     typedLiteral
     | basicLiteral;
+
+identifier:
+    ID;
 
 unsignedTypes:
     U64

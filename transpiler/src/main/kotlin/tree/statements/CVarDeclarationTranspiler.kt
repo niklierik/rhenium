@@ -18,7 +18,7 @@ constructor() : IVarDeclarationTranspiler {
     lateinit var expressionTranspiler: IExpressionTranspiler
 
     override fun transpile(node: VarDeclarationStatement, output: OutputStream) {
-        val cType = node.context.typeToDeclare.cTypeName
+        val cType = node.context.typeToDeclare.cName
 
         output.writeText(cType)
         output.writeText(" ")
