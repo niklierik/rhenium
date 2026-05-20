@@ -1,7 +1,7 @@
 package me.eriknikli.rhenium.semanticContext.scope.types
 
 enum class SignedIntType(
-    private val index: Int,
+    val index: Int,
     override val cName: String
 ) : ExpressionType {
     I64(0, "int64_t"), I32(1, "int32_t"), I16(2, "int16_t"), I8(3, "int8_t");
@@ -19,7 +19,7 @@ enum class SignedIntType(
 }
 
 enum class UnsignedIntType(
-    private val index: Int,
+    val index: Int,
     override val cName: String
 ) : ExpressionType {
     U64(0, "uint64_t"),
@@ -40,7 +40,7 @@ enum class UnsignedIntType(
 }
 
 enum class FloatType(
-    private val index: Int,
+    val index: Int,
     override val cName: String
 ) : ExpressionType {
     F64(0, "float64_t"),

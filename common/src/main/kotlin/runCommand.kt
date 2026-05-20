@@ -1,7 +1,7 @@
 import java.io.File
 import java.util.concurrent.TimeUnit
 
-fun String.runCommand(workingDir: File) {
+fun String.runCommand(workingDir: File = File(".")) {
     ProcessBuilder(*split(" ").toTypedArray())
         .directory(workingDir)
         .redirectOutput(ProcessBuilder.Redirect.INHERIT)

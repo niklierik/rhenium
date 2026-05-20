@@ -22,6 +22,6 @@ constructor() : IRootTranspiler {
         for (statement in node.statements) {
             statementTranspiler.transpile(statement, output)
         }
-        output.writeText("}")
+        output.writeText(";return 0;}")
     }
 }

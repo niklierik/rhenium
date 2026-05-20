@@ -20,6 +20,7 @@ class CTranspiler
     override fun transpile(root: RootNode, outputStream: OutputStream) {
         outputStream.writeText(
             """
+            #include <math.h>
             #include <stdio.h>
             #include <stdlib.h>
             #include <stdint.h>
@@ -27,6 +28,7 @@ class CTranspiler
             
             typedef _Float32 float32_t;
             typedef _Float64 float64_t;
+            typedef _Bool boolean_t;
             """.trimIndent()
         )
         outputStream.writeLineBreak()

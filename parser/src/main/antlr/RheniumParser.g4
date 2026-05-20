@@ -31,9 +31,11 @@ expression:
     primary #primaryExp
     | leftValue #leftValueExp
     | op = (PLUS | MINUS | BANG) expression #unaryExp
-    | expression HAT expression #powExp
-    | expression op = (STAR | SLASH | PERCENT) expression #mulExp
-    | expression op = (PLUS | MINUS) expression #addExp;
+    | left=expression op = (STAR | SLASH | PERCENT) right=expression #mulExp
+    | left=expression op = (PLUS | MINUS) right=expression #addExp
+    | left=expression op = (LESS | GREATER | LESS_EQUALS | GREATER_EQUALS) right=expression #relationalExp
+    | left=expression op = (EQUALSEQUALS | NOTEQUALS) right=expression #equalityExp
+    | left=expression op = (AND | OR) right=expression #logicalExp;
 
 primary:
     OPEN_BRACKET expression CLOSE_BRACKET #groupPrimitive
@@ -43,8 +45,12 @@ leftValue:
     identifier;
 
 literal:
-    typedLiteral
+    booleanLiteral
+    | typedLiteral
     | basicLiteral;
+
+booleanLiteral:
+    TRUE | FALSE;
 
 identifier:
     ID;

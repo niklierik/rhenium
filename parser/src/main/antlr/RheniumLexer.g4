@@ -2,11 +2,21 @@ lexer grammar RheniumLexer;
 
 LET: 'let';
 CONST: 'const';
+
 THIS: 'this';
+TRUE: 'true';
+FALSE: 'false';
+
+IF: 'if';
+ELSE: 'else';
 
 EQUALSEQUALS: '==';
+NOTEQUALS: '!=';
+GREATER_EQUALS: '>=';
+LESS_EQUALS: '<=';
+GREATER: '>';
+LESS: '<';
 EQUALS: '=';
-
 PLUSPLUS: '++';
 PLUS: '+';
 MINUSMINUS: '--';
@@ -16,6 +26,8 @@ SLASH: '/';
 PERCENT: '%';
 HAT: '^';
 BANG: '!';
+AND: '&&';
+OR: '||';
 
 COLON: ':';
 SEMICOLON: ';';

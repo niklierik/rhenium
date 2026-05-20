@@ -2,12 +2,11 @@ package me.eriknikli.rhenium.semanticAnalyzer
 
 import dagger.Binds
 import dagger.Module
-import me.eriknikli.rhenium.semanticAnalyzer.expressions.ExpressionNodeDecorator
-import me.eriknikli.rhenium.semanticAnalyzer.expressions.IExpressionNodeDecorator
-import me.eriknikli.rhenium.semanticAnalyzer.expressions.ILiteralNodeDecorator
-import me.eriknikli.rhenium.semanticAnalyzer.expressions.LiteralNodeDecorator
+import me.eriknikli.rhenium.semanticAnalyzer.expressions.*
 import me.eriknikli.rhenium.semanticAnalyzer.statements.IStatementNodeDecorator
+import me.eriknikli.rhenium.semanticAnalyzer.statements.IVarDeclarationStatementDecorator
 import me.eriknikli.rhenium.semanticAnalyzer.statements.StatementNodeDecorator
+import me.eriknikli.rhenium.semanticAnalyzer.statements.VarDeclarationStatementDecorator
 
 @Module
 interface SemanticAnalyzerModule {
@@ -25,4 +24,13 @@ interface SemanticAnalyzerModule {
 
     @Binds
     fun bindExpressionNodeDecorator(instance: ExpressionNodeDecorator): IExpressionNodeDecorator
+
+    @Binds
+    fun bindBinaryOpDecorator(instance: BinaryOpNodeDecorator): IBinaryOpNodeDecorator
+
+    @Binds
+    fun bindVarDeclarationDecorator(instance: VarDeclarationStatementDecorator): IVarDeclarationStatementDecorator
+
+    @Binds
+    fun bindUnaryOpDecorator(instance: UnaryOpNodeDecorator): IUnaryOpNodeDecorator
 }

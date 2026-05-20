@@ -4,10 +4,7 @@ import dagger.Binds
 import dagger.Module
 import me.eriknikli.rhenium.transpiler.tree.CRootTranspiler
 import me.eriknikli.rhenium.transpiler.tree.IRootTranspiler
-import me.eriknikli.rhenium.transpiler.tree.expressions.CExpressionTranspiler
-import me.eriknikli.rhenium.transpiler.tree.expressions.CLiteralExpressionTranspiler
-import me.eriknikli.rhenium.transpiler.tree.expressions.IExpressionTranspiler
-import me.eriknikli.rhenium.transpiler.tree.expressions.ILiteralExpressionTranspiler
+import me.eriknikli.rhenium.transpiler.tree.expressions.*
 import me.eriknikli.rhenium.transpiler.tree.statements.CStatementTranspiler
 import me.eriknikli.rhenium.transpiler.tree.statements.CVarDeclarationTranspiler
 import me.eriknikli.rhenium.transpiler.tree.statements.IStatementTranspiler
@@ -32,4 +29,10 @@ interface CTranspilerModule {
 
     @Binds
     fun bindLiteral(statement: CLiteralExpressionTranspiler): ILiteralExpressionTranspiler
+
+    @Binds
+    fun bindBinary(statement: CBinaryOpTranspiler): IBinaryOpTranspiler
+
+    @Binds
+    fun bindUnary(statement: CUnaryOpTranspiler): IUnaryOpTranspiler
 }

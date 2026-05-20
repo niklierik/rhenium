@@ -1,6 +1,7 @@
 package me.eriknikli.rhenium.semanticAnalyzer.expressions
 
 import me.eriknikli.rhenium.ast.tree.expressions.literals.*
+import me.eriknikli.rhenium.semanticContext.scope.types.BooleanType
 import me.eriknikli.rhenium.semanticContext.scope.types.FloatType
 import me.eriknikli.rhenium.semanticContext.scope.types.SignedIntType
 import me.eriknikli.rhenium.semanticContext.scope.types.UnsignedIntType
@@ -17,6 +18,9 @@ class LiteralNodeDecorator
 constructor() : ILiteralNodeDecorator {
     override fun decorateLiteral(literal: Literal<*>) {
         when (literal) {
+            is BooleanLiteral ->
+                literal.context.type = BooleanType()
+
             is F64Literal ->
                 literal.context.type = FloatType.F64
 

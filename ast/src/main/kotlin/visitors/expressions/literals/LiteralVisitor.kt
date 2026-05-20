@@ -68,4 +68,13 @@ constructor() : RheniumParserBaseVisitor<Literal<*>>(), ILiteralVisitor {
         val text = ctx.FLOAT().text
         return F64Literal(text.toDouble(), text)
     }
+
+    override fun visitBooleanLiteral(ctx: RheniumParser.BooleanLiteralContext): Literal<*> {
+        val text = ctx.text
+
+        return when (text) {
+            "true" -> BooleanLiteral(true, "true")
+            else -> BooleanLiteral(false, "false")
+        }
+    }
 }

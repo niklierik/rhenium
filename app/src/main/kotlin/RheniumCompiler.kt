@@ -5,7 +5,6 @@ import me.eriknikli.rhenium.semanticAnalyzer.ISemanticAnalyzer
 import me.eriknikli.rhenium.transpiler.ITranspiler
 import org.antlr.v4.runtime.CharStreams
 import runCommand
-import java.io.File
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.io.path.Path
@@ -34,7 +33,7 @@ constructor(
             transpiler.transpile(ast, it)
         }
 
-        "clang ${options.inputPath}.c -o ${options.inputPath}.o".runCommand(File("."))
-        "./${options.inputPath}.o".runCommand(File("."))
+        "clang ${options.inputPath}.c -o ${options.inputPath}.o -lm".runCommand()
+        "./${options.inputPath}.o".runCommand()
     }
 }
