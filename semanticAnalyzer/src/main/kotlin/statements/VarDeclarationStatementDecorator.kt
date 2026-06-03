@@ -59,5 +59,6 @@ class VarDeclarationStatementDecorator
         val mutable = statement.mutable
         val variable = Variable(name, expectedType, mutable)
         scope.insertSymbol(name, variable)
+        statement.context.symbolInfo = variable
     }
 }

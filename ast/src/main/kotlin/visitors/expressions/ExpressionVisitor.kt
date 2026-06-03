@@ -40,17 +40,17 @@ class ExpressionVisitor
 
         val signedType = ctx.signedTypes()?.apply { literalTypeVisitor.visitSignedTypes(this) }
         if (signedType != null) {
-            return Identifier(signedType.text)
+            return Identifier(ctx, signedType.text)
         }
 
         val unsignedType = ctx.unsignedTypes()?.apply { literalTypeVisitor.visitUnsignedTypes(this) }
         if (unsignedType != null) {
-            return Identifier(unsignedType.text)
+            return Identifier(ctx, unsignedType.text)
         }
 
         val floatType = ctx.floatTypes()?.apply { literalTypeVisitor.visitFloatTypes(this) }
         if (floatType != null) {
-            return Identifier(floatType.text)
+            return Identifier(ctx, floatType.text)
         }
 
         throw IllegalStateException("Unhandled type name state.")
@@ -58,7 +58,7 @@ class ExpressionVisitor
 
     override fun visitIdentifier(ctx: RheniumParser.IdentifierContext): Identifier {
         val name = ctx.ID().text
-        return Identifier(name)
+        return Identifier(ctx, name)
     }
 
     override fun visitLiteralPrimitive(ctx: RheniumParser.LiteralPrimitiveContext): Expression {
@@ -84,7 +84,7 @@ class ExpressionVisitor
             else -> Operator.PERCENT
         }
 
-        return BinaryOpExpression(left, op, right)
+        return BinaryOpExpression(ctx, left, op, right)
     }
 
     override fun visitAddExp(ctx: RheniumParser.AddExpContext): BinaryOpExpression {
@@ -93,7 +93,7 @@ class ExpressionVisitor
         val isPlus = ctx.PLUS() != null
         val op = if (isPlus) Operator.PLUS else Operator.MINUS
 
-        return BinaryOpExpression(left, op, right)
+        return BinaryOpExpression(ctx, left, op, right)
     }
 
     override fun visitRelationalExp(ctx: RheniumParser.RelationalExpContext): Expression {
@@ -106,7 +106,7 @@ class ExpressionVisitor
             ">=" -> Operator.GREATER_EQUALS
             else -> Operator.LESS
         }
-        return BinaryOpExpression(left, op, right)
+        return BinaryOpExpression(ctx, left, op, right)
     }
 
     override fun visitEqualityExp(ctx: RheniumParser.EqualityExpContext): Expression {
@@ -117,7 +117,7 @@ class ExpressionVisitor
             "!=" -> Operator.NOT_EQUALS
             else -> Operator.EQUALS
         }
-        return BinaryOpExpression(left, op, right)
+        return BinaryOpExpression(ctx, left, op, right)
     }
 
     override fun visitLogicalExp(ctx: RheniumParser.LogicalExpContext): Expression {
@@ -128,7 +128,7 @@ class ExpressionVisitor
             "||" -> Operator.OR
             else -> Operator.AND
         }
-        return BinaryOpExpression(left, op, right)
+        return BinaryOpExpression(ctx, left, op, right)
     }
 
     override fun visitUnaryExp(ctx: RheniumParser.UnaryExpContext): Expression {
@@ -139,9 +139,8 @@ class ExpressionVisitor
             "!" -> Operator.BANG
             else -> Operator.BANG
         }
-        return UnaryOpExpression(op, expression)
+        return UnaryOpExpression(ctx, op, expression)
     }
-
 
 
 }

@@ -34,6 +34,6 @@ class StatementVisitor
 
         val expression = expressionVisitor.visitExpression(ctx.expression())
 
-        return VarDeclarationStatement(mutable, name, expectedType, expression)
+        return VarDeclarationStatement(ctx, mutable, name, expectedType, expression)
     }
 }

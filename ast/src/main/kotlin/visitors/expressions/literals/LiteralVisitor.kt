@@ -22,11 +22,11 @@ constructor() : RheniumParserBaseVisitor<Literal<*>>(), ILiteralVisitor {
         val type = literalTypeVisitor.visitUnsignedTypes(ctx.unsignedTypes())
         val text = ctx.UNSIGNED_INT().text
         return when (type) {
-            LiteralType.U8 -> U8Literal(text.toUByte(), text)
-            LiteralType.U16 -> U16Literal(text.toUShort(), text)
-            LiteralType.U32 -> U32Literal(text.toUInt(), text)
-            LiteralType.U64 -> U64Literal(text.toULong(), text)
-            else -> throw IllegalArgumentException("Type $type is not an unsigned int type.")
+            LiteralType.U8 -> U8Literal(ctx, text.toUByte(), text)
+            LiteralType.U16 -> U16Literal(ctx, text.toUShort(), text)
+            LiteralType.U32 -> U32Literal(ctx, text.toUInt(), text)
+            LiteralType.U64 -> U64Literal(ctx, text.toULong(), text)
+            else -> throw IllegalArgumentException("'${ctx}'")
         }
     }
 
@@ -35,10 +35,10 @@ constructor() : RheniumParserBaseVisitor<Literal<*>>(), ILiteralVisitor {
         val text = (ctx.SIGNED_INT() ?: ctx.UNSIGNED_INT()).text
 
         return when (type) {
-            LiteralType.I8 -> I8Literal(text.toByte(), text)
-            LiteralType.I16 -> I16Literal(text.toShort(), text)
-            LiteralType.I32 -> I32Literal(text.toInt(), text)
-            LiteralType.I64 -> I64Literal(text.toLong(), text)
+            LiteralType.I8 -> I8Literal(ctx, text.toByte(), text)
+            LiteralType.I16 -> I16Literal(ctx, text.toShort(), text)
+            LiteralType.I32 -> I32Literal(ctx, text.toInt(), text)
+            LiteralType.I64 -> I64Literal(ctx, text.toLong(), text)
             else -> throw IllegalArgumentException("Type $type is not a signed int type.")
         }
     }
@@ -48,33 +48,33 @@ constructor() : RheniumParserBaseVisitor<Literal<*>>(), ILiteralVisitor {
         val text = (ctx.FLOAT() ?: ctx.SIGNED_INT() ?: ctx.UNSIGNED_INT()).text
 
         return when (type) {
-            LiteralType.F32 -> F32Literal(text.toFloat(), text)
-            LiteralType.F64 -> F64Literal(text.toDouble(), text)
+            LiteralType.F32 -> F32Literal(ctx, text.toFloat(), text)
+            LiteralType.F64 -> F64Literal(ctx, text.toDouble(), text)
             else -> throw IllegalArgumentException("Type $type is not a float type.")
         }
     }
 
     override fun visitUnsignedBasic(ctx: RheniumParser.UnsignedBasicContext): Literal<*> {
         val text = ctx.UNSIGNED_INT().text
-        return I32Literal(text.toInt(), text)
+        return I32Literal(ctx, text.toInt(), text)
     }
 
     override fun visitSignedBasic(ctx: RheniumParser.SignedBasicContext): Literal<*> {
         val text = ctx.SIGNED_INT().text
-        return I32Literal(text.toInt(), text)
+        return I32Literal(ctx, text.toInt(), text)
     }
 
     override fun visitFloatBasic(ctx: RheniumParser.FloatBasicContext): Literal<*> {
         val text = ctx.FLOAT().text
-        return F64Literal(text.toDouble(), text)
+        return F64Literal(ctx, text.toDouble(), text)
     }
 
     override fun visitBooleanLiteral(ctx: RheniumParser.BooleanLiteralContext): Literal<*> {
         val text = ctx.text
 
         return when (text) {
-            "true" -> BooleanLiteral(true, "true")
-            else -> BooleanLiteral(false, "false")
+            "true" -> BooleanLiteral(ctx, true, "true")
+            else -> BooleanLiteral(ctx, false, "false")
         }
     }
 }

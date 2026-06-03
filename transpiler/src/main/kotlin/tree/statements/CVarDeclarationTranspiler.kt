@@ -18,11 +18,13 @@ constructor() : IVarDeclarationTranspiler {
     lateinit var expressionTranspiler: IExpressionTranspiler
 
     override fun transpile(node: VarDeclarationStatement, output: OutputStream) {
-        val cType = node.context.typeToDeclare.cName
+        val context = node.context
+        val cType = context.typeToDeclare.cName
+        val symbol = context.symbolInfo
 
         output.writeText(cType)
         output.writeText(" ")
-        output.writeText(node.name)
+        output.writeText(symbol.cName)
         output.writeText("=")
         expressionTranspiler.transpile(node.rightSide, output)
         output.writeText(";")

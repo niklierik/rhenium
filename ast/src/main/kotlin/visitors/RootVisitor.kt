@@ -24,6 +24,6 @@ constructor() : RheniumParserBaseVisitor<RootNode>(), IRootVisitor {
 
     override fun visitRoot(ctx: RheniumParser.RootContext): RootNode {
         val statementNodes = ctx.statement().map { statementVisitor.visitStatement(it) }.toList()
-        return RootNode(statementNodes)
+        return RootNode(ctx, statementNodes)
     }
 }

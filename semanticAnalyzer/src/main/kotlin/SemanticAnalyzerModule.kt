@@ -3,10 +3,7 @@ package me.eriknikli.rhenium.semanticAnalyzer
 import dagger.Binds
 import dagger.Module
 import me.eriknikli.rhenium.semanticAnalyzer.expressions.*
-import me.eriknikli.rhenium.semanticAnalyzer.statements.IStatementNodeDecorator
-import me.eriknikli.rhenium.semanticAnalyzer.statements.IVarDeclarationStatementDecorator
-import me.eriknikli.rhenium.semanticAnalyzer.statements.StatementNodeDecorator
-import me.eriknikli.rhenium.semanticAnalyzer.statements.VarDeclarationStatementDecorator
+import me.eriknikli.rhenium.semanticAnalyzer.statements.*
 
 @Module
 interface SemanticAnalyzerModule {
@@ -33,4 +30,7 @@ interface SemanticAnalyzerModule {
 
     @Binds
     fun bindUnaryOpDecorator(instance: UnaryOpNodeDecorator): IUnaryOpNodeDecorator
+
+    @Binds
+    fun bindVarAssignment(instance: VarAssignmentStatementDecorator): IVarAssignmentStatementDecorator
 }

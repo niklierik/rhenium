@@ -34,7 +34,7 @@ constructor(
 
         when (operator) {
             Operator.BANG -> {
-                if (node.context.type !is BooleanType) {
+                if (inputType !is BooleanType) {
                     throw Exception("Operator '!' as an unary expression is expected to be used with boolean expressions.")
                 }
                 node.context.relevantScope = scope
