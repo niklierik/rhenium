@@ -15,11 +15,12 @@ repositories {
 }
 
 dependencies {
-    val daggerVersion = "2.56.2"
+    val daggerVersion: String by project
 
     testImplementation(kotlin("test"))
     testImplementation("org.junit.jupiter:junit-jupiter-params:5.10.0")
 
+    implementation(project(":common"))
     implementation(project(":parser"))
     implementation(project(":semanticContext"))
     testImplementation(project(":parser"))

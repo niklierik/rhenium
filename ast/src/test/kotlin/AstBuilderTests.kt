@@ -1,6 +1,5 @@
 import me.eriknikli.rhenium.ast.IAstBuilder
 import me.eriknikli.rhenium.ast.tree.RootNode
-import me.eriknikli.rhenium.ast.tree.expressions.literals.*
 import org.antlr.v4.runtime.CharStreams
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
@@ -24,7 +23,7 @@ class AstBuilderTests {
     companion object {
         @JvmStatic
         fun provideData(): Stream<Arguments> {
-            
+            return Stream.of()
         }
     }
 }

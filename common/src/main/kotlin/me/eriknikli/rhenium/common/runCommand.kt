@@ -1,3 +1,5 @@
+package me.eriknikli.rhenium.common
+
 import java.io.File
 import java.util.concurrent.TimeUnit
 

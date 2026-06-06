@@ -7,6 +7,7 @@ plugins {
 
 kotlin {
     jvmToolchain(21)
+    version = "2.3.20"
 }
 
 dependencies {

@@ -14,7 +14,7 @@ repositories {
 }
 
 dependencies {
-    val daggerVersion = "2.56.2"
+    val daggerVersion: String by project
     testImplementation(kotlin("test"))
     implementation(project(":ast"))
     implementation(project(":semanticContext"))

@@ -11,7 +11,7 @@ import javax.inject.Singleton
         AstModule::class,
         AppModule::class,
         SemanticAnalyzerModule::class,
-        CTranspilerModule::class
+        CTranspilerModule::class,
     ]
 )
 @Singleton

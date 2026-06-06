@@ -1,3 +1,5 @@
+val kotlinVersion: String by project
+
 plugins {
     kotlin("jvm")
     id("org.jetbrains.kotlin.kapt")
@@ -13,7 +15,7 @@ repositories {
 }
 
 dependencies {
-    val daggerVersion = "2.56.2"
+    val daggerVersion: String by project
     implementation(project(":ast"))
     implementation(project(":semanticContext"))
     implementation("com.google.dagger:dagger:$daggerVersion")

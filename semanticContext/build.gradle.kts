@@ -13,7 +13,7 @@ repositories {
 }
 
 dependencies {
-    val daggerVersion = "2.56.2"
+    val daggerVersion: String by project
     testImplementation(kotlin("test"))
     implementation("com.google.dagger:dagger:$daggerVersion")
     kapt("com.google.dagger:dagger-compiler:$daggerVersion")

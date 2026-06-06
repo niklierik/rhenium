@@ -9,7 +9,7 @@ plugins {
 }
 
 dependencies {
-    val daggerVersion = "2.56.2"
+    val daggerVersion: String by project
 
     // Project "app" depends on project "utils". (Project paths are separated with ":", so ":utils" refers to the top-level "utils" project.)
     implementation(project(":common"))
@@ -22,6 +22,9 @@ dependencies {
     kapt("com.google.dagger:dagger-compiler:$daggerVersion")
     implementation("org.antlr:antlr4-runtime:4.13.2")
     implementation("io.github.joelromanpr:commandline-ktx:1.0.0")
+    implementation("io.github.oshai:kotlin-logging-jvm:8.0.4")
+    implementation("org.slf4j:slf4j-simple:2.0.18")
+    implementation("org.slf4j:slf4j-api:2.0.18")
 }
 
 application {
