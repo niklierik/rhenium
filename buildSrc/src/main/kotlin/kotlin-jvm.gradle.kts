@@ -7,11 +7,30 @@ import org.gradle.api.tasks.testing.logging.TestLogEvent
 plugins {
     // Apply the Kotlin JVM plugin to add support for Kotlin in JVM projects.
     kotlin("jvm")
+    id("org.jetbrains.kotlin.kapt")
 }
 
 kotlin {
     // Use a specific Java version to make it easier to work in different environments.
     jvmToolchain(21)
+}
+
+dependencies {
+    val daggerVersion: String by project
+    val arrowCoreVersion: String by project
+    val slf4jVersion: String by project
+    val antlrVersion: String by project
+
+    implementation("io.arrow-kt:arrow-core:$arrowCoreVersion")
+    implementation("com.google.dagger:dagger:$daggerVersion")
+    implementation("org.slf4j:slf4j-simple:$slf4jVersion")
+    implementation("org.slf4j:slf4j-api:$slf4jVersion")
+    implementation("org.antlr:antlr4-runtime:$antlrVersion")
+
+    kapt("com.google.dagger:dagger-compiler:$daggerVersion")
+
+    testImplementation(kotlin("test"))
+    testImplementation("org.junit.jupiter:junit-jupiter-params:5.10.0")
 }
 
 tasks.withType<Test>().configureEach {

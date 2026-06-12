@@ -1,15 +1,13 @@
 plugins {
-    // Apply the shared build logic from a convention plugin.
-    // The shared code is located in `buildSrc/src/main/kotlin/kotlin-jvm.gradle.kts`.
     id("buildsrc.convention.kotlin-jvm")
 
     // Apply the Application plugin to add support for building an executable JVM application.
     application
-    id("org.jetbrains.kotlin.kapt")
 }
 
 dependencies {
     val daggerVersion: String by project
+    val antlrVersion: String by project
 
     // Project "app" depends on project "utils". (Project paths are separated with ":", so ":utils" refers to the top-level "utils" project.)
     implementation(project(":common"))
@@ -18,13 +16,7 @@ dependencies {
     implementation(project(":semanticAnalyzer"))
     implementation(project(":semanticContext"))
     implementation(project(":transpiler"))
-    implementation("com.google.dagger:dagger:$daggerVersion")
-    kapt("com.google.dagger:dagger-compiler:$daggerVersion")
-    implementation("org.antlr:antlr4-runtime:4.13.2")
     implementation("io.github.joelromanpr:commandline-ktx:1.0.0")
-    implementation("io.github.oshai:kotlin-logging-jvm:8.0.4")
-    implementation("org.slf4j:slf4j-simple:2.0.18")
-    implementation("org.slf4j:slf4j-api:2.0.18")
 }
 
 application {

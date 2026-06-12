@@ -1,6 +1,5 @@
 plugins {
-    kotlin("jvm")
-    id("org.jetbrains.kotlin.kapt")
+    id("buildsrc.convention.kotlin-jvm")
 }
 
 
@@ -13,10 +12,7 @@ repositories {
 }
 
 dependencies {
-    val daggerVersion: String by project
     testImplementation(kotlin("test"))
-    implementation("com.google.dagger:dagger:$daggerVersion")
-    kapt("com.google.dagger:dagger-compiler:$daggerVersion")
 }
 
 tasks.test {

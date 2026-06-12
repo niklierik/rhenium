@@ -1,6 +1,5 @@
 plugins {
-    kotlin("jvm")
-    id("org.jetbrains.kotlin.kapt")
+    id("buildsrc.convention.kotlin-jvm")
 }
 
 group = "me.eriknikli"
@@ -15,21 +14,10 @@ repositories {
 }
 
 dependencies {
-    val daggerVersion: String by project
-
-    testImplementation(kotlin("test"))
-    testImplementation("org.junit.jupiter:junit-jupiter-params:5.10.0")
-
     implementation(project(":common"))
     implementation(project(":parser"))
     implementation(project(":semanticContext"))
     testImplementation(project(":parser"))
-
-    implementation("org.antlr:antlr4-runtime:4.13.2")
-    testImplementation("org.antlr:antlr4-runtime:4.13.2")
-
-    implementation("com.google.dagger:dagger:$daggerVersion")
-    kapt("com.google.dagger:dagger-compiler:$daggerVersion")
 }
 
 tasks.test {
