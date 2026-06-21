@@ -3,6 +3,7 @@ package me.eriknikli.rhenium.ast.visitors
 import me.eriknikli.rhenium.ast.tree.RootNode
 import me.eriknikli.rhenium.ast.visitors.expressions.literals.ILiteralVisitor
 import me.eriknikli.rhenium.ast.visitors.statements.IStatementVisitor
+import me.eriknikli.rhenium.common.mapAllAndThrow
 import me.eriknikli.rhenium.parser.RheniumParser
 import me.eriknikli.rhenium.parser.RheniumParserBaseVisitor
 import javax.inject.Inject
@@ -23,7 +24,7 @@ constructor() : RheniumParserBaseVisitor<RootNode>(), IRootVisitor {
     lateinit var statementVisitor: IStatementVisitor
 
     override fun visitRoot(ctx: RheniumParser.RootContext): RootNode {
-        val statementNodes = ctx.statement().map { statementVisitor.visitStatement(it) }.toList()
+        val statementNodes = ctx.statement().mapAllAndThrow { statementVisitor.visitStatement(it) }.toList()
         return RootNode(ctx, statementNodes)
     }
 }

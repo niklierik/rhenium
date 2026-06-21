@@ -15,7 +15,7 @@ class CVarDeclarationTranspiler
 @Inject
 constructor() : IVarDeclarationTranspiler {
     @Inject
-    lateinit var expressionTranspiler: IExpressionTranspiler
+    lateinit var expressionTranspiler: Lazy<IExpressionTranspiler>
 
     override fun transpile(node: VarDeclarationStatement, output: OutputStream) {
         val context = node.context
@@ -26,7 +26,7 @@ constructor() : IVarDeclarationTranspiler {
         output.writeText(" ")
         output.writeText(symbol.cName)
         output.writeText("=")
-        expressionTranspiler.transpile(node.rightSide, output)
+        expressionTranspiler.value.transpile(node.rightSide, output)
         output.writeText(";")
     }
 }

@@ -1,8 +1,8 @@
-package me.eriknikli.rhenium.ast.exceptions
+package me.eriknikli.rhenium.semanticAnalyzer.exceptions
 
 import me.eriknikli.rhenium.common.RheniumException
 
-open class SyntaxException : Exception, RheniumException {
+open class SemanticException : Exception, RheniumException {
     constructor() : super()
     constructor(message: String?) : super(message)
     constructor(message: String?, cause: Throwable?) : super(message, cause)

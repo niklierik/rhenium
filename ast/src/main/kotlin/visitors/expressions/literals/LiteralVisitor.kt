@@ -1,6 +1,9 @@
 package me.eriknikli.rhenium.ast.visitors.expressions.literals
 
+import me.eriknikli.rhenium.ast.exceptions.InvalidValueOfLiteralException
+import me.eriknikli.rhenium.ast.exceptions.UnexpectedPrimitiveTypeException
 import me.eriknikli.rhenium.ast.tree.expressions.literals.*
+import me.eriknikli.rhenium.common.throwInsteadIf
 import me.eriknikli.rhenium.parser.RheniumParser
 import me.eriknikli.rhenium.parser.RheniumParserBaseVisitor
 import javax.inject.Inject
@@ -26,7 +29,14 @@ constructor() : RheniumParserBaseVisitor<Literal<*>>(), ILiteralVisitor {
             LiteralType.U16 -> U16Literal(ctx, text.toUShort(), text)
             LiteralType.U32 -> U32Literal(ctx, text.toUInt(), text)
             LiteralType.U64 -> U64Literal(ctx, text.toULong(), text)
-            else -> throw IllegalArgumentException("'${ctx}'")
+            else -> throw UnexpectedPrimitiveTypeException(
+                ctx,
+                type,
+                LiteralType.U8,
+                LiteralType.U16,
+                LiteralType.U32,
+                LiteralType.U64
+            )
         }
     }
 
@@ -39,7 +49,14 @@ constructor() : RheniumParserBaseVisitor<Literal<*>>(), ILiteralVisitor {
             LiteralType.I16 -> I16Literal(ctx, text.toShort(), text)
             LiteralType.I32 -> I32Literal(ctx, text.toInt(), text)
             LiteralType.I64 -> I64Literal(ctx, text.toLong(), text)
-            else -> throw IllegalArgumentException("Type $type is not a signed int type.")
+            else -> throw UnexpectedPrimitiveTypeException(
+                ctx,
+                type,
+                LiteralType.I8,
+                LiteralType.I16,
+                LiteralType.I32,
+                LiteralType.I64
+            )
         }
     }
 
@@ -50,23 +67,54 @@ constructor() : RheniumParserBaseVisitor<Literal<*>>(), ILiteralVisitor {
         return when (type) {
             LiteralType.F32 -> F32Literal(ctx, text.toFloat(), text)
             LiteralType.F64 -> F64Literal(ctx, text.toDouble(), text)
-            else -> throw IllegalArgumentException("Type $type is not a float type.")
+            else -> throw UnexpectedPrimitiveTypeException(
+                ctx,
+                type,
+                LiteralType.F32,
+                LiteralType.F64
+            )
         }
     }
 
     override fun visitUnsignedBasic(ctx: RheniumParser.UnsignedBasicContext): Literal<*> {
         val text = ctx.UNSIGNED_INT().text
-        return I32Literal(ctx, text.toInt(), text)
+        return I32Literal(
+            ctx,
+            { text.toInt() }.throwInsteadIf({ it is NumberFormatException }) {
+                InvalidValueOfLiteralException(
+                    ctx,
+                    text,
+                    LiteralType.I32
+                )
+            },
+            text
+        )
     }
 
     override fun visitSignedBasic(ctx: RheniumParser.SignedBasicContext): Literal<*> {
         val text = ctx.SIGNED_INT().text
-        return I32Literal(ctx, text.toInt(), text)
+        return I32Literal(ctx, { text.toInt() }.throwInsteadIf({ it is NumberFormatException }) {
+            InvalidValueOfLiteralException(
+                ctx,
+                text,
+                LiteralType.I32
+            )
+        }, text)
     }
 
     override fun visitFloatBasic(ctx: RheniumParser.FloatBasicContext): Literal<*> {
         val text = ctx.FLOAT().text
-        return F64Literal(ctx, text.toDouble(), text)
+        return F64Literal(
+            ctx,
+            { text.toDouble() }.throwInsteadIf({ it is NumberFormatException }) {
+                InvalidValueOfLiteralException(
+                    ctx,
+                    text,
+                    LiteralType.F64
+                )
+            },
+            text
+        )
     }
 
     override fun visitBooleanLiteral(ctx: RheniumParser.BooleanLiteralContext): Literal<*> {
@@ -74,7 +122,8 @@ constructor() : RheniumParserBaseVisitor<Literal<*>>(), ILiteralVisitor {
 
         return when (text) {
             "true" -> BooleanLiteral(ctx, true, "true")
-            else -> BooleanLiteral(ctx, false, "false")
+            "false" -> BooleanLiteral(ctx, false, "false")
+            else -> throw InvalidValueOfLiteralException(ctx, text, LiteralType.BOOL)
         }
     }
 }

@@ -14,6 +14,7 @@ repositories {
 
 dependencies {
     implementation(project(":ast"))
+    implementation(project(":common"))
     implementation(project(":semanticContext"))
 }
 

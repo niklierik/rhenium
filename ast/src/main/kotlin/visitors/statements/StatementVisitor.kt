@@ -1,9 +1,9 @@
 package me.eriknikli.rhenium.ast.visitors.statements
 
-import me.eriknikli.rhenium.ast.tree.expressions.Identifier
 import me.eriknikli.rhenium.ast.tree.statements.Statement
 import me.eriknikli.rhenium.ast.tree.statements.vars.VarDeclarationStatement
 import me.eriknikli.rhenium.ast.visitors.expressions.IExpressionVisitor
+import me.eriknikli.rhenium.common.and
 import me.eriknikli.rhenium.parser.RheniumParser
 import me.eriknikli.rhenium.parser.RheniumParserBaseVisitor
 import javax.inject.Inject
@@ -26,13 +26,21 @@ class StatementVisitor
 
         val name = ctx.name.text
 
-        val expectedTypeNode = ctx.expectedType
-        var expectedType: Identifier? = null
-        if (expectedTypeNode != null) {
-            expectedType = expressionVisitor.visitTypeName(expectedTypeNode)
+        val expectedTypeNode = try {
+            ctx.expectedType
+        } catch (_: NullPointerException) {
+            null
         }
 
-        val expression = expressionVisitor.visitExpression(ctx.expression())
+        val (expectedType, expression) = and(
+            {
+                expectedTypeNode?.let { expressionVisitor.visitTypeName(it) }
+            },
+            {
+                expressionVisitor.visitExpression(ctx.expression())
+            }
+        )
+
 
         return VarDeclarationStatement(ctx, mutable, name, expectedType, expression)
     }

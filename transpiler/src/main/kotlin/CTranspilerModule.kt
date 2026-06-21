@@ -5,10 +5,7 @@ import dagger.Module
 import me.eriknikli.rhenium.transpiler.tree.CRootTranspiler
 import me.eriknikli.rhenium.transpiler.tree.IRootTranspiler
 import me.eriknikli.rhenium.transpiler.tree.expressions.*
-import me.eriknikli.rhenium.transpiler.tree.statements.CStatementTranspiler
-import me.eriknikli.rhenium.transpiler.tree.statements.CVarDeclarationTranspiler
-import me.eriknikli.rhenium.transpiler.tree.statements.IStatementTranspiler
-import me.eriknikli.rhenium.transpiler.tree.statements.IVarDeclarationTranspiler
+import me.eriknikli.rhenium.transpiler.tree.statements.*
 
 @Module
 interface CTranspilerModule {
@@ -20,6 +17,9 @@ interface CTranspilerModule {
 
     @Binds
     fun bindVarDecl(varDeclarationStatement: CVarDeclarationTranspiler): IVarDeclarationTranspiler
+
+    @Binds
+    fun bindVarAssignment(varAssignmentStatement: CVarAssignmentTranspiler): IVarAssignmentTranspiler
 
     @Binds
     fun bindStatement(statement: CStatementTranspiler): IStatementTranspiler

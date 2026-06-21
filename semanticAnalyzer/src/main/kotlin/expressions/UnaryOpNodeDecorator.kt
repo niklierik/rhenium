@@ -3,9 +3,12 @@ package me.eriknikli.rhenium.semanticAnalyzer.expressions
 import dagger.Lazy
 import me.eriknikli.rhenium.ast.tree.expressions.operators.Operator
 import me.eriknikli.rhenium.ast.tree.expressions.operators.UnaryOpExpression
+import me.eriknikli.rhenium.semanticAnalyzer.exceptions.IllegalUnaryOperation
+import me.eriknikli.rhenium.semanticAnalyzer.exceptions.UnaryOperatorTypeMismatchException
 import me.eriknikli.rhenium.semanticContext.scope.types.BooleanType
 import me.eriknikli.rhenium.semanticContext.scope.types.UnsignedIntType
 import me.eriknikli.rhenium.semanticContext.scope.types.isNumeric
+import me.eriknikli.rhenium.semanticContext.scope.types.numericTypes
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -27,44 +30,56 @@ constructor(
         val scope = context.scope
 
         val expression = node.expression
-        expressionNodeDecorator.decorateExpression(expression, ExpressionNodeDecoratorContext(scope))
-
         val operator = node.operator
+
+        expressionNodeDecorator.decorateExpression(expression, ExpressionNodeDecoratorContext(scope))
         val inputType = expression.context.type
 
         when (operator) {
             Operator.BANG -> {
                 if (inputType !is BooleanType) {
-                    throw Exception("Operator '!' as an unary expression is expected to be used with boolean expressions.")
+                    throw UnaryOperatorTypeMismatchException(
+                        expression.parserContext,
+                        operator,
+                        inputType,
+                        BooleanType()
+                    )
                 }
-                node.context.relevantScope = scope
-                node.context.type = inputType
-                return
             }
 
             Operator.PLUS -> {
                 if (!inputType.isNumeric()) {
-                    throw Exception("Operator '+' as an unary expression is expected to be used with numeric expressions.")
+                    throw UnaryOperatorTypeMismatchException(
+                        expression.parserContext,
+                        operator,
+                        inputType,
+                        *numericTypes().toTypedArray()
+                    )
                 }
-
-                node.context.relevantScope = scope
-                node.context.type = inputType
-                return
             }
 
             Operator.MINUS -> {
                 if (!inputType.isNumeric()) {
-                    throw Exception("Operator '-' as an unary expression is expected to be used with signed integer or float expressions.")
+                    throw UnaryOperatorTypeMismatchException(
+                        expression.parserContext,
+                        operator,
+                        inputType,
+                        *numericTypes().minus(UnsignedIntType.entries).toTypedArray()
+                    )
                 }
                 if (inputType is UnsignedIntType) {
-                    throw Exception("Operator '-' as an unary expression is expected to be used with signed integer or float expressions.")
+                    throw UnaryOperatorTypeMismatchException(
+                        expression.parserContext,
+                        operator,
+                        inputType,
+                        *numericTypes().minus(UnsignedIntType.entries).toTypedArray()
+                    )
                 }
-
-                node.context.type = inputType
-                node.context.relevantScope = scope
             }
 
-            else -> throw IllegalStateException("Invalid unary operator: ${operator}.")
+            else -> throw IllegalUnaryOperation(expression.parserContext, inputType, operator)
         }
+
+        node.context.type = inputType
     }
 }

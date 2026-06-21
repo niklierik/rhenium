@@ -3,6 +3,9 @@ package me.eriknikli.rhenium.semanticAnalyzer.expressions
 import dagger.Lazy
 import me.eriknikli.rhenium.ast.tree.expressions.operators.BinaryOpExpression
 import me.eriknikli.rhenium.ast.tree.expressions.operators.Operator
+import me.eriknikli.rhenium.common.forEachAllAndThrow
+import me.eriknikli.rhenium.semanticAnalyzer.exceptions.BinaryOperatorTypeMismatchException
+import me.eriknikli.rhenium.semanticAnalyzer.exceptions.IllegalBinaryOperation
 import me.eriknikli.rhenium.semanticContext.scope.types.*
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -32,14 +35,22 @@ constructor() : IBinaryOpNodeDecorator {
         val left = binaryOpExpression.left
         val right = binaryOpExpression.right
 
-        expressionNodeDecorator.decorateExpression(left, ExpressionNodeDecoratorContext(scope))
-        expressionNodeDecorator.decorateExpression(right, ExpressionNodeDecoratorContext(scope))
+
+        listOf(left, right).forEachAllAndThrow {
+            expressionNodeDecorator.decorateExpression(it, ExpressionNodeDecoratorContext(scope))
+        }
 
         binaryOpExpression.context.type =
-            resolveType(left.context.type, right.context.type, binaryOpExpression.operator)
+            resolveType(left.context.type, right.context.type, binaryOpExpression.operator, binaryOpExpression)
+
     }
 
-    private fun resolveType(left: ExpressionType, right: ExpressionType, operator: Operator): ExpressionType {
+    private fun resolveType(
+        left: ExpressionType,
+        right: ExpressionType,
+        operator: Operator,
+        expression: BinaryOpExpression
+    ): ExpressionType {
         if (left.isNumeric() && right.isNumeric()) {
             when (operator) {
                 Operator.HAT -> {
@@ -81,7 +92,7 @@ constructor() : IBinaryOpNodeDecorator {
                         return right
                     }
 
-                    throw IllegalStateException("Unhandled numeric binary op type case: left = ${left}, right = ${right}, op = ${operator}.")
+                    throw IllegalBinaryOperation(expression.parserContext, left, right, operator)
                 }
 
                 Operator.EQUALS, Operator.NOT_EQUALS -> {
@@ -93,16 +104,15 @@ constructor() : IBinaryOpNodeDecorator {
                 Operator.LESS,
                 Operator.LESS_EQUALS -> {
                     if (!left.isNumeric() || !right.isNumeric()) {
-                        throw Exception("Operator $operator is expected to be used with numeric expressions.")
+                        throw BinaryOperatorTypeMismatchException(expression.parserContext, left, right, operator)
                     }
 
                     return BooleanType()
                 }
 
-                else -> throw IllegalStateException("Unhandled binary operator: ${operator}.")
+                else -> throw IllegalBinaryOperation(expression.parserContext, left, right, operator)
             }
         }
-
-        return InvalidType()
+        throw IllegalBinaryOperation(expression.parserContext, left, right, operator)
     }
 }

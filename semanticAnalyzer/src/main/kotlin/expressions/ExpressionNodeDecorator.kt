@@ -4,6 +4,7 @@ import me.eriknikli.rhenium.ast.tree.expressions.Expression
 import me.eriknikli.rhenium.ast.tree.expressions.literals.Literal
 import me.eriknikli.rhenium.ast.tree.expressions.operators.BinaryOpExpression
 import me.eriknikli.rhenium.ast.tree.expressions.operators.UnaryOpExpression
+import me.eriknikli.rhenium.semanticAnalyzer.exceptions.IllegalExpressionException
 import me.eriknikli.rhenium.semanticContext.scope.Scope
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -40,11 +41,12 @@ constructor() : IExpressionNodeDecorator {
         expression: Expression,
         expressionNodeDecoratorContext: ExpressionNodeDecoratorContext
     ) {
+        expression.context.relevantScope = expressionNodeDecoratorContext.scope
         when (expression) {
             is BinaryOpExpression -> binaryNodeDecorator.decorate(expression, expressionNodeDecoratorContext)
             is UnaryOpExpression -> unaryNodeDecorator.decorate(expression, expressionNodeDecoratorContext)
             is Literal<*> -> literalNodeDecorator.decorateLiteral(expression)
-            else -> throw IllegalStateException("Unhandled expression ${expression.javaClass}")
+            else -> throw IllegalExpressionException(expression.parserContext, expression.javaClass)
         }
     }
 }

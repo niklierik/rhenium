@@ -32,7 +32,6 @@ constructor() : IExpressionTranspiler {
 
     private val unaryOpTranspiler by lazy { unaryOpTranspilerProvider.get() }
 
-
     override fun transpile(node: Expression, output: OutputStream) {
         when (node) {
             is Literal<*> -> literalExpressionTranspiler.transpile(node, output)

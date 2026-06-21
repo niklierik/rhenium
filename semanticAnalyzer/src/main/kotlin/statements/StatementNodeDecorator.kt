@@ -2,7 +2,9 @@ package me.eriknikli.rhenium.semanticAnalyzer.statements
 
 import dagger.Lazy
 import me.eriknikli.rhenium.ast.tree.statements.Statement
+import me.eriknikli.rhenium.ast.tree.statements.vars.VarAssignmentStatement
 import me.eriknikli.rhenium.ast.tree.statements.vars.VarDeclarationStatement
+import me.eriknikli.rhenium.semanticAnalyzer.exceptions.IllegalStatementException
 import me.eriknikli.rhenium.semanticContext.scope.Scope
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -26,6 +28,10 @@ constructor(
 
     private val varDeclStatementDecorator by lazy { varDeclStatementDecoratorProvider.get() }
 
+    @Inject
+    lateinit var varAssignmentStatementDecoratorProvider: Lazy<IVarAssignmentStatementDecorator>
+    private val varAssignmentStatementDecorator by lazy { varAssignmentStatementDecoratorProvider.get() }
+
 
     override fun decorateStatement(
         statement: Statement,
@@ -36,8 +42,12 @@ constructor(
 
         when (statement) {
             is VarDeclarationStatement -> varDeclStatementDecorator.decorate(statement)
+            is VarAssignmentStatement -> varAssignmentStatementDecorator.decorate(
+                statement,
+                StatementDecoratorContext(scope)
+            )
 
-            else -> throw IllegalStateException("Unhandled node ${statement.javaClass}")
+            else -> throw IllegalStatementException(statement.parserContext, statement.javaClass)
         }
     }
 }

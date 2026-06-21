@@ -1,6 +1,7 @@
 package me.eriknikli.rhenium.semanticAnalyzer
 
 import me.eriknikli.rhenium.ast.tree.RootNode
+import me.eriknikli.rhenium.common.forEachAllAndThrow
 import me.eriknikli.rhenium.semanticAnalyzer.statements.IStatementNodeDecorator
 import me.eriknikli.rhenium.semanticAnalyzer.statements.StatementDecoratorContext
 import me.eriknikli.rhenium.semanticContext.scope.globalScope
@@ -21,8 +22,8 @@ constructor() : IRootNodeDecorator {
     override fun decorate(rootNode: RootNode) {
         val scope = globalScope()
 
-        for (statement in rootNode.statements) {
-            statementDecorator.decorateStatement(statement, StatementDecoratorContext(scope))
+        rootNode.statements.forEachAllAndThrow {
+            statementDecorator.decorateStatement(it, StatementDecoratorContext(scope))
         }
     }
 

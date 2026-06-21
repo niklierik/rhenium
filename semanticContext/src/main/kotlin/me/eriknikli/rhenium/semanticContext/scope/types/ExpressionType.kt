@@ -1,6 +1,7 @@
 package me.eriknikli.rhenium.semanticContext.scope.types
 
 import me.eriknikli.rhenium.semanticContext.scope.Symbol
+import org.antlr.v4.runtime.ParserRuleContext
 
 interface ExpressionType : Symbol {
     fun canAssignTo(target: ExpressionType): Boolean
@@ -12,6 +13,8 @@ fun ExpressionType.isNumeric(): Boolean {
 }
 
 class InvalidType : ExpressionType {
+    override val declarationParserContext: ParserRuleContext? = null
+
     override fun canAssignTo(target: ExpressionType): Boolean {
         return false
     }
@@ -25,6 +28,8 @@ class InvalidType : ExpressionType {
 }
 
 class BooleanType : ExpressionType {
+    override val declarationParserContext: ParserRuleContext? = null
+    
     override val cName: String = "boolean_t"
 
     override fun canAssignTo(target: ExpressionType): Boolean {

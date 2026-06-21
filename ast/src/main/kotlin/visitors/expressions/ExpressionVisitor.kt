@@ -7,6 +7,7 @@ import me.eriknikli.rhenium.ast.tree.expressions.operators.Operator
 import me.eriknikli.rhenium.ast.tree.expressions.operators.UnaryOpExpression
 import me.eriknikli.rhenium.ast.visitors.expressions.literals.ILiteralTypeVisitor
 import me.eriknikli.rhenium.ast.visitors.expressions.literals.ILiteralVisitor
+import me.eriknikli.rhenium.common.and
 import me.eriknikli.rhenium.parser.RheniumParser
 import me.eriknikli.rhenium.parser.RheniumParserBaseVisitor
 import javax.inject.Inject
@@ -38,22 +39,22 @@ class ExpressionVisitor
             return visitIdentifier(identifier)
         }
 
-        val signedType = ctx.signedTypes()?.apply { literalTypeVisitor.visitSignedTypes(this) }
+        val signedType = ctx.signedTypes()?.let { literalTypeVisitor.visitSignedTypes(it) }
         if (signedType != null) {
-            return Identifier(ctx, signedType.text)
+            return Identifier(ctx, signedType.name)
         }
 
-        val unsignedType = ctx.unsignedTypes()?.apply { literalTypeVisitor.visitUnsignedTypes(this) }
+        val unsignedType = ctx.unsignedTypes()?.let { literalTypeVisitor.visitUnsignedTypes(it) }
         if (unsignedType != null) {
-            return Identifier(ctx, unsignedType.text)
+            return Identifier(ctx, unsignedType.name)
         }
 
-        val floatType = ctx.floatTypes()?.apply { literalTypeVisitor.visitFloatTypes(this) }
+        val floatType = ctx.floatTypes()?.let { literalTypeVisitor.visitFloatTypes(it) }
         if (floatType != null) {
-            return Identifier(ctx, floatType.text)
+            return Identifier(ctx, floatType.name)
         }
 
-        throw IllegalStateException("Unhandled type name state.")
+        throw IllegalStateException("Unhandled state is reached.")
     }
 
     override fun visitIdentifier(ctx: RheniumParser.IdentifierContext): Identifier {
@@ -74,13 +75,16 @@ class ExpressionVisitor
     }
 
     override fun visitMulExp(ctx: RheniumParser.MulExpContext): BinaryOpExpression {
-        val left = visit(ctx.left)
-        val right = visit(ctx.right)
+        val (left, right) = and(
+            { visit(ctx.left) },
+            { visit(ctx.right) }
+        )
         val opText = ctx.op.text
 
         val op = when (opText) {
             "*" -> Operator.STAR
             "/" -> Operator.SLASH
+            "%" -> Operator.PERCENT
             else -> Operator.PERCENT
         }
 
@@ -88,8 +92,10 @@ class ExpressionVisitor
     }
 
     override fun visitAddExp(ctx: RheniumParser.AddExpContext): BinaryOpExpression {
-        val left = visit(ctx.left)
-        val right = visit(ctx.right)
+        val (left, right) = and(
+            { visit(ctx.left) },
+            { visit(ctx.right) }
+        )
         val isPlus = ctx.PLUS() != null
         val op = if (isPlus) Operator.PLUS else Operator.MINUS
 
@@ -110,8 +116,10 @@ class ExpressionVisitor
     }
 
     override fun visitEqualityExp(ctx: RheniumParser.EqualityExpContext): Expression {
-        val left = visit(ctx.left)
-        val right = visit(ctx.right)
+        val (left, right) = and(
+            { visit(ctx.left) },
+            { visit(ctx.right) }
+        )
         val op = when (ctx.text) {
             "==" -> Operator.EQUALS
             "!=" -> Operator.NOT_EQUALS
@@ -121,8 +129,10 @@ class ExpressionVisitor
     }
 
     override fun visitLogicalExp(ctx: RheniumParser.LogicalExpContext): Expression {
-        val left = visit(ctx.left)
-        val right = visit(ctx.right)
+        val (left, right) = and(
+            { visit(ctx.left) },
+            { visit(ctx.right) }
+        )
         val op = when (ctx.op.text) {
             "&&" -> Operator.AND
             "||" -> Operator.OR

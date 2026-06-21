@@ -2,6 +2,9 @@ package me.eriknikli.rhenium.semanticAnalyzer.statements
 
 import dagger.Lazy
 import me.eriknikli.rhenium.ast.tree.statements.vars.VarAssignmentStatement
+import me.eriknikli.rhenium.common.and
+import me.eriknikli.rhenium.semanticAnalyzer.exceptions.NotAnLValueException
+import me.eriknikli.rhenium.semanticAnalyzer.exceptions.TypeMismatchException
 import me.eriknikli.rhenium.semanticAnalyzer.expressions.ExpressionNodeDecoratorContext
 import me.eriknikli.rhenium.semanticAnalyzer.expressions.IExpressionNodeDecorator
 import me.eriknikli.rhenium.semanticContext.tree.expressions.LValueContext
@@ -24,18 +27,33 @@ constructor() : IVarAssignmentStatementDecorator {
     override fun decorate(statement: VarAssignmentStatement, context: StatementDecoratorContext) {
         val scope = context.scope
 
-        val right = statement.rightValue
-        expressionNodeDecorator.decorateExpression(right, ExpressionNodeDecoratorContext(scope))
+        val (left, right) = and(
+            {
+                statement.leftValue.let {
+                    expressionNodeDecorator.decorateExpression(it, ExpressionNodeDecoratorContext(scope))
+                    if (it.context !is LValueContext) {
+                        throw NotAnLValueException(it.parserContext)
+                    }
+                    it
+                }
+            },
+            {
+                statement.rightValue.let {
+                    expressionNodeDecorator.decorateExpression(it, ExpressionNodeDecoratorContext(scope))
+                    it
+                }
+            }
+        )
 
-        val left = statement.leftValue
-        expressionNodeDecorator.decorateExpression(left, ExpressionNodeDecoratorContext(scope))
-        if (left.context !is LValueContext) {
-            throw Exception("Left side in variable assignment is not a valid left-value.")
-        }
-
-        val validAssignment = right.context.type.canAssignTo(left.context.type)
+        val actualType = right.context.type
+        val expectedType = left.context.type
+        val validAssignment = actualType.canAssignTo(expectedType)
         if (!validAssignment) {
-            throw Exception("Expression with type of ${right.context.type} cannot be assigned to type of ${left.context.type}.")
+            throw TypeMismatchException(
+                statement.parserContext,
+                actualType,
+                expectedType
+            )
         }
 
         statement.context.relevantScope = scope
