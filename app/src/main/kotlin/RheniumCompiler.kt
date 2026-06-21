@@ -58,7 +58,8 @@ constructor(
         }
 
         if (throwable is RheniumException) {
-            logger.error(throwable.message)
+            logger.error("\n${throwable.message}")
+            return
         }
 
         logger.error("Fatal error.", throwable)

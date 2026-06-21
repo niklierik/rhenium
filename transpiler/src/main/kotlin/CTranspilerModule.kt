@@ -22,6 +22,9 @@ interface CTranspilerModule {
     fun bindVarAssignment(varAssignmentStatement: CVarAssignmentTranspiler): IVarAssignmentTranspiler
 
     @Binds
+    fun bindLeftValue(leftValue: CLeftValueTranspiler): ILeftValueTranspiler
+
+    @Binds
     fun bindStatement(statement: CStatementTranspiler): IStatementTranspiler
 
     @Binds

@@ -5,5 +5,4 @@ import me.eriknikli.rhenium.semanticContext.tree.Context
 
 interface ExpressionContext : Context {
     var type: ExpressionType
-
 }

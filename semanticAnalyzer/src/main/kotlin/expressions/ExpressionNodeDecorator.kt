@@ -1,6 +1,8 @@
 package me.eriknikli.rhenium.semanticAnalyzer.expressions
 
+import dagger.Lazy
 import me.eriknikli.rhenium.ast.tree.expressions.Expression
+import me.eriknikli.rhenium.ast.tree.expressions.Identifier
 import me.eriknikli.rhenium.ast.tree.expressions.literals.Literal
 import me.eriknikli.rhenium.ast.tree.expressions.operators.BinaryOpExpression
 import me.eriknikli.rhenium.ast.tree.expressions.operators.UnaryOpExpression
@@ -37,6 +39,9 @@ constructor() : IExpressionNodeDecorator {
 
     private val unaryNodeDecorator by lazy { unaryNodeDecoratorProvider.get() }
 
+    @Inject
+    lateinit var identifierNodeDecorator: Lazy<IIdentifierNodeDecorator>
+
     override fun decorateExpression(
         expression: Expression,
         expressionNodeDecoratorContext: ExpressionNodeDecoratorContext
@@ -46,6 +51,9 @@ constructor() : IExpressionNodeDecorator {
             is BinaryOpExpression -> binaryNodeDecorator.decorate(expression, expressionNodeDecoratorContext)
             is UnaryOpExpression -> unaryNodeDecorator.decorate(expression, expressionNodeDecoratorContext)
             is Literal<*> -> literalNodeDecorator.decorateLiteral(expression)
+            is Identifier -> identifierNodeDecorator.get()
+                .decorateIdentifier(expression, expressionNodeDecoratorContext)
+
             else -> throw IllegalExpressionException(expression.parserContext, expression.javaClass)
         }
     }

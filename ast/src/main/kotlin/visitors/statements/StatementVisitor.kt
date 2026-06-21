@@ -1,8 +1,11 @@
 package me.eriknikli.rhenium.ast.visitors.statements
 
+import dagger.Lazy
 import me.eriknikli.rhenium.ast.tree.statements.Statement
+import me.eriknikli.rhenium.ast.tree.statements.vars.VarAssignmentStatement
 import me.eriknikli.rhenium.ast.tree.statements.vars.VarDeclarationStatement
 import me.eriknikli.rhenium.ast.visitors.expressions.IExpressionVisitor
+import me.eriknikli.rhenium.ast.visitors.expressions.ILeftValueVisitor
 import me.eriknikli.rhenium.common.and
 import me.eriknikli.rhenium.parser.RheniumParser
 import me.eriknikli.rhenium.parser.RheniumParserBaseVisitor
@@ -19,7 +22,10 @@ class StatementVisitor
 
 ), IStatementVisitor {
     @Inject
-    lateinit var expressionVisitor: IExpressionVisitor
+    lateinit var expressionVisitor: Lazy<IExpressionVisitor>
+
+    @Inject
+    lateinit var leftValueVisitor: Lazy<ILeftValueVisitor>
 
     override fun visitVarDeclarationStatement(ctx: RheniumParser.VarDeclarationStatementContext): Statement {
         val mutable = ctx.LET() != null
@@ -34,14 +40,22 @@ class StatementVisitor
 
         val (expectedType, expression) = and(
             {
-                expectedTypeNode?.let { expressionVisitor.visitTypeName(it) }
+                expectedTypeNode?.let { expressionVisitor.get().visitTypeName(it) }
             },
             {
-                expressionVisitor.visitExpression(ctx.expression())
+                expressionVisitor.get().visitExpression(ctx.expression())
             }
         )
 
 
         return VarDeclarationStatement(ctx, mutable, name, expectedType, expression)
+    }
+
+    override fun visitVarAssignmentStatement(ctx: RheniumParser.VarAssignmentStatementContext): Statement {
+
+        val leftValue = leftValueVisitor.get().visitLeftValue(ctx.leftValue())
+        val rightValue = expressionVisitor.get().visitExpression(ctx.expression())
+
+        return VarAssignmentStatement(ctx, leftValue, rightValue)
     }
 }

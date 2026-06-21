@@ -8,6 +8,8 @@ import me.eriknikli.rhenium.ast.visitors.IRootVisitor
 import me.eriknikli.rhenium.ast.visitors.RootVisitor
 import me.eriknikli.rhenium.ast.visitors.expressions.ExpressionVisitor
 import me.eriknikli.rhenium.ast.visitors.expressions.IExpressionVisitor
+import me.eriknikli.rhenium.ast.visitors.expressions.ILeftValueVisitor
+import me.eriknikli.rhenium.ast.visitors.expressions.LeftValueVisitor
 import me.eriknikli.rhenium.ast.visitors.expressions.literals.ILiteralTypeVisitor
 import me.eriknikli.rhenium.ast.visitors.expressions.literals.ILiteralVisitor
 import me.eriknikli.rhenium.ast.visitors.expressions.literals.LiteralTypeVisitor
@@ -37,4 +39,7 @@ interface AstModule {
 
     @Binds
     fun bindStatementVisitor(statementVisitor: StatementVisitor): IStatementVisitor
+
+    @Binds
+    fun bindLeftValueVisitor(leftValueVisitor: LeftValueVisitor): ILeftValueVisitor
 }

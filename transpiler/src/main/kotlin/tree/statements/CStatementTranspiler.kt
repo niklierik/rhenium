@@ -1,5 +1,6 @@
 package me.eriknikli.rhenium.transpiler.tree.statements
 
+import dagger.Lazy
 import me.eriknikli.rhenium.ast.tree.statements.Statement
 import me.eriknikli.rhenium.ast.tree.statements.vars.VarAssignmentStatement
 import me.eriknikli.rhenium.ast.tree.statements.vars.VarDeclarationStatement
@@ -22,8 +23,8 @@ constructor() : IStatementTranspiler {
 
     override fun transpile(node: Statement, output: OutputStream) {
         when (node) {
-            is VarDeclarationStatement -> varDeclarationTranspiler.value.transpile(node, output)
-            is VarAssignmentStatement -> varAssignmentTranspiler.value.transpile(node, output)
+            is VarDeclarationStatement -> varDeclarationTranspiler.get().transpile(node, output)
+            is VarAssignmentStatement -> varAssignmentTranspiler.get().transpile(node, output)
             else -> throw IllegalStateException("Unhandled node ${node.javaClass} and cannot transpile it as statement.")
         }
     }

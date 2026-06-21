@@ -3,11 +3,12 @@ package me.eriknikli.rhenium.semanticAnalyzer.statements
 import dagger.Lazy
 import me.eriknikli.rhenium.ast.tree.statements.vars.VarAssignmentStatement
 import me.eriknikli.rhenium.common.and
+import me.eriknikli.rhenium.semanticAnalyzer.exceptions.ImmutableLeftValueException
 import me.eriknikli.rhenium.semanticAnalyzer.exceptions.NotAnLValueException
 import me.eriknikli.rhenium.semanticAnalyzer.exceptions.TypeMismatchException
 import me.eriknikli.rhenium.semanticAnalyzer.expressions.ExpressionNodeDecoratorContext
 import me.eriknikli.rhenium.semanticAnalyzer.expressions.IExpressionNodeDecorator
-import me.eriknikli.rhenium.semanticContext.tree.expressions.LValueContext
+import me.eriknikli.rhenium.semanticContext.tree.expressions.LeftValueContext
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -31,8 +32,12 @@ constructor() : IVarAssignmentStatementDecorator {
             {
                 statement.leftValue.let {
                     expressionNodeDecorator.decorateExpression(it, ExpressionNodeDecoratorContext(scope))
-                    if (it.context !is LValueContext) {
+                    val context = it.context
+                    if (context !is LeftValueContext) {
                         throw NotAnLValueException(it.parserContext)
+                    }
+                    if (!context.symbol.mutable) {
+                        throw ImmutableLeftValueException(it.parserContext, it)
                     }
                     it
                 }

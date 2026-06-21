@@ -1,5 +1,6 @@
 package me.eriknikli.rhenium.transpiler.tree.statements
 
+import dagger.Lazy
 import me.eriknikli.rhenium.ast.tree.statements.vars.VarDeclarationStatement
 import me.eriknikli.rhenium.transpiler.INodeTranspiler
 import me.eriknikli.rhenium.transpiler.tree.expressions.IExpressionTranspiler
@@ -26,7 +27,7 @@ constructor() : IVarDeclarationTranspiler {
         output.writeText(" ")
         output.writeText(symbol.cName)
         output.writeText("=")
-        expressionTranspiler.value.transpile(node.rightSide, output)
+        expressionTranspiler.get().transpile(node.rightSide, output)
         output.writeText(";")
     }
 }

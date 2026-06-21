@@ -27,6 +27,10 @@ constructor() : ILiteralExpressionTranspiler {
 
             is F64Literal -> output.writeText("${literal.value}")
             is F32Literal -> output.writeText("${literal.value}f")
+
+            is BooleanLiteral -> output.writeText(literal.value.toString())
+
+            else -> throw Exception("Illegal literal $literal cannot be transpiled.")
         }
     }
 }

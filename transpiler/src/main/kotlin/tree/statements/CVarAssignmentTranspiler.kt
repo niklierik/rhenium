@@ -1,5 +1,6 @@
 package me.eriknikli.rhenium.transpiler.tree.statements
 
+import dagger.Lazy
 import me.eriknikli.rhenium.ast.tree.statements.vars.VarAssignmentStatement
 import me.eriknikli.rhenium.transpiler.INodeTranspiler
 import me.eriknikli.rhenium.transpiler.tree.expressions.IExpressionTranspiler
@@ -18,12 +19,13 @@ constructor() : IVarAssignmentTranspiler {
     @Inject
     lateinit var expressionTranspiler: Lazy<IExpressionTranspiler>
 
-    override fun transpile(node: VarAssignmentStatement, output: OutputStream) {
-        val context = node.context
+    @Inject
+    lateinit var leftValueTranspiler: Lazy<ILeftValueTranspiler>
 
-        leftValueTranspiler.value.transpile(node., output)
+    override fun transpile(node: VarAssignmentStatement, output: OutputStream) {
+        leftValueTranspiler.get().transpile(node.leftValue, output)
         output.writeText("=(")
-        expressionTranspiler.value.transpile(node.rightValue, output)
+        expressionTranspiler.get().transpile(node.rightValue, output)
         output.writeText(");")
     }
 }
