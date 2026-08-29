@@ -24,5 +24,5 @@ tasks.test {
     dependsOn(":parser:generateGrammarSource")
 }
 kotlin {
-    jvmToolchain(21)
+    jvmToolchain(25)
 }
