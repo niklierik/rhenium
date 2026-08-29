@@ -8,6 +8,7 @@ import me.eriknikli.rhenium.semanticAnalyzer.ISemanticAnalyzer
 import me.eriknikli.rhenium.transpiler.ITranspiler
 import org.antlr.v4.runtime.CharStreams
 import org.slf4j.Logger
+import java.io.File
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.io.path.Path
@@ -38,8 +39,10 @@ constructor(
                 transpiler.transpile(ast, it)
             }
 
-            "clang ${options.inputPath}.c -o ${options.inputPath}.o -lm".runCommand()
-            "./${options.inputPath}.o".runCommand()
+            val binaryPath = File("${options.inputPath}.o").absolutePath
+
+            "clang ${options.inputPath}.c -o $binaryPath -lm".runCommand()
+            binaryPath.runCommand()
         } catch (exception: Exception) {
             handleException(exception)
         }
