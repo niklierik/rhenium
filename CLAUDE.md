@@ -49,6 +49,8 @@ semanticContext  →  (nothing)
 3. `ITranspiler.transpile(ast, outputStream)` — emits a C prologue (the includes and typedefs the `cName`s rely on) then `int main(){ ... }`.
 4. Shells out to `clang`, then executes the produced binary, both via `String.runCommand()` in **common**.
 
+Steps 1 and 2 each return `Diagnosed<T>`, and the chain is an `either { }` block, so step 3 is only reached for a program with no diagnostics — nothing is written next to the source until then. `Main` prints them and exits non-zero.
+
 Each stage is a parallel tree of small classes, one per node kind: `visitors/` (ast) ↔ `tree/` (ast) ↔ decorators (semanticAnalyzer) ↔ `tree/` transpilers (transpiler). Adding syntax means touching all four, in that order, plus a `@Binds` in the relevant Dagger module.
 
 ## Conventions
@@ -57,7 +59,17 @@ Each stage is a parallel tree of small classes, one per node kind: `visitors/` (
 
 The trees are mutually recursive, so dependencies are field-injected as `dagger.Lazy<IFoo>` and unwrapped through a `private val foo by lazy { provider.get() }`. Keep that idiom for anything that can recurse back into the injector.
 
-**Multi-error reporting.** Sibling subtrees are visited through `and(left, right)`, `mapAllAndThrow`, and `forEachAllAndThrow` in [common](common/src/main/kotlin/me/eriknikli/rhenium/common/AggregateException.kt), which run every branch, collect the exceptions, and throw one flattened `AggregateException`. Don't replace these with plain calls — that would report only the first diagnostic. `RheniumCompiler.handleException` recursively unwraps `AggregateException` and logs anything implementing the `RheniumException` marker as a user error; everything else is "Fatal error." with a stack trace. Every concrete exception passes a formatted message to its `SyntaxException`/`SemanticException` super constructor, prefixed with `ParserRuleContext.location` (the `line:column` extension in **common**) — keep that shape so diagnostics stay locatable.
+**Errors are values.** Anything the user can get wrong is a `Diagnostic` — `line`, `column`, `message` — returned, never thrown. Every walker's signature says so: `Diagnosed<T>` (alias for Arrow's `EitherNel<Diagnostic, T>`) is "a `T`, or every reason there isn't one". A thrown exception means a **compiler bug**, not bad input; an unhandled node kind in a `when` dispatch is the usual case and stays an `IllegalStateException`. Each diagnostic gets its own file under its module's `diagnostics/` package — one public type per file, as everywhere else in this repo — and implements `ContextDiagnostic` when it can point at a parse node, which derives `line` and `column` from it.
+
+Diagnostics accumulate rather than short-circuit, which is the whole point — use Arrow's combinators for it and do not hand-roll collection:
+
+- sibling children of one node → `zipOrAccumulate({ ... }, { ... }) { a, b -> ... }`, so a broken left operand never hides an error on the right
+- a list of children → `mapOrAccumulate(children) { ... }`
+- inside either, a child result is unwrapped with `.bindNel()`; a single check is `ensure(cond) { Diagnostic }`
+
+Recovery is by **poison type**, not by aborting the subtree: a failed expression yields `InvalidType`, which absorbs every operation and assignment, and an unresolved identifier binds [ErrorSymbol](semanticContext/src/main/kotlin/me/eriknikli/rhenium/semanticContext/scope/vars/ErrorSymbol.kt). A failed declaration still declares its variable, poisoned. That is what keeps one mistake to one message instead of a cascade — there are tests pinning this, so if you add a rule, add the suppression too.
+
+ANTLR reports through a callback, so [ParseTreeFactory](ast/src/main/kotlin/utils/ParseTreeFactory.kt) is the one place diagnostics are collected by mutation; its listener replaces ANTLR's console listener, and the list becomes a value again when it returns.
 
 **Types and C names.** Every `ExpressionType` exposes a `cName` that is emitted verbatim, plus `canAssignTo` (implicit conversions) and `canAssignToExplicit` (casts); the numeric types order themselves by an `index` for width comparisons. Primitives are seeded into the scope by `globalScope()` in [GlobalScope.kt](semanticContext/src/main/kotlin/me/eriknikli/rhenium/semanticContext/scope/GlobalScope.kt). Variables get a mangled `cName` of `re_<name>_<uuid>` so C never sees a shadowing collision.
 
