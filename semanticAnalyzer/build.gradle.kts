@@ -16,10 +16,12 @@ dependencies {
     implementation(project(":ast"))
     implementation(project(":common"))
     implementation(project(":semanticContext"))
+    testImplementation(project(":parser"))
 }
 
 tasks.test {
     useJUnitPlatform()
+    dependsOn(":parser:generateGrammarSource")
 }
 kotlin {
     jvmToolchain(21)
