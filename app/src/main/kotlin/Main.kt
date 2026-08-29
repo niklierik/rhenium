@@ -1,7 +1,8 @@
 package me.eriknikli.rhenium.app
 
+import me.eriknikli.rhenium.common.diagnostics.render
 import java.io.File
-import java.io.FileNotFoundException
+import kotlin.system.exitProcess
 
 fun main(args: Array<String>) {
     var path = args.joinToString(" ")
@@ -10,11 +11,15 @@ fun main(args: Array<String>) {
     }
 
     if (!File(path).exists()) {
-        throw FileNotFoundException("Input file '$path' not found.")
+        System.err.println("Input file '$path' not found.")
+        exitProcess(1)
     }
 
     val factory = DaggerRheniumCompilerFactory.create()
     val compiler = factory.makeCompiler()
-    compiler.compile(CompilerOptions(path))
 
+    compiler.compile(CompilerOptions(path)).onLeft { diagnostics ->
+        System.err.println(diagnostics.render())
+        exitProcess(1)
+    }
 }

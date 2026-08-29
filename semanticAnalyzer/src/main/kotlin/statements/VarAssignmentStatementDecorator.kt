@@ -1,11 +1,15 @@
 package me.eriknikli.rhenium.semanticAnalyzer.statements
 
+import arrow.core.nel
+import arrow.core.raise.either
+import arrow.core.raise.ensure
+import arrow.core.raise.zipOrAccumulate
 import dagger.Lazy
 import me.eriknikli.rhenium.ast.tree.statements.vars.VarAssignmentStatement
-import me.eriknikli.rhenium.common.and
-import me.eriknikli.rhenium.semanticAnalyzer.exceptions.ImmutableLeftValueException
-import me.eriknikli.rhenium.semanticAnalyzer.exceptions.NotAnLValueException
-import me.eriknikli.rhenium.semanticAnalyzer.exceptions.TypeMismatchException
+import me.eriknikli.rhenium.common.diagnostics.Diagnosed
+import me.eriknikli.rhenium.semanticAnalyzer.diagnostics.ImmutableLeftValue
+import me.eriknikli.rhenium.semanticAnalyzer.diagnostics.NotAnLValue
+import me.eriknikli.rhenium.semanticAnalyzer.diagnostics.TypeMismatch
 import me.eriknikli.rhenium.semanticAnalyzer.expressions.ExpressionNodeDecoratorContext
 import me.eriknikli.rhenium.semanticAnalyzer.expressions.IExpressionNodeDecorator
 import me.eriknikli.rhenium.semanticContext.tree.expressions.LeftValueContext
@@ -13,7 +17,7 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 interface IVarAssignmentStatementDecorator {
-    fun decorate(statement: VarAssignmentStatement, context: StatementDecoratorContext)
+    fun decorate(statement: VarAssignmentStatement, context: StatementDecoratorContext): Diagnosed<Unit>
 }
 
 @Singleton
@@ -25,42 +29,39 @@ constructor() : IVarAssignmentStatementDecorator {
 
     private val expressionNodeDecorator by lazy { expressionNodeDecoratorProvider.get() }
 
-    override fun decorate(statement: VarAssignmentStatement, context: StatementDecoratorContext) {
+    override fun decorate(
+        statement: VarAssignmentStatement,
+        context: StatementDecoratorContext
+    ): Diagnosed<Unit> = either {
         val scope = context.scope
+        statement.context.relevantScope = scope
 
-        val (left, right) = and(
+        val (targetType, valueType) = zipOrAccumulate(
             {
-                statement.leftValue.let {
-                    expressionNodeDecorator.decorateExpression(it, ExpressionNodeDecoratorContext(scope))
-                    val context = it.context
-                    if (context !is LeftValueContext) {
-                        throw NotAnLValueException(it.parserContext)
-                    }
-                    if (!context.symbol.mutable) {
-                        throw ImmutableLeftValueException(it.parserContext, it)
-                    }
-                    it
+                val leftValue = statement.leftValue
+                expressionNodeDecorator
+                    .decorateExpression(leftValue, ExpressionNodeDecoratorContext(scope))
+                    .bindNel()
+
+                val leftValueContext = leftValue.context
+                if (leftValueContext !is LeftValueContext) {
+                    raise(NotAnLValue(leftValue.parserContext))
                 }
+                ensure(leftValueContext.symbol.mutable) {
+                    ImmutableLeftValue(leftValue.parserContext, leftValue)
+                }
+
+                leftValueContext.type
             },
             {
-                statement.rightValue.let {
-                    expressionNodeDecorator.decorateExpression(it, ExpressionNodeDecoratorContext(scope))
-                    it
-                }
+                expressionNodeDecorator
+                    .decorateExpression(statement.rightValue, ExpressionNodeDecoratorContext(scope))
+                    .bindNel()
             }
-        )
+        ) { target, value -> target to value }
 
-        val actualType = right.context.type
-        val expectedType = left.context.type
-        val validAssignment = actualType.canAssignTo(expectedType)
-        if (!validAssignment) {
-            throw TypeMismatchException(
-                statement.parserContext,
-                actualType,
-                expectedType
-            )
+        ensure(valueType.canAssignTo(targetType)) {
+            TypeMismatch(statement.parserContext, valueType, listOf(targetType)).nel()
         }
-
-        statement.context.relevantScope = scope
     }
 }

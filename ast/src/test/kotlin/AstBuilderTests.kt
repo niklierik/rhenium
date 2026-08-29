@@ -1,3 +1,4 @@
+import arrow.core.getOrElse
 import me.eriknikli.rhenium.ast.IAstBuilder
 import me.eriknikli.rhenium.ast.tree.AstNode
 import me.eriknikli.rhenium.ast.tree.RootNode
@@ -7,12 +8,16 @@ import me.eriknikli.rhenium.ast.tree.expressions.operators.BinaryOpExpression
 import me.eriknikli.rhenium.ast.tree.expressions.operators.UnaryOpExpression
 import me.eriknikli.rhenium.ast.tree.statements.vars.VarAssignmentStatement
 import me.eriknikli.rhenium.ast.tree.statements.vars.VarDeclarationStatement
+import me.eriknikli.rhenium.common.diagnostics.render
 import org.antlr.v4.runtime.CharStreams
+import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
 import org.junit.jupiter.params.provider.MethodSource
 import java.util.stream.Stream
 import kotlin.test.assertEquals
+import kotlin.test.assertTrue
+import kotlin.test.fail
 
 class AstBuilderTests {
     private val astBuilder: IAstBuilder = DaggerAstTestComponent.create().makeAstBuilder()
@@ -23,8 +28,33 @@ class AstBuilderTests {
         val stream = CharStreams.fromString(sourceCode)
 
         val actualTree = astBuilder.parse(stream)
+            .getOrElse { fail("expected a tree, got diagnostics:\n${it.render()}") }
 
         assertEquals(expectedTree, actualTree.sexpr())
+    }
+
+    @ParameterizedTest(name = "Run {index}, name {0}")
+    @MethodSource("provideDiagnostics")
+    fun `test ast diagnostics`(name: String, sourceCode: String, expectedDiagnostics: String) {
+        val stream = CharStreams.fromString(sourceCode)
+
+        val diagnostics = astBuilder.parse(stream).leftOrNull()
+            ?: fail("expected diagnostics, but the source parsed successfully")
+
+        assertEquals(expectedDiagnostics, diagnostics.render())
+    }
+
+    @Test
+    fun `syntax errors are reported instead of printed`() {
+        val stream = CharStreams.fromString("let a = ;")
+
+        val diagnostics = astBuilder.parse(stream).leftOrNull()
+            ?: fail("expected diagnostics, but the source parsed successfully")
+
+        assertEquals(1, diagnostics.size)
+        assertEquals(1, diagnostics.head.line)
+        assertEquals(9, diagnostics.head.column)
+        assertTrue(diagnostics.head.message.isNotBlank())
     }
 
     companion object {
@@ -66,6 +96,38 @@ class AstBuilderTests {
                     "(root (let a (i32 1)) (= a (i32 2)))"
                 ),
                 Arguments.of("empty program", "", "(root)")
+            )
+        }
+
+        @JvmStatic
+        fun provideDiagnostics(): Stream<Arguments> {
+            return Stream.of(
+                Arguments.of(
+                    "integer literal out of range",
+                    "let a = 99999999999999999999;",
+                    "1:9: '99999999999999999999' is not a valid I32 literal."
+                ),
+                Arguments.of(
+                    "typed literal out of range",
+                    "let a = U8(300);",
+                    "1:9: '300' is not a valid U8 literal."
+                ),
+                Arguments.of(
+                    "both operands are reported, not just the first",
+                    "let a = U8(300) + U8(400);",
+                    """
+                    1:9: '300' is not a valid U8 literal.
+                    1:19: '400' is not a valid U8 literal.
+                    """.trimIndent()
+                ),
+                Arguments.of(
+                    "every statement is reported",
+                    "let a = U8(300);\nlet b = U8(400);",
+                    """
+                    1:9: '300' is not a valid U8 literal.
+                    2:9: '400' is not a valid U8 literal.
+                    """.trimIndent()
+                )
             )
         }
 

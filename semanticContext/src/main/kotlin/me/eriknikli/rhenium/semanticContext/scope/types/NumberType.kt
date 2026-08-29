@@ -11,6 +11,9 @@ enum class SignedIntType(
     override val declarationParserContext: ParserRuleContext? = null
 
     override fun canAssignTo(target: ExpressionType): Boolean {
+        if (target is InvalidType) {
+            return true
+        }
         if (target !is SignedIntType) {
             return false
         }
@@ -18,7 +21,7 @@ enum class SignedIntType(
     }
 
     override fun canAssignToExplicit(target: ExpressionType): Boolean {
-        return target is FloatType || target is SignedIntType || target is UnsignedIntType
+        return target is InvalidType || target is FloatType || target is SignedIntType || target is UnsignedIntType
     }
 }
 
@@ -34,6 +37,9 @@ enum class UnsignedIntType(
     override val declarationParserContext: ParserRuleContext? = null
 
     override fun canAssignTo(target: ExpressionType): Boolean {
+        if (target is InvalidType) {
+            return true
+        }
         if (target !is UnsignedIntType) {
             return false
         }
@@ -41,7 +47,7 @@ enum class UnsignedIntType(
     }
 
     override fun canAssignToExplicit(target: ExpressionType): Boolean {
-        return target is FloatType || target is SignedIntType || target is UnsignedIntType
+        return target is InvalidType || target is FloatType || target is SignedIntType || target is UnsignedIntType
     }
 }
 
@@ -55,6 +61,9 @@ enum class FloatType(
     override val declarationParserContext: ParserRuleContext? = null
 
     override fun canAssignTo(target: ExpressionType): Boolean {
+        if (target is InvalidType) {
+            return true
+        }
         if (target !is FloatType) {
             return false
         }
@@ -62,7 +71,7 @@ enum class FloatType(
     }
 
     override fun canAssignToExplicit(target: ExpressionType): Boolean {
-        return target is FloatType || target is SignedIntType || target is UnsignedIntType
+        return target is InvalidType || target is FloatType || target is SignedIntType || target is UnsignedIntType
     }
 }
 

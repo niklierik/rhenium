@@ -4,7 +4,7 @@ import dagger.Lazy
 import me.eriknikli.rhenium.ast.tree.statements.Statement
 import me.eriknikli.rhenium.ast.tree.statements.vars.VarAssignmentStatement
 import me.eriknikli.rhenium.ast.tree.statements.vars.VarDeclarationStatement
-import me.eriknikli.rhenium.semanticAnalyzer.exceptions.IllegalStatementException
+import me.eriknikli.rhenium.common.diagnostics.Diagnosed
 import me.eriknikli.rhenium.semanticContext.scope.Scope
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -14,7 +14,10 @@ data class StatementDecoratorContext(
 )
 
 interface IStatementNodeDecorator {
-    fun decorateStatement(statement: Statement, statementDecoratorContext: StatementDecoratorContext)
+    fun decorateStatement(
+        statement: Statement,
+        statementDecoratorContext: StatementDecoratorContext
+    ): Diagnosed<Unit>
 }
 
 @Singleton
@@ -32,23 +35,23 @@ constructor(
     lateinit var varAssignmentStatementDecoratorProvider: Lazy<IVarAssignmentStatementDecorator>
     private val varAssignmentStatementDecorator by lazy { varAssignmentStatementDecoratorProvider.get() }
 
-
     override fun decorateStatement(
         statement: Statement,
         statementDecoratorContext: StatementDecoratorContext
-    ) {
+    ): Diagnosed<Unit> {
         val scope = statementDecoratorContext.scope
         statement.context.relevantScope = scope
 
-        when (statement) {
+        return when (statement) {
             is VarDeclarationStatement -> varDeclStatementDecorator.decorate(statement)
             is VarAssignmentStatement -> varAssignmentStatementDecorator.decorate(
                 statement,
                 StatementDecoratorContext(scope)
             )
 
-            else -> throw IllegalStatementException(statement.parserContext, statement.javaClass)
+            else -> throw IllegalStateException(
+                "Unhandled statement node ${statement.javaClass.simpleName} cannot be decorated."
+            )
         }
     }
 }
-
