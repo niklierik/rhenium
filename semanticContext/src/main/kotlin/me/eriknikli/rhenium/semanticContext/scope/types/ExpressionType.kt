@@ -25,6 +25,9 @@ class InvalidType : ExpressionType {
 
     override val cName: String = "void"
 
+    override fun toString(): String {
+        return "<invalid>"
+    }
 }
 
 class BooleanType : ExpressionType {
