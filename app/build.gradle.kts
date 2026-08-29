@@ -6,9 +6,6 @@ plugins {
 }
 
 dependencies {
-    val daggerVersion: String by project
-    val antlrVersion: String by project
-
     // Project "app" depends on project "utils". (Project paths are separated with ":", so ":utils" refers to the top-level "utils" project.)
     implementation(project(":common"))
     implementation(project(":parser"))
@@ -22,7 +19,7 @@ dependencies {
 application {
     // Define the Fully Qualified Name for the application main class
     // (Note that Kotlin compiles `App.kt` to a class with FQN `com.example.app.AppKt`.)
-    mainClass = "me.eriknikli.rhenium.MainKt"
+    mainClass = "me.eriknikli.rhenium.app.MainKt"
 }
 
 
