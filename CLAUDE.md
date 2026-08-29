@@ -74,3 +74,17 @@ ANTLR reports through a callback, so [ParseTreeFactory](ast/src/main/kotlin/util
 **Types and C names.** Every `ExpressionType` exposes a `cName` that is emitted verbatim, plus `canAssignTo` (implicit conversions) and `canAssignToExplicit` (casts); the numeric types order themselves by an `index` for width comparisons. Primitives are seeded into the scope by `globalScope()` in [GlobalScope.kt](semanticContext/src/main/kotlin/me/eriknikli/rhenium/semanticContext/scope/GlobalScope.kt). Variables get a mangled `cName` of `re_<name>_<uuid>` so C never sees a shadowing collision.
 
 Dependency versions are declared centrally — [gradle.properties](gradle.properties) and [gradle/libs.versions.toml](gradle/libs.versions.toml) — and read back via `val x: String by project` / `libs.*`; do not inline a version in a module build file. Shared Kotlin/kapt/test setup lives in the convention plugin under [buildSrc/](buildSrc/src/main/kotlin/).
+
+## The language being built
+
+The compiler implements a small slice of a much larger language design. That design is documented in
+[docs/](docs/README.md):
+
+- [Language reference](docs/language-reference.md) — syntax, types, operator precedence, control flow, objects
+- [Memory model](docs/memory-model.md) — ownership, `gives` / `take` / `using`, leak detection
+- [C interop](docs/c-interop.md) — `c_decl` and its mapping attributes
+- [Standard library](docs/standard-library.md) — planned types and Result-based error handling
+- [Roadmap and status](docs/roadmap.md) — the schedule, what is implemented today, and the known gaps
+
+Read [docs/roadmap.md](docs/roadmap.md) before planning work: most of what the other documents
+describe is not built yet. The design originates on the `plans` branch, which wins on any conflict.

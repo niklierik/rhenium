@@ -1,0 +1,29 @@
+# Roadmap and status
+
+## Schedule
+
+From `plan.md` on the `plans` branch. MSc thesis project, defense planned for spring 2027.
+
+| When | Work |
+| --- | --- |
+| September 2026 | expressions, variables with types, temporary printing, type analysis, C generation infrastructure |
+| October 2026 | scopes, `if` / `else if` / `else`, `for`, `while`, functions, structs |
+| November 2026 | interfaces, classes, `take` / `gives`, `using` |
+| December 2026 | generics, C interop, standard library |
+| January 2027 | example program (Battleship), fixing what it uncovers |
+| February–May 2027 | writing the thesis |
+
+## What the compiler implements today
+
+Literals, unary and binary arithmetic, relational, equality and logical operators, grouping,
+`let` / `const` declarations with an optional declared type, assignment, the type rules over those,
+and a transpiler that emits every statement into a single C `main()`.
+
+Everything else in these documents is unbuilt.
+
+## Known gaps worth knowing before you start
+
+- `^` (Pow) exists as a lexer token and has type rules in `BinaryOpNodeDecorator`, but **no parser
+  rule** — it cannot be written in a program yet.
+- There is no `entry`, no `namespace` and no `Project.json` handling. The compiler takes a single
+  `.re` file path on the command line and compiles that.
