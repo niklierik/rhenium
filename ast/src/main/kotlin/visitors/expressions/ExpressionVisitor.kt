@@ -103,9 +103,11 @@ class ExpressionVisitor
     }
 
     override fun visitRelationalExp(ctx: RheniumParser.RelationalExpContext): Expression {
-        val left = visit(ctx.left)
-        val right = visit(ctx.right)
-        val op = when (ctx.text) {
+        val (left, right) = and(
+            { visit(ctx.left) },
+            { visit(ctx.right) }
+        )
+        val op = when (ctx.op.text) {
             "<" -> Operator.LESS
             "<=" -> Operator.LESS_EQUALS
             ">" -> Operator.GREATER
@@ -120,7 +122,7 @@ class ExpressionVisitor
             { visit(ctx.left) },
             { visit(ctx.right) }
         )
-        val op = when (ctx.text) {
+        val op = when (ctx.op.text) {
             "==" -> Operator.EQUALS
             "!=" -> Operator.NOT_EQUALS
             else -> Operator.EQUALS
