@@ -5,6 +5,7 @@ import arrow.core.raise.either
 import arrow.core.raise.zipOrAccumulate
 import dagger.Lazy
 import me.eriknikli.rhenium.ast.diagnostics.UnhandledParseRule
+import me.eriknikli.rhenium.ast.tree.statements.ExpressionStatement
 import me.eriknikli.rhenium.ast.tree.statements.Statement
 import me.eriknikli.rhenium.ast.tree.statements.vars.VarAssignmentStatement
 import me.eriknikli.rhenium.ast.tree.statements.vars.VarDeclarationStatement
@@ -56,4 +57,10 @@ class StatementVisitor
             VarAssignmentStatement(ctx, leftValue, rightValue)
         }
     }
+
+    override fun visitExpressionStatement(
+        ctx: RheniumParser.ExpressionStatementContext
+    ): Diagnosed<Statement> = expressionVisitor.get()
+        .visitExpression(ctx.expression())
+        .map { ExpressionStatement(ctx, it) }
 }

@@ -1,6 +1,7 @@
 package me.eriknikli.rhenium.semanticAnalyzer.statements
 
 import dagger.Lazy
+import me.eriknikli.rhenium.ast.tree.statements.ExpressionStatement
 import me.eriknikli.rhenium.ast.tree.statements.Statement
 import me.eriknikli.rhenium.ast.tree.statements.vars.VarAssignmentStatement
 import me.eriknikli.rhenium.ast.tree.statements.vars.VarDeclarationStatement
@@ -35,6 +36,10 @@ constructor(
     lateinit var varAssignmentStatementDecoratorProvider: Lazy<IVarAssignmentStatementDecorator>
     private val varAssignmentStatementDecorator by lazy { varAssignmentStatementDecoratorProvider.get() }
 
+    @Inject
+    lateinit var expressionStatementDecoratorProvider: Lazy<IExpressionStatementDecorator>
+    private val expressionStatementDecorator by lazy { expressionStatementDecoratorProvider.get() }
+
     override fun decorateStatement(
         statement: Statement,
         statementDecoratorContext: StatementDecoratorContext
@@ -45,6 +50,11 @@ constructor(
         return when (statement) {
             is VarDeclarationStatement -> varDeclStatementDecorator.decorate(statement)
             is VarAssignmentStatement -> varAssignmentStatementDecorator.decorate(
+                statement,
+                StatementDecoratorContext(scope)
+            )
+
+            is ExpressionStatement -> expressionStatementDecorator.decorate(
                 statement,
                 StatementDecoratorContext(scope)
             )

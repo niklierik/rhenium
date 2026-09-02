@@ -6,6 +6,7 @@ import me.eriknikli.rhenium.ast.tree.expressions.Identifier
 import me.eriknikli.rhenium.ast.tree.expressions.literals.Literal
 import me.eriknikli.rhenium.ast.tree.expressions.operators.BinaryOpExpression
 import me.eriknikli.rhenium.ast.tree.expressions.operators.UnaryOpExpression
+import me.eriknikli.rhenium.ast.tree.statements.ExpressionStatement
 import me.eriknikli.rhenium.ast.tree.statements.vars.VarAssignmentStatement
 import me.eriknikli.rhenium.ast.tree.statements.vars.VarDeclarationStatement
 import me.eriknikli.rhenium.common.diagnostics.render
@@ -95,6 +96,12 @@ class AstBuilderTests {
                     "let a = 1;\na = 2;",
                     "(root (let a (i32 1)) (= a (i32 2)))"
                 ),
+                Arguments.of("expression statement", "1 + 2;", "(root (expr (+ (i32 1) (i32 2))))"),
+                Arguments.of(
+                    "an expression statement beside a declaration",
+                    "let a = 1;\na + 1;",
+                    "(root (let a (i32 1)) (expr (+ a (i32 1))))"
+                ),
                 Arguments.of("empty program", "", "(root)")
             )
         }
@@ -141,6 +148,7 @@ class AstBuilderTests {
             }
 
             is VarAssignmentStatement -> "(= ${leftValue.sexpr()} ${rightValue.sexpr()})"
+            is ExpressionStatement -> "(expr ${expression.sexpr()})"
             is BinaryOpExpression -> "(${operator.cString} ${left.sexpr()} ${right.sexpr()})"
             is UnaryOpExpression -> "(${operator.cString} ${expression.sexpr()})"
             is Identifier -> id

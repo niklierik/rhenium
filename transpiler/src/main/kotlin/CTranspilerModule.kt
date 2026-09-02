@@ -28,6 +28,9 @@ interface CTranspilerModule {
     fun bindStatement(statement: CStatementTranspiler): IStatementTranspiler
 
     @Binds
+    fun bindExpressionStatement(expressionStatement: CExpressionStatementTranspiler): IExpressionStatementTranspiler
+
+    @Binds
     fun bindExpression(expression: CExpressionTranspiler): IExpressionTranspiler
 
     @Binds

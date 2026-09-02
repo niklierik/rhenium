@@ -30,6 +30,12 @@ class SemanticAnalyzerTests {
         fun provideData(): Stream<Arguments> {
             return Stream.of(
                 Arguments.of("a valid program has no diagnostics", "let a = 1;\na = 2;", ""),
+                Arguments.of("an expression statement is not a diagnostic", "let a = 1;\na + 1;", ""),
+                Arguments.of(
+                    "a broken expression statement reports once",
+                    "b + 1;",
+                    "1:1: unknown symbol 'b'."
+                ),
                 Arguments.of("unknown symbol", "b = 3;", "1:1: unknown symbol 'b'."),
                 Arguments.of(
                     "assignment to an immutable variable",
