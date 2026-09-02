@@ -7,6 +7,7 @@ import me.eriknikli.rhenium.ast.tree.expressions.literals.Literal
 import me.eriknikli.rhenium.ast.tree.expressions.operators.BinaryOpExpression
 import me.eriknikli.rhenium.ast.tree.expressions.operators.UnaryOpExpression
 import me.eriknikli.rhenium.ast.tree.statements.ExpressionStatement
+import me.eriknikli.rhenium.ast.tree.statements.PrintStatement
 import me.eriknikli.rhenium.ast.tree.statements.vars.VarAssignmentStatement
 import me.eriknikli.rhenium.ast.tree.statements.vars.VarDeclarationStatement
 import me.eriknikli.rhenium.common.diagnostics.render
@@ -43,6 +44,18 @@ class AstBuilderTests {
             ?: fail("expected diagnostics, but the source parsed successfully")
 
         assertEquals(expectedDiagnostics, diagnostics.render())
+    }
+
+    @Test
+    fun `print without an operand does not parse`() {
+        val stream = CharStreams.fromString("print;")
+
+        val diagnostics = astBuilder.parse(stream).leftOrNull()
+            ?: fail("expected diagnostics, but the source parsed successfully")
+
+        assertEquals(1, diagnostics.size)
+        assertEquals(1, diagnostics.head.line)
+        assertEquals(6, diagnostics.head.column)
     }
 
     @Test
@@ -102,6 +115,14 @@ class AstBuilderTests {
                     "let a = 1;\na + 1;",
                     "(root (let a (i32 1)) (expr (+ a (i32 1))))"
                 ),
+                Arguments.of("print", "print 1;", "(root (print (i32 1)))"),
+                Arguments.of("println", "println 1;", "(root (println (i32 1)))"),
+                Arguments.of("bare println", "println;", "(root (println))"),
+                Arguments.of(
+                    "println takes a whole expression",
+                    "println 1 + 2;",
+                    "(root (println (+ (i32 1) (i32 2))))"
+                ),
                 Arguments.of("empty program", "", "(root)")
             )
         }
@@ -149,6 +170,12 @@ class AstBuilderTests {
 
             is VarAssignmentStatement -> "(= ${leftValue.sexpr()} ${rightValue.sexpr()})"
             is ExpressionStatement -> "(expr ${expression.sexpr()})"
+
+            is PrintStatement -> {
+                val keyword = if (newLine) "println" else "print"
+                val operand = expression?.let { " ${it.sexpr()}" } ?: ""
+                "($keyword$operand)"
+            }
             is BinaryOpExpression -> "(${operator.cString} ${left.sexpr()} ${right.sexpr()})"
             is UnaryOpExpression -> "(${operator.cString} ${expression.sexpr()})"
             is Identifier -> id
