@@ -1,0 +1,70 @@
+import arrow.core.getOrElse
+import me.eriknikli.rhenium.common.diagnostics.render
+import org.antlr.v4.runtime.CharStreams
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.Arguments
+import org.junit.jupiter.params.provider.MethodSource
+import java.io.ByteArrayOutputStream
+import java.util.stream.Stream
+import kotlin.test.assertEquals
+import kotlin.test.fail
+
+class CTranspilerTests {
+    private val component = DaggerTranspilerTestComponent.create()
+    private val astBuilder = component.makeAstBuilder()
+    private val semanticAnalyzer = component.makeSemanticAnalyzer()
+    private val transpiler = component.makeTranspiler()
+
+    @ParameterizedTest(name = "Run {index}, name {0}")
+    @MethodSource("provideData")
+    fun `test emitted c`(name: String, sourceCode: String, expectedBody: String) {
+        val ast = astBuilder.parse(CharStreams.fromString(sourceCode))
+            .getOrElse { fail("expected the source to parse, got:\n${it.render()}") }
+
+        semanticAnalyzer.decorateSemanticContext(ast)
+            .getOrElse { fail("expected the source to analyze, got:\n${it.render()}") }
+
+        val output = ByteArrayOutputStream()
+        transpiler.transpile(ast, output)
+
+        assertEquals(expectedBody, output.toString().mainBody())
+    }
+
+    companion object {
+        @JvmStatic
+        fun provideData(): Stream<Arguments> {
+            return Stream.of(
+                Arguments.of("print omits the line break", "print 1;", """printf("%" PRId32,(int32_t)(1l));"""),
+                Arguments.of("println appends a line break", "println 1;", """printf("%" PRId32 "\n",(int32_t)(1l));"""),
+                Arguments.of("bare println writes only a line break", "println;", """printf("\n");"""),
+                Arguments.of("i8", "println I8(-8);", """printf("%d" "\n",(int8_t)(-8));"""),
+                Arguments.of("i16", "println I16(-16);", """printf("%d" "\n",(int16_t)(-16));"""),
+                Arguments.of("i32", "println I32(-32);", """printf("%" PRId32 "\n",(int32_t)(-32l));"""),
+                Arguments.of("i64", "println I64(-64);", """printf("%" PRId64 "\n",(int64_t)(-64ll));"""),
+                Arguments.of("u8", "println U8(8);", """printf("%u" "\n",(uint8_t)(8));"""),
+                Arguments.of("u16", "println U16(16);", """printf("%u" "\n",(uint16_t)(16));"""),
+                Arguments.of("u32", "println U32(32);", """printf("%" PRIu32 "\n",(uint32_t)(32lu));"""),
+                Arguments.of("u64", "println U64(64);", """printf("%" PRIu64 "\n",(uint64_t)(64llu));"""),
+                Arguments.of("f32", "println F32(1.5);", """printf("%f" "\n",(float32_t)(1.5f));"""),
+                Arguments.of("f64", "println F64(2.5);", """printf("%f" "\n",(float64_t)(2.5));"""),
+                Arguments.of(
+                    "a boolean renders as its source spelling, not as an int",
+                    "println true;",
+                    """printf("%s" "\n",(true)?"true":"false");"""
+                ),
+                Arguments.of(
+                    "printing a variable casts it to its declared type",
+                    "let a = I64(42);\nprintln a;",
+                    """int64_t $A=42ll;printf("%" PRId64 "\n",(int64_t)($A));"""
+                ),
+                Arguments.of("an expression statement discards its value", "1 + 2;", "(1l+2l);")
+            )
+        }
+
+        private const val A = "re_a"
+
+        private fun String.mainBody(): String = substringAfter("int main(){")
+            .substringBeforeLast(";return 0;}")
+            .replace(Regex("re_a_[0-9a-f_]+"), A)
+    }
+}
