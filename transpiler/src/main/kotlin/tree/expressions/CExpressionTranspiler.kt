@@ -2,6 +2,7 @@ package me.eriknikli.rhenium.transpiler.tree.expressions
 
 import dagger.Lazy
 import me.eriknikli.rhenium.ast.tree.expressions.Expression
+import me.eriknikli.rhenium.ast.tree.expressions.LeftValue
 import me.eriknikli.rhenium.ast.tree.expressions.literals.Literal
 import me.eriknikli.rhenium.ast.tree.expressions.operators.BinaryOpExpression
 import me.eriknikli.rhenium.ast.tree.expressions.operators.UnaryOpExpression
@@ -32,11 +33,17 @@ constructor() : IExpressionTranspiler {
 
     private val unaryOpTranspiler by lazy { unaryOpTranspilerProvider.get() }
 
+    @Inject
+    lateinit var leftValueTranspilerProvider: Lazy<ILeftValueTranspiler>
+
+    private val leftValueTranspiler by lazy { leftValueTranspilerProvider.get() }
+
     override fun transpile(node: Expression, output: OutputStream) {
         when (node) {
             is Literal<*> -> literalExpressionTranspiler.transpile(node, output)
             is UnaryOpExpression -> unaryOpTranspiler.transpile(node, output)
             is BinaryOpExpression -> binaryOpExpressionTranspiler.transpile(node, output)
+            is LeftValue -> leftValueTranspiler.transpile(node, output)
             else -> throw IllegalStateException("Unhandled node ${node.javaClass} and cannot transpile it as expression.")
         }
     }
