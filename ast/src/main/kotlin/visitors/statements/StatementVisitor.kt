@@ -1,11 +1,13 @@
 package me.eriknikli.rhenium.ast.visitors.statements
 
 import arrow.core.leftNel
+import arrow.core.right
 import arrow.core.raise.either
 import arrow.core.raise.zipOrAccumulate
 import dagger.Lazy
 import me.eriknikli.rhenium.ast.diagnostics.UnhandledParseRule
 import me.eriknikli.rhenium.ast.tree.statements.ExpressionStatement
+import me.eriknikli.rhenium.ast.tree.statements.PrintStatement
 import me.eriknikli.rhenium.ast.tree.statements.Statement
 import me.eriknikli.rhenium.ast.tree.statements.vars.VarAssignmentStatement
 import me.eriknikli.rhenium.ast.tree.statements.vars.VarDeclarationStatement
@@ -63,4 +65,16 @@ class StatementVisitor
     ): Diagnosed<Statement> = expressionVisitor.get()
         .visitExpression(ctx.expression())
         .map { ExpressionStatement(ctx, it) }
+
+    override fun visitPrintStatement(
+        ctx: RheniumParser.PrintStatementContext
+    ): Diagnosed<Statement> {
+        val newLine = ctx.PRINTLN() != null
+        val expressionNode = ctx.expression()
+            ?: return PrintStatement(ctx, newLine, null).right()
+
+        return expressionVisitor.get()
+            .visitExpression(expressionNode)
+            .map { PrintStatement(ctx, newLine, it) }
+    }
 }

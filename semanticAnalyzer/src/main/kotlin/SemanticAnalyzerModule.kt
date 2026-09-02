@@ -39,4 +39,7 @@ interface SemanticAnalyzerModule {
 
     @Binds
     fun bindExpressionStatementDecorator(instance: ExpressionStatementDecorator): IExpressionStatementDecorator
+
+    @Binds
+    fun bindPrintStatementDecorator(instance: PrintStatementDecorator): IPrintStatementDecorator
 }

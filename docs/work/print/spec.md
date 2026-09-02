@@ -65,12 +65,19 @@ printf("%s", (re_flag_<uuid>) ? "true" : "false");
 
 ## Emitted C
 
+The operand is cast to its own `cName` before being passed. `printf` is variadic, so no conversion
+happens at the call and the argument's C type must already be the one the specifier names. Nothing
+guarantees that otherwise: `CLiteralExpressionTranspiler` emits an `I32` literal with an `l` suffix,
+and integer promotion in a binary operation widens operands further. The cast is to the operand's
+declared type, not to a wider one chosen for `printf`'s convenience, so the specifier table above
+stays as it is.
+
 | Source | Emitted C |
 | --- | --- |
-| `print 1;` | `printf("%" PRId32, 1);` |
-| `println 1;` | `printf("%" PRId32 "\n", 1);` |
+| `print 1;` | `printf("%" PRId32,(int32_t)(1l));` |
+| `println 1;` | `printf("%" PRId32 "\n",(int32_t)(1l));` |
 | `println;` | `printf("\n");` |
-| `println true;` | `printf("%s\n", (true) ? "true" : "false");` |
+| `println true;` | `printf("%s" "\n",(true)?"true":"false");` |
 
 ## Diagnostics
 

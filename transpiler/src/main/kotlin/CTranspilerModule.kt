@@ -31,6 +31,9 @@ interface CTranspilerModule {
     fun bindExpressionStatement(expressionStatement: CExpressionStatementTranspiler): IExpressionStatementTranspiler
 
     @Binds
+    fun bindPrint(print: CPrintTranspiler): IPrintTranspiler
+
+    @Binds
     fun bindExpression(expression: CExpressionTranspiler): IExpressionTranspiler
 
     @Binds
