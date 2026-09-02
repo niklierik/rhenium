@@ -88,3 +88,20 @@ The compiler implements a small slice of a much larger language design. That des
 
 Read [docs/roadmap.md](docs/roadmap.md) before planning work: most of what the other documents
 describe is not built yet. The design originates on the `plans` branch, which wins on any conflict.
+
+## Agent skills
+
+### Issue tracker
+
+No external issue tracker — specs and tickets are markdown under `docs/work/<feature>/`, and the
+top-level `docs/*.md` stay language design. See `docs/agents/issue-tracker.md`.
+
+### Triage labels
+
+The five canonical roles, written as a `Status:` line in the issue file. See
+`docs/agents/triage-labels.md`.
+
+### Domain docs
+
+Single-context: `CONTEXT.md` at the root plus `docs/adr/`, both created lazily. See
+`docs/agents/domain.md`.
