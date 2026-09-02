@@ -4,9 +4,13 @@ import org.antlr.v4.runtime.ParserRuleContext
 
 enum class SignedIntType(
     val index: Int,
-    override val cName: String
+    override val cName: String,
+    override val cFormat: String
 ) : ExpressionType {
-    I64(0, "int64_t"), I32(1, "int32_t"), I16(2, "int16_t"), I8(3, "int8_t");
+    I64(0, "int64_t", "\"%\" PRId64"),
+    I32(1, "int32_t", "\"%\" PRId32"),
+    I16(2, "int16_t", "\"%d\""),
+    I8(3, "int8_t", "\"%d\"");
 
     override val declarationParserContext: ParserRuleContext? = null
 
@@ -27,12 +31,13 @@ enum class SignedIntType(
 
 enum class UnsignedIntType(
     val index: Int,
-    override val cName: String
+    override val cName: String,
+    override val cFormat: String
 ) : ExpressionType {
-    U64(0, "uint64_t"),
-    U32(1, "uint32_t"),
-    U16(2, "uint16_t"),
-    U8(3, "uint8_t");
+    U64(0, "uint64_t", "\"%\" PRIu64"),
+    U32(1, "uint32_t", "\"%\" PRIu32"),
+    U16(2, "uint16_t", "\"%u\""),
+    U8(3, "uint8_t", "\"%u\"");
 
     override val declarationParserContext: ParserRuleContext? = null
 
@@ -53,10 +58,11 @@ enum class UnsignedIntType(
 
 enum class FloatType(
     val index: Int,
-    override val cName: String
+    override val cName: String,
+    override val cFormat: String
 ) : ExpressionType {
-    F64(0, "float64_t"),
-    F32(1, "float32_t");
+    F64(0, "float64_t", "\"%f\""),
+    F32(1, "float32_t", "\"%f\"");
 
     override val declarationParserContext: ParserRuleContext? = null
 

@@ -25,6 +25,7 @@ class CTranspiler
             #include <stdlib.h>
             #include <stdint.h>
             #include <stdbool.h>
+            #include <inttypes.h>
             
             typedef _Float32 float32_t;
             typedef _Float64 float64_t;

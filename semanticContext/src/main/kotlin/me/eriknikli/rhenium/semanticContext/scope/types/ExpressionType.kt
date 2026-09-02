@@ -4,6 +4,8 @@ import me.eriknikli.rhenium.semanticContext.scope.Symbol
 import org.antlr.v4.runtime.ParserRuleContext
 
 interface ExpressionType : Symbol {
+    val cFormat: String?
+
     fun canAssignTo(target: ExpressionType): Boolean
     fun canAssignToExplicit(target: ExpressionType): Boolean
 }
@@ -14,6 +16,8 @@ fun ExpressionType.isNumeric(): Boolean {
 
 data object InvalidType : ExpressionType {
     override val declarationParserContext: ParserRuleContext? = null
+
+    override val cFormat: String? = null
 
     override fun canAssignTo(target: ExpressionType): Boolean {
         return true
@@ -34,6 +38,8 @@ data object BooleanType : ExpressionType {
     override val declarationParserContext: ParserRuleContext? = null
 
     override val cName: String = "boolean_t"
+
+    override val cFormat: String = "\"%s\""
 
     override fun canAssignTo(target: ExpressionType): Boolean {
         return target is InvalidType || target is BooleanType
