@@ -16,8 +16,13 @@ From `plan.md` on the `plans` branch. MSc thesis project, defense planned for sp
 ## What the compiler implements today
 
 Literals, unary and binary arithmetic, relational, equality and logical operators, grouping,
-`let` / `const` declarations with an optional declared type, assignment, the type rules over those,
-and a transpiler that emits every statement into a single C `main()`.
+`let` / `const` declarations with an optional declared type, assignment, expression statements, the
+type rules over those, and a transpiler that emits every statement into a single C `main()`.
+
+`print` and `println` write a value to standard output. They are a placeholder for the `Console` of
+[the standard library](standard-library.md), reserved keywords rather than calls because the language
+has neither functions nor strings yet, and they are removed when `Console` lands. See
+[docs/work/print/spec.md](work/print/spec.md).
 
 Everything else in these documents is unbuilt.
 
@@ -27,3 +32,6 @@ Everything else in these documents is unbuilt.
   rule** — it cannot be written in a program yet.
 - There is no `entry`, no `namespace` and no `Project.json` handling. The compiler takes a single
   `.re` file path on the command line and compiles that.
+- Integer literals are emitted with C suffixes wider than their own type — an `I32` literal becomes
+  `-32l` — so arithmetic that should overflow at 32 bits is evaluated at 64 and truncated on
+  assignment. `print` sidesteps this by casting its operand, but the arithmetic is still wrong.
