@@ -10,6 +10,7 @@ root:
 statement:
     varDeclarationStatement
     | varAssignmentStatement
+    | printStatement
     | expressionStatement;
 
 varDeclarationStatement:
@@ -23,6 +24,10 @@ typeName:
 
 varAssignmentStatement:
     leftValue EQUALS expression SEMICOLON;
+
+printStatement:
+    PRINT expression SEMICOLON
+    | PRINTLN expression? SEMICOLON;
 
 expressionStatement:
     expression SEMICOLON;

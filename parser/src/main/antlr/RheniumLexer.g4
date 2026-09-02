@@ -3,6 +3,9 @@ lexer grammar RheniumLexer;
 LET: 'let';
 CONST: 'const';
 
+PRINT: 'print';
+PRINTLN: 'println';
+
 THIS: 'this';
 TRUE: 'true';
 FALSE: 'false';
