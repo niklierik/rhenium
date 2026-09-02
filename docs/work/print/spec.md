@@ -88,7 +88,10 @@ type keeps it to one message:
 
 - `print b;` where `b` is undeclared → `unknown symbol 'b'`, and nothing further. The operand poisons
   to `InvalidType`; print does not report a second time.
-- `print I64;` → `InvalidLeftValueSymbol`, because a type symbol is not a left value.
+- Naming a type where a value belongs would report `InvalidLeftValueSymbol`, since a type symbol is
+  not a left value. It is unreachable today: every type in the global scope is a lexer keyword rather
+  than an `ID`, so `print I64;` is a syntax error instead. It becomes reachable once user-defined type
+  names exist.
 
 Rejecting `InvalidType` at the print site was considered and dropped: it produces two messages for
 one mistake, which is exactly what the poison type exists to prevent, and it buys no safety —
