@@ -1,6 +1,8 @@
 package me.eriknikli.rhenium.transpiler
 
-import me.eriknikli.rhenium.lowering.actions.*
+import dagger.Lazy
+import me.eriknikli.rhenium.lowering.actions.Action
+import me.eriknikli.rhenium.transpiler.actions.IAnyActionTranspiler
 import me.eriknikli.rhenium.transpiler.utils.writeLineBreak
 import me.eriknikli.rhenium.transpiler.utils.writeText
 import java.io.OutputStream
@@ -15,94 +17,17 @@ interface ITranspiler {
 class CTranspiler
 @Inject
 constructor() : ITranspiler {
+    @Inject
+    lateinit var actionTranspilerProvider: Lazy<IAnyActionTranspiler>
+
+    private val actionTranspiler by lazy { actionTranspilerProvider.get() }
+
     override fun transpile(action: Action, outputStream: OutputStream) {
         outputStream.writeText(PROLOGUE)
         outputStream.writeLineBreak()
         outputStream.writeLineBreak()
 
-        action.write(outputStream)
-    }
-
-    private fun Action.write(output: OutputStream) {
-        when (this) {
-            is Block -> actions.forEach { it.write(output) }
-
-            is FunctionAction -> {
-                output.writeText("$cReturnType $cName(){")
-                body.write(output)
-                output.writeText("}")
-            }
-
-            is ReturnAction -> {
-                output.writeText("return")
-                value?.let {
-                    output.writeText(" ")
-                    it.write(output)
-                }
-                output.writeText(";")
-            }
-
-            is PrintAction -> {
-                output.writeText("printf($cFormat")
-                value?.let {
-                    output.writeText(",")
-                    it.write(output)
-                }
-                output.writeText(");")
-            }
-
-            is CastAction -> {
-                output.writeText("((${type.cName})")
-                operand.write(output)
-                output.writeText(")")
-            }
-
-            is TernaryAction -> {
-                output.writeText("(")
-                condition.write(output)
-                output.writeText("?")
-                ifTrue.write(output)
-                output.writeText(":")
-                ifFalse.write(output)
-                output.writeText(")")
-            }
-
-            is BinaryAction -> {
-                output.writeText("(")
-                left.write(output)
-                output.writeText(cOperator)
-                right.write(output)
-                output.writeText(")")
-            }
-
-            is UnaryAction -> {
-                output.writeText("($cOperator")
-                operand.write(output)
-                output.writeText(")")
-            }
-
-            is VarDeclarationAction -> {
-                output.writeText("${type.cName} $cName=")
-                value.write(output)
-                output.writeText(";")
-            }
-
-            is AssignmentAction -> {
-                target.write(output)
-                output.writeText("=")
-                value.write(output)
-                output.writeText(";")
-            }
-
-            is ExpressionStatementAction -> {
-                value.write(output)
-                output.writeText(";")
-            }
-
-            is VarRefAction -> output.writeText(cName)
-
-            is ConstantAction -> output.writeText(cLiteral)
-        }
+        actionTranspiler.transpile(action, outputStream)
     }
 }
 

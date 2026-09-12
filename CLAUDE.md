@@ -44,7 +44,7 @@ find yourself wanting it back, the lowering is incomplete.
 - **semanticContext** — the mutable analysis state (`Context`, `Scope`, `Symbol`, `ExpressionType`) that AST nodes carry. It is its own module precisely so `ast` can hold analysis results without depending on `semanticAnalyzer`.
 - **semanticAnalyzer** — "decorators" that walk the AST and fill in each node's `context`.
 - **lowering** — walks the decorated AST and builds the **action tree**: nested data classes in [lowering/src/main/kotlin/actions/](lowering/src/main/kotlin/actions/), one per construct of the C program about to be written. Actions carry plain data and never reference the AST, so an action exists for C code with no Rhenium source behind it. See [ADR 0001](docs/adr/0001-lower-the-ast-to-an-action-tree.md).
-- **transpiler** — the printer. One exhaustive `when` over the sealed action set, writing C to an `OutputStream`. It performs lookups (an `ExpressionType` to its `cName`) but makes **no decisions**; every decision about the emitted C is made while lowering, which is the only one of the two with tests on it.
+- **transpiler** — the printer. One transpiler class per action kind in [transpiler/src/main/kotlin/actions/](transpiler/src/main/kotlin/actions/), each writing C to an `OutputStream`, routed by `CAnyActionTranspiler` — a dispatcher whose single exhaustive `when` over the sealed action set is what makes a new action a compile error until it is printed. Each transpiler performs lookups (an `ExpressionType` to its `cName`) but makes **no decisions**; every decision about the emitted C is made while lowering, which is the only one of the two with tests on it.
 
 ## Pipeline
 
@@ -58,7 +58,7 @@ find yourself wanting it back, the lowering is incomplete.
 
 Steps 1 and 2 each return `Diagnosed<T>`, and the chain is an `either { }` block, so steps 3 and 4 are only reached for a program with no diagnostics — nothing is written next to the source until then. `Main` prints them and exits non-zero.
 
-Each stage is a parallel tree of small classes, one per node kind: `visitors/` (ast) ↔ `tree/` (ast) ↔ decorators (semanticAnalyzer) ↔ lowerers (lowering). Adding syntax means touching all four, in that order, plus a `@Binds` in the relevant Dagger module. The printer is the exception and does not get a class per kind: it is one `when` over a sealed set, so a new action is a compile error until it is printed — which is the enforcement the per-kind `@Binds` cannot give you.
+Each stage is a parallel tree of small classes, one per kind: `visitors/` (ast) ↔ `tree/` (ast) ↔ decorators (semanticAnalyzer) ↔ lowerers (lowering) ↔ action transpilers (transpiler). Adding syntax means touching all five, in that order, plus a `@Binds` in the relevant Dagger module. The printer has one extra layer the others do not: its per-kind classes are reached through a dispatcher holding one `when` over the sealed action set, so a new action kind fails to compile until it is printed — which is the enforcement a per-kind `@Binds` cannot give you, since a forgotten binding is only found by kapt.
 
 ## Conventions
 

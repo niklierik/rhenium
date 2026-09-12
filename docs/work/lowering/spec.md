@@ -74,7 +74,9 @@ it at all, which is the case the memory model needs.
     lowering looks like the decorator walk it parallels and adding syntax stays one ritual.
 17. As a compiler developer, I want the action set to be a sealed hierarchy dispatched by a single
     `when` in the printer, so that adding an action kind is a compile error until it is printed
-    rather than a forgotten Dagger binding.
+    rather than a forgotten Dagger binding. Revised after review — see Comments: the `when` moved
+    into a dispatcher that routes to one transpiler class per action kind, which keeps the compile
+    error and restores the per-kind parallel tree.
 18. As a compiler developer, I want lowering to return actions directly rather than a diagnosed
     result, so that the stage's signature states that everything the user can get wrong was already
     caught.
@@ -188,9 +190,11 @@ and a `@Binds` entry, mirroring the decorator walk it parallels — so adding sy
 ritual the project already documents, with lowering inserted into it. Mutually recursive lowerers use
 the established `dagger.Lazy` field injection idiom.
 
-Printing goes the other way: a single printer with one exhaustive `when` over the sealed action set.
-The action set is closed and owned by this project, so exhaustiveness is checked by the compiler,
-which is strictly stronger than a Dagger binding that can be forgotten.
+Printing mirrors it, with one extra layer. There is one transpiler class per action kind, wired the
+same way; they are reached through a dispatcher holding a single exhaustive `when` over the sealed
+action set. The action set is closed and owned by this project, so exhaustiveness is checked by the
+compiler — which is strictly stronger than a Dagger binding that can be forgotten, and the dispatcher
+is what preserves that check while still giving each action kind its own class.
 
 ### Lowering cannot fail
 
@@ -316,3 +320,21 @@ The stage is built now, while the language has five statement kinds and six expr
 than after October adds scopes, control flow, functions and structs. Porting roughly twenty-five node
 kinds off a stream later is the same work at two and a half times the size, and blocks — which
 October introduces — are exactly where the stream model hurts most.
+
+## Comments
+
+### Per-action transpilers restored (post-review)
+
+The spec originally called for the printer to be a single class holding one exhaustive `when`, on the
+grounds that compiler-checked exhaustiveness beats a forgettable `@Binds`. It shipped that way. On
+review the author rejected it: every other stage is a parallel tree of one small class per kind, and
+collapsing only the printer into one class broke the symmetry the project documents everywhere else.
+
+The two goals turned out not to conflict. The `when` moved into a dispatcher that does nothing but
+route, and the printing rules moved out into one transpiler class per action kind, mirroring the
+lowerers. Adding an action kind still fails to compile until the dispatcher handles it, so nothing
+was traded away for the symmetry.
+
+The emitted C is byte-identical across the change, verified by running the same program through both
+the pre-change and post-change compiler and diffing the generated `.c` (modulo the variable-name
+UUIDs, which are freshly generated per run).
