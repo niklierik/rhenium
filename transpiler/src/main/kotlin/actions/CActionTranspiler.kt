@@ -2,17 +2,17 @@ package me.eriknikli.rhenium.transpiler.actions
 
 import dagger.Lazy
 import me.eriknikli.rhenium.lowering.actions.*
-import me.eriknikli.rhenium.transpiler.IActionTranspiler
+import me.eriknikli.rhenium.transpiler.IKindTranspiler
 import java.io.OutputStream
 import javax.inject.Inject
 import javax.inject.Singleton
 
-interface IAnyActionTranspiler : IActionTranspiler<Action>
+interface IActionTranspiler : IKindTranspiler<Action>
 
 @Singleton
-class CAnyActionTranspiler
+class CActionTranspiler
 @Inject
-constructor() : IAnyActionTranspiler {
+constructor() : IActionTranspiler {
     @Inject
     lateinit var blockTranspilerProvider: Lazy<IBlockTranspiler>
 

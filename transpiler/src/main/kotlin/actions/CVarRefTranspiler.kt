@@ -1,13 +1,13 @@
 package me.eriknikli.rhenium.transpiler.actions
 
 import me.eriknikli.rhenium.lowering.actions.VarRefAction
-import me.eriknikli.rhenium.transpiler.IActionTranspiler
+import me.eriknikli.rhenium.transpiler.IKindTranspiler
 import me.eriknikli.rhenium.transpiler.utils.writeText
 import java.io.OutputStream
 import javax.inject.Inject
 import javax.inject.Singleton
 
-interface IVarRefTranspiler : IActionTranspiler<VarRefAction>
+interface IVarRefTranspiler : IKindTranspiler<VarRefAction>
 
 @Singleton
 class CVarRefTranspiler

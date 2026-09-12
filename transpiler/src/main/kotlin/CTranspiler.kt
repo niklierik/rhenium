@@ -2,7 +2,7 @@ package me.eriknikli.rhenium.transpiler
 
 import dagger.Lazy
 import me.eriknikli.rhenium.lowering.actions.Action
-import me.eriknikli.rhenium.transpiler.actions.IAnyActionTranspiler
+import me.eriknikli.rhenium.transpiler.actions.IActionTranspiler
 import me.eriknikli.rhenium.transpiler.utils.writeLineBreak
 import me.eriknikli.rhenium.transpiler.utils.writeText
 import java.io.OutputStream
@@ -18,7 +18,7 @@ class CTranspiler
 @Inject
 constructor() : ITranspiler {
     @Inject
-    lateinit var actionTranspilerProvider: Lazy<IAnyActionTranspiler>
+    lateinit var actionTranspilerProvider: Lazy<IActionTranspiler>
 
     private val actionTranspiler by lazy { actionTranspilerProvider.get() }
 

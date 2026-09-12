@@ -10,7 +10,7 @@ interface CTranspilerModule {
     fun bindTranspiler(cTranspiler: CTranspiler): ITranspiler
 
     @Binds
-    fun bindAnyActionTranspiler(transpiler: CAnyActionTranspiler): IAnyActionTranspiler
+    fun bindActionTranspiler(transpiler: CActionTranspiler): IActionTranspiler
 
     @Binds
     fun bindBlockTranspiler(transpiler: CBlockTranspiler): IBlockTranspiler
