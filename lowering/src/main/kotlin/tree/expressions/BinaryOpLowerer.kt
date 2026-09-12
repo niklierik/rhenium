@@ -8,8 +8,8 @@ import me.eriknikli.rhenium.lowering.INodeLowerer
 import me.eriknikli.rhenium.lowering.actions.Action
 import me.eriknikli.rhenium.lowering.actions.BinaryAction
 import me.eriknikli.rhenium.lowering.actions.CastAction
-import me.eriknikli.rhenium.semanticContext.scope.types.SignedIntType
 import me.eriknikli.rhenium.semanticContext.scope.types.UnsignedIntType
+import me.eriknikli.rhenium.semanticContext.scope.types.detourType
 import me.eriknikli.rhenium.semanticContext.scope.types.isNumeric
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -37,7 +37,7 @@ constructor() : IBinaryOpLowerer {
             )
         }
 
-        val detour = if (type is SignedIntType && node.operator in DETOURED_OPERATORS) type.detourType else null
+        val detour = if (node.operator in DETOURED_OPERATORS) type.detourType else null
 
         return CastAction(
             type,

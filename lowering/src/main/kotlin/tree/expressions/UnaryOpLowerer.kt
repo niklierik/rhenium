@@ -7,7 +7,7 @@ import me.eriknikli.rhenium.lowering.INodeLowerer
 import me.eriknikli.rhenium.lowering.actions.Action
 import me.eriknikli.rhenium.lowering.actions.CastAction
 import me.eriknikli.rhenium.lowering.actions.UnaryAction
-import me.eriknikli.rhenium.semanticContext.scope.types.SignedIntType
+import me.eriknikli.rhenium.semanticContext.scope.types.detourType
 import me.eriknikli.rhenium.semanticContext.scope.types.isNumeric
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -32,7 +32,7 @@ constructor() : IUnaryOpLowerer {
             return UnaryAction(operator, operand)
         }
 
-        val detour = if (type is SignedIntType && node.operator == Operator.MINUS) type.detourType else null
+        val detour = if (node.operator == Operator.MINUS) type.detourType else null
 
         return CastAction(
             type,

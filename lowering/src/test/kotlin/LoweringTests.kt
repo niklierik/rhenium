@@ -177,9 +177,34 @@ class LoweringTests {
                     "(expr (cast int32_t (% (cast int32_t 7) (cast int32_t 2))))"
                 ),
                 Arguments.of(
-                    "unsigned arithmetic needs no detour, only the result cast",
+                    "u32 arithmetic needs no detour, being unsigned and already as wide as int",
                     "U32(1) + U32(2);",
                     "(expr (cast uint32_t (+ (cast uint32_t 1u) (cast uint32_t 2u))))"
+                ),
+                Arguments.of(
+                    "the widest unsigned type needs no detour either",
+                    "U64(1) + U64(2);",
+                    "(expr (cast uint64_t (+ (cast uint64_t 1u) (cast uint64_t 2u))))"
+                ),
+                Arguments.of(
+                    "u16 multiplication detours, because c promotes both operands to signed int",
+                    "U16(3) * U16(4);",
+                    "(expr (cast uint16_t (* (cast uint32_t (cast uint16_t 3u)) (cast uint32_t (cast uint16_t 4u)))))"
+                ),
+                Arguments.of(
+                    "u8 multiplication takes the same detour",
+                    "U8(3) * U8(4);",
+                    "(expr (cast uint8_t (* (cast uint32_t (cast uint8_t 3u)) (cast uint32_t (cast uint8_t 4u)))))"
+                ),
+                Arguments.of(
+                    "narrow unsigned addition detours as well",
+                    "U16(1) + U16(2);",
+                    "(expr (cast uint16_t (+ (cast uint32_t (cast uint16_t 1u)) (cast uint32_t (cast uint16_t 2u)))))"
+                ),
+                Arguments.of(
+                    "narrow unsigned division does not detour, matching the signed rule",
+                    "U16(6) / U16(2);",
+                    "(expr (cast uint16_t (/ (cast uint16_t 6u) (cast uint16_t 2u))))"
                 ),
                 Arguments.of(
                     "float arithmetic takes the result cast and no detour",

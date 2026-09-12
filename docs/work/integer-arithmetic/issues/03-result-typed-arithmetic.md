@@ -28,3 +28,27 @@ This is the ticket the roadmap gap names.
 
 A string assertion cannot show that `I32(2147483647) + I32(1)` evaluates to `-2147483648`. Verify
 that once by hand through `clang` and record it; the build does not prove it.
+
+## Comments
+
+### Narrow unsigned arithmetic was left undefined (post-review)
+
+The detour shipped as a signed-only rule — a `detourType` member on `SignedIntType`, reached behind
+an `is SignedIntType` test in both lowerers. That left `U8` and `U16` arithmetic with no detour at
+all, and C's integer promotions make it undefined: `U16(65535) * U16(65535)` emitted
+`(uint16_t)(a * b)`, which promotes both operands to signed `int` and overflows there.
+
+`-fsanitize=undefined` reports `signed integer overflow: 65535 * 65535 cannot be represented in type
+'int'` on the old emission, and `clang -Winteger-overflow` warns at compile time when the operands
+are literals. Neither fires on the new emission, which prints the `1` the language promises.
+
+The spec had already worked out why the detour must be wider than the result type, and used
+`(uint16_t)-1 * (uint16_t)-1` as its example of the undefined behaviour — but drew the conclusion
+only for signed types. The gap was in the spec first; it has been amended.
+
+`detourType` is now a nullable rule over `ExpressionType`, null for `U32`, `U64` and the non-integer
+types, and both lowerers dropped their `is SignedIntType` test as a result. Unary `-` on an unsigned
+operand is rejected during analysis, so only the binary operators reach the new case.
+
+Pinned by six cases in `LoweringTests`: `U16`/`U8` multiplication and addition detour, `U64`
+addition and `U16` division do not.

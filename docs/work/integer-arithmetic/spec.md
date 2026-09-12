@@ -54,9 +54,26 @@ that of `int`. `I64` detours through `U64`; `I32`, `I16` and `I8` all detour thr
 result cast back to the node's own `cName` truncates to the declared width, so `I8` and `I16` still
 wrap where the language says they do.
 
+### Narrow unsigned arithmetic detours for the same reason
+
+The promotion argument is about width, not signedness, so it applies to `U8` and `U16` unchanged.
+`(uint16_t)a * (uint16_t)b` promotes both operands to signed `int` and multiplies there, so
+`U16(65535) * U16(65535)` is `65535 * 65535` evaluated in `int` — the same undefined behaviour,
+reached by a program containing no signed type at all. `U8` and `U16` therefore detour through
+`U32` as well.
+
+`U32` and `U64` need no detour: they are already unsigned at a rank at least that of `int`, so the
+usual arithmetic conversions keep the operation unsigned, and wraparound is defined where it
+happens.
+
+The detour is therefore a property of the result type's **width**, not of its signedness: every
+signed integer type, and every integer type narrower than `int`, evaluates through an unsigned type
+of rank at least `int` and casts back.
+
 The detour applies to `+`, `-`, `*` and unary `-`. It does **not** apply to `/` and `%`: signed
 division overflows only at `MIN / -1`, and routing that through unsigned produces a different
-answer rather than a wrapped one.
+answer rather than a wrapped one. Unary `-` on an unsigned operand is rejected by the signedness
+rules, so the unsigned detour is reached only through the binary operators.
 
 ### Literals carry a cast, not a suffix
 
@@ -137,8 +154,10 @@ Relational, equality and logical operators emit as they always did: they yield `
 no arithmetic whose width could be wrong. Their operands must still agree in signedness, which is an
 analysis rule rather than an emission one.
 
-The detour needs a signed-to-unsigned counterpart for each width, which lands as a property on
-`SignedIntType` in `semanticContext` beside `cName` and `cFormat`.
+The detour needs, for each integer type, the unsigned type its arithmetic is evaluated through — or
+nothing, where the type needs none. That spans both integer enums, so it lands in `semanticContext`
+as a nullable rule over `ExpressionType` rather than as a member of `SignedIntType`, and the lowerers
+ask for it without first testing what kind of integer they hold.
 
 ## The primitive type names
 
