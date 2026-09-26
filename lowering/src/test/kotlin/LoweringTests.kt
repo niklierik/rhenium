@@ -256,6 +256,26 @@ class LoweringTests {
                     "blocks nest as the source does",
                     "{ { let a = 1; } }",
                     "(block (block (decl int32_t re_a (cast int32_t 1))))"
+                ),
+                Arguments.of(
+                    "a while loop lowers to a while action over its condition and a block body",
+                    "while (true) { let a = 1; }",
+                    "(while true (block (decl int32_t re_a (cast int32_t 1))))"
+                ),
+                Arguments.of(
+                    "an empty loop body lowers to an empty block action",
+                    "while (true) {}",
+                    "(while true (block))"
+                ),
+                Arguments.of(
+                    "while loops nest as the source does",
+                    "while (true) { while (false) {} }",
+                    "(while true (block (while false (block))))"
+                ),
+                Arguments.of(
+                    "a condition is lowered as any other expression, so a comparison nests unchanged",
+                    "let a = 0;\nwhile (a < I32(3)) {}",
+                    "(decl int32_t re_a (cast int32_t 0)) (while (< re_a (cast int32_t 3)) (block))"
                 )
             )
         }
@@ -269,6 +289,7 @@ class LoweringTests {
             is Block -> (listOf("block") + actions.map { it.sexpr() }).joinToString(" ", "(", ")")
             is BlockAction ->
                 (listOf("block") + body.actions.map { it.sexpr() }).joinToString(" ", "(", ")")
+            is WhileAction -> "(while ${condition.sexpr()} ${body.sexpr()})"
             is FunctionAction -> "(fn $cReturnType $cName ${body.sexpr()})"
             is ReturnAction -> value?.let { "(return ${it.sexpr()})" } ?: "(return)"
             is PrintAction -> value?.let { "(print $cFormat ${it.sexpr()})" } ?: "(print $cFormat)"

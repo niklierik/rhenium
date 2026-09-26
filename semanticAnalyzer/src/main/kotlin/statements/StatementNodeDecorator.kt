@@ -5,6 +5,7 @@ import me.eriknikli.rhenium.ast.tree.statements.BlockStatement
 import me.eriknikli.rhenium.ast.tree.statements.ExpressionStatement
 import me.eriknikli.rhenium.ast.tree.statements.PrintStatement
 import me.eriknikli.rhenium.ast.tree.statements.Statement
+import me.eriknikli.rhenium.ast.tree.statements.WhileStatement
 import me.eriknikli.rhenium.ast.tree.statements.vars.VarAssignmentStatement
 import me.eriknikli.rhenium.ast.tree.statements.vars.VarDeclarationStatement
 import me.eriknikli.rhenium.common.diagnostics.Diagnosed
@@ -50,6 +51,10 @@ constructor(
     lateinit var blockStatementDecoratorProvider: Lazy<IBlockStatementDecorator>
     private val blockStatementDecorator by lazy { blockStatementDecoratorProvider.get() }
 
+    @Inject
+    lateinit var whileStatementDecoratorProvider: Lazy<IWhileStatementDecorator>
+    private val whileStatementDecorator by lazy { whileStatementDecoratorProvider.get() }
+
     override fun decorateStatement(
         statement: Statement,
         statementDecoratorContext: StatementDecoratorContext
@@ -75,6 +80,11 @@ constructor(
             )
 
             is BlockStatement -> blockStatementDecorator.decorate(
+                statement,
+                StatementDecoratorContext(scope)
+            )
+
+            is WhileStatement -> whileStatementDecorator.decorate(
                 statement,
                 StatementDecoratorContext(scope)
             )

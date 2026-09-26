@@ -100,6 +100,81 @@ class SemanticAnalyzerTests {
                     "1:3: unknown symbol 'b'."
                 ),
                 Arguments.of(
+                    "a loop decorates its condition and its body",
+                    "let a = 1;\nwhile (a < 3) {\n    println a;\n}",
+                    ""
+                ),
+                Arguments.of("a loop with an empty body is not a diagnostic", "while (true) {}", ""),
+                Arguments.of(
+                    "a declaration in a loop body does not outlive the loop",
+                    "while (true) { let b = 1; }\nprintln b;",
+                    "2:9: unknown symbol 'b'."
+                ),
+                Arguments.of(
+                    "a loop body may not shadow a declaration from around the loop",
+                    "let a = 1;\nwhile (true) { let a = 2; }",
+                    "2:16: variable 'a' shadows variable 'a' declared at 1:1."
+                ),
+                Arguments.of(
+                    "a broken condition and a broken body statement are both reported",
+                    "while (b) { c + 1; }",
+                    "1:8: unknown symbol 'b'." + System.lineSeparator() +
+                            "1:8: type mismatch, found <invalid> but expected Boolean." + System.lineSeparator() +
+                            "1:13: unknown symbol 'c'."
+                ),
+                Arguments.of(
+                    "a broken statement inside a loop body reports once and hides nothing after it",
+                    "while (true) { b + 1; c + 1; }",
+                    "1:16: unknown symbol 'b'." + System.lineSeparator() +
+                            "1:23: unknown symbol 'c'."
+                ),
+                Arguments.of(
+                    "nested loops with a valid body produce no diagnostics",
+                    "let a = 1;\nwhile (a < 3) {\n    while (a < 2) {\n        println a;\n    }\n}",
+                    ""
+                ),
+                Arguments.of(
+                    "every loop in a program is reported",
+                    "while (b) {}\nwhile (c) {}",
+                    "1:8: unknown symbol 'b'." + System.lineSeparator() +
+                            "1:8: type mismatch, found <invalid> but expected Boolean." + System.lineSeparator() +
+                            "2:8: unknown symbol 'c'." + System.lineSeparator() +
+                            "2:8: type mismatch, found <invalid> but expected Boolean."
+                ),
+                Arguments.of(
+                    "a relational condition is a boolean, so the loop accepts it",
+                    "let a = 1;\nwhile (a < 3) {}",
+                    ""
+                ),
+                Arguments.of(
+                    "an integer condition is rejected, because a loop wants a boolean and not c's zero test",
+                    "while (1) {}",
+                    "1:8: type mismatch, found I32 but expected Boolean."
+                ),
+                Arguments.of(
+                    "a float condition is rejected too",
+                    "while (1.5) {}",
+                    "1:8: type mismatch, found F64 but expected Boolean."
+                ),
+                Arguments.of(
+                    "a condition that is broken reports its own fault and the loop's requirement (ADR 0003)",
+                    "while (1 + true) {}",
+                    "1:8: illegal binary operation 'I32 + Boolean'." + System.lineSeparator() +
+                            "1:8: type mismatch, found <invalid> but expected Boolean."
+                ),
+                Arguments.of(
+                    "a non-boolean condition and a broken body statement are both reported",
+                    "while (1) { b + 1; }",
+                    "1:8: type mismatch, found I32 but expected Boolean." + System.lineSeparator() +
+                            "1:13: unknown symbol 'b'."
+                ),
+                Arguments.of(
+                    "every loop with a non-boolean condition is reported",
+                    "while (1) {}\nwhile (2) {}",
+                    "1:8: type mismatch, found I32 but expected Boolean." + System.lineSeparator() +
+                            "2:8: type mismatch, found I32 but expected Boolean."
+                ),
+                Arguments.of(
                     "a broken expression statement reports once",
                     "b + 1;",
                     "1:1: unknown symbol 'b'."

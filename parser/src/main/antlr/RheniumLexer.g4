@@ -12,6 +12,7 @@ FALSE: 'false';
 
 IF: 'if';
 ELSE: 'else';
+WHILE: 'while';
 
 EQUALSEQUALS: '==';
 NOTEQUALS: '!=';

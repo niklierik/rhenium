@@ -9,6 +9,7 @@ import me.eriknikli.rhenium.ast.tree.expressions.operators.UnaryOpExpression
 import me.eriknikli.rhenium.ast.tree.statements.BlockStatement
 import me.eriknikli.rhenium.ast.tree.statements.ExpressionStatement
 import me.eriknikli.rhenium.ast.tree.statements.PrintStatement
+import me.eriknikli.rhenium.ast.tree.statements.WhileStatement
 import me.eriknikli.rhenium.ast.tree.statements.vars.VarAssignmentStatement
 import me.eriknikli.rhenium.ast.tree.statements.vars.VarDeclarationStatement
 import me.eriknikli.rhenium.common.diagnostics.render
@@ -131,6 +132,21 @@ class AstBuilderTests {
                     "(root (block (block (let a (i32 1)))))"
                 ),
                 Arguments.of(
+                    "a while loop holds its condition and its body",
+                    "while (true) { println 1; }",
+                    "(root (while (boolean true) (block (println (i32 1)))))"
+                ),
+                Arguments.of(
+                    "a while loop with an empty body still has one",
+                    "while (true) {}",
+                    "(root (while (boolean true) (block)))"
+                ),
+                Arguments.of(
+                    "while loops nest",
+                    "while (true) { while (false) {} }",
+                    "(root (while (boolean true) (block (while (boolean false) (block)))))"
+                ),
+                Arguments.of(
                     "println takes a whole expression",
                     "println 1 + 2;",
                     "(root (println (+ (i32 1) (i32 2))))"
@@ -195,6 +211,8 @@ class AstBuilderTests {
 
             is BlockStatement ->
                 (listOf("block") + statements.map { it.sexpr() }).joinToString(" ", "(", ")")
+
+            is WhileStatement -> "(while ${condition.sexpr()} ${body.sexpr()})"
 
             is PrintStatement -> {
                 val keyword = if (newLine) "println" else "print"

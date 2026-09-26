@@ -12,10 +12,14 @@ statement:
     | varAssignmentStatement
     | printStatement
     | expressionStatement
+    | whileStatement
     | block;
 
 block:
     OPEN_BRACE statement* CLOSE_BRACE;
+
+whileStatement:
+    WHILE OPEN_BRACKET condition=expression CLOSE_BRACKET body=block;
 
 varDeclarationStatement:
     (LET | CONST) name=ID (COLON expectedType=typeName)? EQUALS expression SEMICOLON;

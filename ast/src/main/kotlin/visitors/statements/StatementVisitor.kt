@@ -11,6 +11,7 @@ import me.eriknikli.rhenium.ast.tree.statements.BlockStatement
 import me.eriknikli.rhenium.ast.tree.statements.ExpressionStatement
 import me.eriknikli.rhenium.ast.tree.statements.PrintStatement
 import me.eriknikli.rhenium.ast.tree.statements.Statement
+import me.eriknikli.rhenium.ast.tree.statements.WhileStatement
 import me.eriknikli.rhenium.ast.tree.statements.vars.VarAssignmentStatement
 import me.eriknikli.rhenium.ast.tree.statements.vars.VarDeclarationStatement
 import me.eriknikli.rhenium.ast.visitors.expressions.IExpressionVisitor
@@ -70,7 +71,22 @@ class StatementVisitor
 
     override fun visitBlock(
         ctx: RheniumParser.BlockContext
+    ): Diagnosed<Statement> = blockStatementOf(ctx)
+
+    override fun visitWhileStatement(
+        ctx: RheniumParser.WhileStatementContext
     ): Diagnosed<Statement> = either {
+        zipOrAccumulate(
+            { expressionVisitor.get().visitExpression(ctx.condition).bindNel() },
+            { blockStatementOf(ctx.body).bindNel() }
+        ) { condition, body ->
+            WhileStatement(ctx, condition, body)
+        }
+    }
+
+    private fun blockStatementOf(
+        ctx: RheniumParser.BlockContext
+    ): Diagnosed<BlockStatement> = either {
         val statements = mapOrAccumulate(ctx.statement()) { visitStatement(it).bindNel() }
 
         BlockStatement(ctx, statements)

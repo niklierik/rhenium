@@ -166,6 +166,27 @@ class TranspilerTests {
                     "{}"
                 ),
                 Arguments.of(
+                    "a while loop parenthesises its condition and leaves the braces to its body",
+                    WhileAction(
+                        ConstantAction("1"),
+                        BlockAction(Block(mutableListOf(ExpressionStatementAction(ConstantAction("2")))))
+                    ),
+                    "while(1){2;}"
+                ),
+                Arguments.of(
+                    "a while loop with an empty body still writes the body's braces",
+                    WhileAction(ConstantAction("1"), BlockAction(Block(mutableListOf()))),
+                    "while(1){}"
+                ),
+                Arguments.of(
+                    "the loop's parentheses are its own, so a condition that brings its own keeps them",
+                    WhileAction(
+                        BinaryAction("<", VarRefAction("re_a_1"), ConstantAction("3")),
+                        BlockAction(Block(mutableListOf()))
+                    ),
+                    "while((re_a_1<3)){}"
+                ),
+                Arguments.of(
                     "a function writes its return type before its name",
                     FunctionAction("main", "int32_t", Block(mutableListOf(ReturnAction(ConstantAction("0"))))),
                     "int32_t main(){return 0;}"

@@ -45,4 +45,7 @@ interface SemanticAnalyzerModule {
 
     @Binds
     fun bindBlockStatementDecorator(instance: BlockStatementDecorator): IBlockStatementDecorator
+
+    @Binds
+    fun bindWhileStatementDecorator(instance: WhileStatementDecorator): IWhileStatementDecorator
 }
