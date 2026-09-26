@@ -17,6 +17,9 @@ interface LoweringModule {
     fun bindPrint(printStatementLowerer: PrintStatementLowerer): IPrintStatementLowerer
 
     @Binds
+    fun bindBlockStatement(blockStatementLowerer: BlockStatementLowerer): IBlockStatementLowerer
+
+    @Binds
     fun bindVarDeclaration(varDeclarationLowerer: VarDeclarationLowerer): IVarDeclarationLowerer
 
     @Binds

@@ -11,7 +11,11 @@ statement:
     varDeclarationStatement
     | varAssignmentStatement
     | printStatement
-    | expressionStatement;
+    | expressionStatement
+    | block;
+
+block:
+    OPEN_BRACE statement* CLOSE_BRACE;
 
 varDeclarationStatement:
     (LET | CONST) name=ID (COLON expectedType=typeName)? EQUALS expression SEMICOLON;

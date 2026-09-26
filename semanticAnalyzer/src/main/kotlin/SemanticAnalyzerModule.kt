@@ -42,4 +42,7 @@ interface SemanticAnalyzerModule {
 
     @Binds
     fun bindPrintStatementDecorator(instance: PrintStatementDecorator): IPrintStatementDecorator
+
+    @Binds
+    fun bindBlockStatementDecorator(instance: BlockStatementDecorator): IBlockStatementDecorator
 }

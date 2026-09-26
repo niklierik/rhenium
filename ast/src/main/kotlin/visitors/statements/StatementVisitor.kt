@@ -3,9 +3,11 @@ package me.eriknikli.rhenium.ast.visitors.statements
 import arrow.core.leftNel
 import arrow.core.right
 import arrow.core.raise.either
+import arrow.core.raise.mapOrAccumulate
 import arrow.core.raise.zipOrAccumulate
 import dagger.Lazy
 import me.eriknikli.rhenium.ast.diagnostics.UnhandledParseRule
+import me.eriknikli.rhenium.ast.tree.statements.BlockStatement
 import me.eriknikli.rhenium.ast.tree.statements.ExpressionStatement
 import me.eriknikli.rhenium.ast.tree.statements.PrintStatement
 import me.eriknikli.rhenium.ast.tree.statements.Statement
@@ -65,6 +67,14 @@ class StatementVisitor
     ): Diagnosed<Statement> = expressionVisitor.get()
         .visitExpression(ctx.expression())
         .map { ExpressionStatement(ctx, it) }
+
+    override fun visitBlock(
+        ctx: RheniumParser.BlockContext
+    ): Diagnosed<Statement> = either {
+        val statements = mapOrAccumulate(ctx.statement()) { visitStatement(it).bindNel() }
+
+        BlockStatement(ctx, statements)
+    }
 
     override fun visitPrintStatement(
         ctx: RheniumParser.PrintStatementContext

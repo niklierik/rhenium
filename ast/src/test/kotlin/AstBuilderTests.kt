@@ -6,6 +6,7 @@ import me.eriknikli.rhenium.ast.tree.expressions.Identifier
 import me.eriknikli.rhenium.ast.tree.expressions.literals.Literal
 import me.eriknikli.rhenium.ast.tree.expressions.operators.BinaryOpExpression
 import me.eriknikli.rhenium.ast.tree.expressions.operators.UnaryOpExpression
+import me.eriknikli.rhenium.ast.tree.statements.BlockStatement
 import me.eriknikli.rhenium.ast.tree.statements.ExpressionStatement
 import me.eriknikli.rhenium.ast.tree.statements.PrintStatement
 import me.eriknikli.rhenium.ast.tree.statements.vars.VarAssignmentStatement
@@ -118,6 +119,17 @@ class AstBuilderTests {
                 Arguments.of("print", "print 1;", "(root (print (i32 1)))"),
                 Arguments.of("println", "println 1;", "(root (println (i32 1)))"),
                 Arguments.of("bare println", "println;", "(root (println))"),
+                Arguments.of("an empty block", "{}", "(root (block))"),
+                Arguments.of(
+                    "a block holds statements",
+                    "let a = 1;\n{\n    println a;\n}",
+                    "(root (let a (i32 1)) (block (println a)))"
+                ),
+                Arguments.of(
+                    "blocks nest",
+                    "{ { let a = 1; } }",
+                    "(root (block (block (let a (i32 1)))))"
+                ),
                 Arguments.of(
                     "println takes a whole expression",
                     "println 1 + 2;",
@@ -180,6 +192,9 @@ class AstBuilderTests {
 
             is VarAssignmentStatement -> "(= ${leftValue.sexpr()} ${rightValue.sexpr()})"
             is ExpressionStatement -> "(expr ${expression.sexpr()})"
+
+            is BlockStatement ->
+                (listOf("block") + statements.map { it.sexpr() }).joinToString(" ", "(", ")")
 
             is PrintStatement -> {
                 val keyword = if (newLine) "println" else "print"

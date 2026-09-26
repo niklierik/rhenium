@@ -38,6 +38,9 @@ SEMICOLON: ';';
 OPEN_BRACKET: '(';
 CLOSE_BRACKET: ')';
 
+OPEN_BRACE: '{';
+CLOSE_BRACE: '}';
+
 AS: 'as';
 
 F64: 'F64';

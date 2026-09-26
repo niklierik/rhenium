@@ -17,6 +17,9 @@ constructor() : IActionTranspiler {
     lateinit var blockTranspilerProvider: Lazy<IBlockTranspiler>
 
     @Inject
+    lateinit var blockActionTranspilerProvider: Lazy<IBlockActionTranspiler>
+
+    @Inject
     lateinit var functionTranspilerProvider: Lazy<IFunctionTranspiler>
 
     @Inject
@@ -53,6 +56,7 @@ constructor() : IActionTranspiler {
     lateinit var constantTranspilerProvider: Lazy<IConstantTranspiler>
 
     private val blockTranspiler by lazy { blockTranspilerProvider.get() }
+    private val blockActionTranspiler by lazy { blockActionTranspilerProvider.get() }
     private val functionTranspiler by lazy { functionTranspilerProvider.get() }
     private val returnTranspiler by lazy { returnTranspilerProvider.get() }
     private val printTranspiler by lazy { printTranspilerProvider.get() }
@@ -69,6 +73,7 @@ constructor() : IActionTranspiler {
     override fun transpile(action: Action, output: OutputStream) {
         when (action) {
             is Block -> blockTranspiler.transpile(action, output)
+            is BlockAction -> blockActionTranspiler.transpile(action, output)
             is FunctionAction -> functionTranspiler.transpile(action, output)
             is ReturnAction -> returnTranspiler.transpile(action, output)
             is PrintAction -> printTranspiler.transpile(action, output)

@@ -245,6 +245,17 @@ class LoweringTests {
                     "the most negative i64 is lowered so that c never sees an out-of-range constant",
                     "I64(-9223372036854775808);",
                     "(expr (cast int64_t (-9223372036854775807-1)))"
+                ),
+                Arguments.of(
+                    "a block lowers to a block action holding its statements",
+                    "{ let a = 1; }",
+                    "(block (decl int32_t re_a (cast int32_t 1)))"
+                ),
+                Arguments.of("an empty block lowers to an empty block action", "{}", "(block)"),
+                Arguments.of(
+                    "blocks nest as the source does",
+                    "{ { let a = 1; } }",
+                    "(block (block (decl int32_t re_a (cast int32_t 1))))"
                 )
             )
         }
@@ -256,6 +267,8 @@ class LoweringTests {
 
         private fun Action.sexpr(): String = when (this) {
             is Block -> (listOf("block") + actions.map { it.sexpr() }).joinToString(" ", "(", ")")
+            is BlockAction ->
+                (listOf("block") + body.actions.map { it.sexpr() }).joinToString(" ", "(", ")")
             is FunctionAction -> "(fn $cReturnType $cName ${body.sexpr()})"
             is ReturnAction -> value?.let { "(return ${it.sexpr()})" } ?: "(return)"
             is PrintAction -> value?.let { "(print $cFormat ${it.sexpr()})" } ?: "(print $cFormat)"

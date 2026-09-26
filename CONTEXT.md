@@ -49,6 +49,13 @@ withdraw one it had already planned.
 _Avoid_: Scope, body, sequence, compound statement — `scope` is the semantic-context term and the two
 are different things
 
+**Block statement**:
+The source construct `{ ... }` — a braced, freely nesting group of statements that is a statement
+itself, and that carries a scope of its own. A block statement lowers to a **block action**: the
+source-level term and the action-tree term share the word and are told apart by which tree they are
+in, as `PrintStatement` and `PrintAction` already are.
+_Avoid_: Brace group, compound statement, body
+
 **Transpiler**:
 The printer that concatenates an action tree into C text. It performs lookups — following an
 expression type to its C name — but makes no decisions; every decision about the emitted C is made
@@ -109,6 +116,13 @@ two declarations collide across scopes it does not have.
 _Avoid_: Unique name, generated name, symbol name
 
 ### Scopes and symbols
+
+**Scope**:
+The variables and symbols available at a point in the program. Every block has one, holding what that
+block declares; lookup walks outwards through the enclosing ones, so an inner block sees what encloses
+it and nothing sees what an inner block declared. Distinct from a **block**, which is the action that
+owns the list of child actions.
+_Avoid_: Frame, environment, namespace, context — `context` is the per-node semantic state
 
 **Symbol**:
 A named thing a scope can resolve — a variable or a type.

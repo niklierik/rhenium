@@ -32,6 +32,74 @@ class SemanticAnalyzerTests {
                 Arguments.of("a valid program has no diagnostics", "let a = 1;\na = 2;", ""),
                 Arguments.of("an expression statement is not a diagnostic", "let a = 1;\na + 1;", ""),
                 Arguments.of(
+                    "a block decorates the statements it holds",
+                    "let a = 1;\n{\n    println a;\n}",
+                    ""
+                ),
+                Arguments.of("an empty block is not a diagnostic", "{}", ""),
+                Arguments.of(
+                    "a declaration does not outlive the block that holds it",
+                    "{ let b = 1; }\nprintln b;",
+                    "2:9: unknown symbol 'b'."
+                ),
+                Arguments.of(
+                    "sibling blocks may each declare the same name",
+                    "{ let a = 1; }\n{ let a = 2; }",
+                    ""
+                ),
+                Arguments.of(
+                    "a declaration after a block may reuse the block's name",
+                    "{ let a = 1; }\nlet a = 2;",
+                    ""
+                ),
+                Arguments.of(
+                    "a block does not see a declaration that comes after it",
+                    "{ println a; }\nlet a = 1;",
+                    "1:11: unknown symbol 'a'."
+                ),
+                Arguments.of(
+                    "a declaration may not shadow one from an enclosing block",
+                    "let a = 1;\n{ let a = 2; }",
+                    "2:3: variable 'a' shadows variable 'a' declared at 1:1."
+                ),
+                Arguments.of(
+                    "shadowing is reported however deeply the blocks nest",
+                    "let a = 1;\n{\n    {\n        let a = 2;\n    }\n}",
+                    "4:9: variable 'a' shadows variable 'a' declared at 1:1."
+                ),
+                Arguments.of(
+                    "a shadow of a poisoned variable is reported alongside what poisoned it",
+                    "let a = b;\n{ let a = 1; }",
+                    "1:9: unknown symbol 'b'." + System.lineSeparator() +
+                            "2:3: variable 'a' shadows variable 'a' declared at 1:1."
+                ),
+                Arguments.of(
+                    "a shadow is reported beside an unrelated error in the same declaration",
+                    "let a = 1;\n{ let a = b; }",
+                    "2:3: variable 'a' shadows variable 'a' declared at 1:1." + System.lineSeparator() +
+                            "2:11: unknown symbol 'b'."
+                ),
+                Arguments.of(
+                    "a type name is taken, at the top level",
+                    "let Boolean = 1;",
+                    "1:1: variable 'Boolean' is already declared."
+                ),
+                Arguments.of(
+                    "a type name is taken inside a block too, so a declared type never resolves to a variable",
+                    "{ let Boolean = 1; }",
+                    "1:3: variable 'Boolean' is already declared."
+                ),
+                Arguments.of(
+                    "a declaration that collides with a type name leaves the type name alone",
+                    "{ let Boolean = 1; let b: Boolean = true; }",
+                    "1:3: variable 'Boolean' is already declared."
+                ),
+                Arguments.of(
+                    "a broken statement inside a block reports once",
+                    "{ b + 1; }",
+                    "1:3: unknown symbol 'b'."
+                ),
+                Arguments.of(
                     "a broken expression statement reports once",
                     "b + 1;",
                     "1:1: unknown symbol 'b'."

@@ -16,8 +16,15 @@ From `plan.md` on the `plans` branch. MSc thesis project, defense planned for sp
 ## What the compiler implements today
 
 Literals, unary and binary arithmetic, relational and equality operators, grouping,
-`let` / `const` declarations with an optional declared type, assignment, expression statements, the
-type rules over those, and a transpiler that emits every statement into a single C `main()`.
+`let` / `const` declarations with an optional declared type, assignment, expression statements,
+braced blocks with a scope of their own, the type rules over those, and a transpiler that emits every
+statement into a single C `main()`.
+
+A block is a statement, so blocks nest and stand on their own. What a block declares stops existing at
+its closing brace, and a declaration may not shadow one from an enclosing block — the two collisions
+report separately, `variable 'a' is already declared at 1:1.` within one block and
+`variable 'a' shadows variable 'a' declared at 1:1.` across two. See
+[docs/work/scopes/spec.md](work/scopes/spec.md).
 
 `print` and `println` write a value to standard output. They are a placeholder for the `Console` of
 [the standard library](standard-library.md), reserved keywords rather than calls because the language

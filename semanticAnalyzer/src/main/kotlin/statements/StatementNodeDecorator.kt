@@ -1,6 +1,7 @@
 package me.eriknikli.rhenium.semanticAnalyzer.statements
 
 import dagger.Lazy
+import me.eriknikli.rhenium.ast.tree.statements.BlockStatement
 import me.eriknikli.rhenium.ast.tree.statements.ExpressionStatement
 import me.eriknikli.rhenium.ast.tree.statements.PrintStatement
 import me.eriknikli.rhenium.ast.tree.statements.Statement
@@ -45,6 +46,10 @@ constructor(
     lateinit var printStatementDecoratorProvider: Lazy<IPrintStatementDecorator>
     private val printStatementDecorator by lazy { printStatementDecoratorProvider.get() }
 
+    @Inject
+    lateinit var blockStatementDecoratorProvider: Lazy<IBlockStatementDecorator>
+    private val blockStatementDecorator by lazy { blockStatementDecoratorProvider.get() }
+
     override fun decorateStatement(
         statement: Statement,
         statementDecoratorContext: StatementDecoratorContext
@@ -65,6 +70,11 @@ constructor(
             )
 
             is PrintStatement -> printStatementDecorator.decorate(
+                statement,
+                StatementDecoratorContext(scope)
+            )
+
+            is BlockStatement -> blockStatementDecorator.decorate(
                 statement,
                 StatementDecoratorContext(scope)
             )

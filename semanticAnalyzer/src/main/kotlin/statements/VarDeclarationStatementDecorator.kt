@@ -14,8 +14,10 @@ import me.eriknikli.rhenium.common.diagnostics.Diagnosed
 import me.eriknikli.rhenium.semanticAnalyzer.diagnostics.TypeMismatch
 import me.eriknikli.rhenium.semanticAnalyzer.diagnostics.UnknownType
 import me.eriknikli.rhenium.semanticAnalyzer.diagnostics.VariableAlreadyDeclared
+import me.eriknikli.rhenium.semanticAnalyzer.diagnostics.VariableShadowsOuter
 import me.eriknikli.rhenium.semanticAnalyzer.expressions.ExpressionNodeDecoratorContext
 import me.eriknikli.rhenium.semanticAnalyzer.expressions.IExpressionNodeDecorator
+import me.eriknikli.rhenium.semanticContext.scope.LeftValueSymbol
 import me.eriknikli.rhenium.semanticContext.scope.Scope
 import me.eriknikli.rhenium.semanticContext.scope.types.ExpressionType
 import me.eriknikli.rhenium.semanticContext.scope.types.InvalidType
@@ -48,13 +50,11 @@ class VarDeclarationStatementDecorator
                 },
                 {
                     statement.expectedType?.let { declaredTypeOf(it, scope).bindNel() }
+                },
+                {
+                    nameIsFree(statement, scope, name).bindNel()
                 }
-            ) { actual, expected -> actual to expected }
-
-            val existingVariable = scope.getDirectSymbol(name)
-            ensure(existingVariable == null) {
-                VariableAlreadyDeclared(statement.parserContext, name, existingVariable).nel()
-            }
+            ) { actual, expected, _ -> actual to expected }
 
             val declaredType = expectedType ?: actualType
             ensure(actualType.canAssignTo(declaredType)) {
@@ -67,6 +67,25 @@ class VarDeclarationStatementDecorator
         declare(statement, scope, declaredType.getOrElse { InvalidType })
 
         return declaredType.map { }
+    }
+
+    private fun nameIsFree(
+        statement: VarDeclarationStatement,
+        scope: Scope,
+        name: String
+    ): Diagnosed<Unit> {
+        val declaredHere = scope.getDirectSymbol(name)
+        if (declaredHere != null) {
+            return VariableAlreadyDeclared(statement.parserContext, name, declaredHere).leftNel()
+        }
+
+        val outer = scope.getSymbol(name) ?: return Unit.right()
+
+        return if (outer is LeftValueSymbol) {
+            VariableShadowsOuter(statement.parserContext, name, outer).leftNel()
+        } else {
+            VariableAlreadyDeclared(statement.parserContext, name, outer).leftNel()
+        }
     }
 
     private fun declaredTypeOf(expectedType: Identifier, scope: Scope): Diagnosed<ExpressionType> {
@@ -86,7 +105,10 @@ class VarDeclarationStatementDecorator
         statement.context.typeToDeclare = type
         statement.context.symbolInfo = variable
 
-        if (scope.getDirectSymbol(statement.name) == null) {
+        val taken = scope.getSymbol(statement.name)
+        val takenByAType = taken != null && taken !is LeftValueSymbol
+
+        if (scope.getDirectSymbol(statement.name) == null && !takenByAType) {
             scope.insertSymbol(statement.name, variable)
         }
     }

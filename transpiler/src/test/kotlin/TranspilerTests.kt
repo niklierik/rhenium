@@ -149,6 +149,23 @@ class TranspilerTests {
                     ""
                 ),
                 Arguments.of(
+                    "a block action braces the actions it holds",
+                    BlockAction(
+                        Block(
+                            mutableListOf(
+                                VarDeclarationAction(SignedIntType.I32, "re_a_1", ConstantAction("1")),
+                                ExpressionStatementAction(ConstantAction("2"))
+                            )
+                        )
+                    ),
+                    "{int32_t re_a_1=1;2;}"
+                ),
+                Arguments.of(
+                    "an empty block action still writes its braces",
+                    BlockAction(Block(mutableListOf())),
+                    "{}"
+                ),
+                Arguments.of(
                     "a function writes its return type before its name",
                     FunctionAction("main", "int32_t", Block(mutableListOf(ReturnAction(ConstantAction("0"))))),
                     "int32_t main(){return 0;}"
