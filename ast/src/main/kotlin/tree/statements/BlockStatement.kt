@@ -7,6 +7,6 @@ import org.antlr.v4.runtime.ParserRuleContext
 data class BlockStatement(
     override val parserContext: ParserRuleContext,
     val statements: List<Statement>
-) : Statement {
+) : ElseBranch {
     override val context: StatementContext = BlockStatementContext()
 }

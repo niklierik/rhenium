@@ -8,7 +8,9 @@ import arrow.core.raise.zipOrAccumulate
 import dagger.Lazy
 import me.eriknikli.rhenium.ast.diagnostics.UnhandledParseRule
 import me.eriknikli.rhenium.ast.tree.statements.BlockStatement
+import me.eriknikli.rhenium.ast.tree.statements.ElseBranch
 import me.eriknikli.rhenium.ast.tree.statements.ExpressionStatement
+import me.eriknikli.rhenium.ast.tree.statements.IfStatement
 import me.eriknikli.rhenium.ast.tree.statements.PrintStatement
 import me.eriknikli.rhenium.ast.tree.statements.Statement
 import me.eriknikli.rhenium.ast.tree.statements.WhileStatement
@@ -83,6 +85,28 @@ class StatementVisitor
             WhileStatement(ctx, condition, body)
         }
     }
+
+    override fun visitIfStatement(
+        ctx: RheniumParser.IfStatementContext
+    ): Diagnosed<Statement> = ifStatementOf(ctx)
+
+    private fun ifStatementOf(
+        ctx: RheniumParser.IfStatementContext
+    ): Diagnosed<IfStatement> = either {
+        zipOrAccumulate(
+            { expressionVisitor.get().visitExpression(ctx.condition).bindNel() },
+            { blockStatementOf(ctx.thenBranch).bindNel() },
+            { elseBranchOf(ctx)?.bindNel() }
+        ) { condition, thenBranch, elseBranch ->
+            IfStatement(ctx, condition, thenBranch, elseBranch)
+        }
+    }
+
+    private fun elseBranchOf(
+        ctx: RheniumParser.IfStatementContext
+    ): Diagnosed<ElseBranch>? =
+        ctx.elseIf?.let { ifStatementOf(it) }
+            ?: ctx.elseBlock?.let { blockStatementOf(it) }
 
     private fun blockStatementOf(
         ctx: RheniumParser.BlockContext

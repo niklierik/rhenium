@@ -3,19 +3,19 @@ package me.eriknikli.rhenium.semanticAnalyzer.statements
 import arrow.core.raise.either
 import arrow.core.raise.zipOrAccumulate
 import dagger.Lazy
-import me.eriknikli.rhenium.ast.tree.statements.WhileStatement
+import me.eriknikli.rhenium.ast.tree.statements.IfStatement
 import me.eriknikli.rhenium.common.diagnostics.Diagnosed
 import javax.inject.Inject
 import javax.inject.Singleton
 
-interface IWhileStatementDecorator {
-    fun decorate(statement: WhileStatement, context: StatementDecoratorContext): Diagnosed<Unit>
+interface IIfStatementDecorator {
+    fun decorate(statement: IfStatement, context: StatementDecoratorContext): Diagnosed<Unit>
 }
 
 @Singleton
-class WhileStatementDecorator
+class IfStatementDecorator
 @Inject
-constructor() : IWhileStatementDecorator {
+constructor() : IIfStatementDecorator {
     @Inject
     lateinit var conditionDecoratorProvider: Lazy<IConditionDecorator>
 
@@ -26,7 +26,7 @@ constructor() : IWhileStatementDecorator {
     private val statementNodeDecorator by lazy { statementNodeDecoratorProvider.get() }
 
     override fun decorate(
-        statement: WhileStatement,
+        statement: IfStatement,
         context: StatementDecoratorContext
     ): Diagnosed<Unit> = either {
         zipOrAccumulate(
@@ -37,9 +37,16 @@ constructor() : IWhileStatementDecorator {
             },
             {
                 statementNodeDecorator
-                    .decorateStatement(statement.body, StatementDecoratorContext(context.scope))
+                    .decorateStatement(statement.thenBranch, StatementDecoratorContext(context.scope))
                     .bindNel()
+            },
+            {
+                statement.elseBranch?.let {
+                    statementNodeDecorator
+                        .decorateStatement(it, StatementDecoratorContext(context.scope))
+                        .bindNel()
+                }
             }
-        ) { _, _ -> }
+        ) { _, _, _ -> }
     }
 }

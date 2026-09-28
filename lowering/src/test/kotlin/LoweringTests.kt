@@ -276,6 +276,36 @@ class LoweringTests {
                     "a condition is lowered as any other expression, so a comparison nests unchanged",
                     "let a = 0;\nwhile (a < I32(3)) {}",
                     "(decl int32_t re_a (cast int32_t 0)) (while (< re_a (cast int32_t 3)) (block))"
+                ),
+                Arguments.of(
+                    "an if without an else lowers to an if action with no else side",
+                    "if (true) { let a = 1; }",
+                    "(if true (block (decl int32_t re_a (cast int32_t 1))))"
+                ),
+                Arguments.of(
+                    "an if with an else lowers both branches to block actions",
+                    "if (true) { let a = 1; } else { let a = 2; }",
+                    "(if true (block (decl int32_t re_a (cast int32_t 1))) (block (decl int32_t re_a (cast int32_t 2))))"
+                ),
+                Arguments.of(
+                    "empty branches lower to empty block actions",
+                    "if (false) {} else {}",
+                    "(if false (block) (block))"
+                ),
+                Arguments.of(
+                    "an else if lowers to an if action in the else side",
+                    "if (true) {} else if (false) {}",
+                    "(if true (block) (if false (block)))"
+                ),
+                Arguments.of(
+                    "a chain ending in an else nests the final block in the innermost if action",
+                    "if (true) {} else if (false) {} else {}",
+                    "(if true (block) (if false (block) (block)))"
+                ),
+                Arguments.of(
+                    "ifs and while loops nest as the source does",
+                    "while (true) { if (false) {} }",
+                    "(while true (block (if false (block))))"
                 )
             )
         }
@@ -290,6 +320,10 @@ class LoweringTests {
             is BlockAction ->
                 (listOf("block") + body.actions.map { it.sexpr() }).joinToString(" ", "(", ")")
             is WhileAction -> "(while ${condition.sexpr()} ${body.sexpr()})"
+            is IfAction -> {
+                val elseSide = elseBranch?.let { " ${it.sexpr()}" } ?: ""
+                "(if ${condition.sexpr()} ${thenBranch.sexpr()}$elseSide)"
+            }
             is FunctionAction -> "(fn $cReturnType $cName ${body.sexpr()})"
             is ReturnAction -> value?.let { "(return ${it.sexpr()})" } ?: "(return)"
             is PrintAction -> value?.let { "(print $cFormat ${it.sexpr()})" } ?: "(print $cFormat)"

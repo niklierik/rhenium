@@ -17,7 +17,7 @@ From `plan.md` on the `plans` branch. MSc thesis project, defense planned for sp
 
 Literals, unary and binary arithmetic, relational and equality operators, grouping,
 `let` / `const` declarations with an optional declared type, assignment, expression statements,
-braced blocks with a scope of their own, `while` loops, the type rules over those, and a transpiler
+braced blocks with a scope of their own, `while` loops, `if` / `else if` / `else`, the type rules over those, and a transpiler
 that emits every statement into a single C `main()`.
 
 A block is a statement, so blocks nest and stand on their own. What a block declares stops existing at
@@ -33,6 +33,12 @@ that is already broken is reported *and* told that a loop wants a `Boolean`, whi
 poison-type convention on purpose; see
 [ADR 0003](adr/0003-a-while-condition-is-checked-even-when-poisoned.md). There is no `break`, no
 `continue` and no `do`-`while`. See [docs/work/while-loop/spec.md](work/while-loop/spec.md).
+
+`if (condition) { ... }` runs its block when the condition holds, optionally followed by `else` and
+either a block or another `if`, so `else if` is not a construct of its own. Every branch is braced, and
+`else while` must be written `else { while ... }`. The condition is checked by the same decorator as a
+`while` condition, with the same wording and the same exception to the poison-type convention. There is
+no conditional expression form yet. See [docs/work/if-statement/spec.md](work/if-statement/spec.md).
 
 `print` and `println` write a value to standard output. They are a placeholder for the `Console` of
 [the standard library](standard-library.md), reserved keywords rather than calls because the language
@@ -58,7 +64,7 @@ Everything else in these documents is unbuilt.
 - There is no `entry`, no `namespace` and no `Project.json` handling. The compiler takes a single
   `.re` file path on the command line and compiles that.
 - Division by zero and `MIN / -1` are undefined. Diagnosing them needs a way to fail at runtime, and
-  there is no `if`, no panic and no `Result` yet. See
+  there is no panic and no `Result` yet. See
   [docs/work/integer-arithmetic/spec.md](work/integer-arithmetic/spec.md).
 - There is no warning severity. `Diagnostic` carries only a line, a column and a message, and a
   diagnostic *is* the `Either` left, so producing one halts lowering and makes the compiler exit

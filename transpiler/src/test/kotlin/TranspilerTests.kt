@@ -187,6 +187,42 @@ class TranspilerTests {
                     "while((re_a_1<3)){}"
                 ),
                 Arguments.of(
+                    "an if parenthesises its condition and leaves the braces to its branch",
+                    IfAction(
+                        ConstantAction("1"),
+                        BlockAction(Block(mutableListOf(ExpressionStatementAction(ConstantAction("2"))))),
+                        null
+                    ),
+                    "if(1){2;}"
+                ),
+                Arguments.of(
+                    "an if with an else writes the keyword between the two branches",
+                    IfAction(
+                        ConstantAction("1"),
+                        BlockAction(Block(mutableListOf(ExpressionStatementAction(ConstantAction("2"))))),
+                        BlockAction(Block(mutableListOf(ExpressionStatementAction(ConstantAction("3")))))
+                    ),
+                    "if(1){2;}else {3;}"
+                ),
+                Arguments.of(
+                    "the if's parentheses are its own, so a condition that brings its own keeps them",
+                    IfAction(
+                        BinaryAction("<", VarRefAction("re_a_1"), ConstantAction("3")),
+                        BlockAction(Block(mutableListOf())),
+                        BlockAction(Block(mutableListOf()))
+                    ),
+                    "if((re_a_1<3)){}else {}"
+                ),
+                Arguments.of(
+                    "an if in the else side prints as else if, with no braces of the chain's own",
+                    IfAction(
+                        ConstantAction("1"),
+                        BlockAction(Block(mutableListOf())),
+                        IfAction(ConstantAction("2"), BlockAction(Block(mutableListOf())), BlockAction(Block(mutableListOf())))
+                    ),
+                    "if(1){}else if(2){}else {}"
+                ),
+                Arguments.of(
                     "a function writes its return type before its name",
                     FunctionAction("main", "int32_t", Block(mutableListOf(ReturnAction(ConstantAction("0"))))),
                     "int32_t main(){return 0;}"

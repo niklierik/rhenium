@@ -81,6 +81,21 @@ thing that would have given it a real type failed. A poisoned declaration is wha
 the program keep being analyzed.
 _Avoid_: Failed, invalid, broken, unresolved
 
+### Control flow
+
+**Condition**:
+The `Boolean` expression that decides whether an `if` branch or a loop body runs. Every construct that
+has one checks it through the same decorator, so the rule is stated once: an integer is rejected rather
+than compared with zero, and the requirement is reported even when the condition is already poisoned —
+see [ADR 0003](./docs/adr/0003-a-while-condition-is-checked-even-when-poisoned.md).
+_Avoid_: Predicate, test, guard
+
+**Else branch**:
+What follows `else`: a block statement or another if statement, and nothing else. `else if` is an if
+statement in an else branch, not a construct of its own. Every block statement and block action is
+typed as a possible else branch, because a sealed type is what makes lowering exhaustive over the two.
+_Avoid_: Else clause, alternative, otherwise
+
 ### Types and values
 
 **Expression type**:

@@ -22,6 +22,9 @@ interface CTranspilerModule {
     fun bindWhileTranspiler(transpiler: CWhileTranspiler): IWhileTranspiler
 
     @Binds
+    fun bindIfTranspiler(transpiler: CIfTranspiler): IIfTranspiler
+
+    @Binds
     fun bindFunctionTranspiler(transpiler: CFunctionTranspiler): IFunctionTranspiler
 
     @Binds

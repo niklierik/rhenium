@@ -13,6 +13,7 @@ statement:
     | printStatement
     | expressionStatement
     | whileStatement
+    | ifStatement
     | block;
 
 block:
@@ -20,6 +21,9 @@ block:
 
 whileStatement:
     WHILE OPEN_BRACKET condition=expression CLOSE_BRACKET body=block;
+
+ifStatement:
+    IF OPEN_BRACKET condition=expression CLOSE_BRACKET thenBranch=block (ELSE (elseIf=ifStatement | elseBlock=block))?;
 
 varDeclarationStatement:
     (LET | CONST) name=ID (COLON expectedType=typeName)? EQUALS expression SEMICOLON;

@@ -175,6 +175,69 @@ class SemanticAnalyzerTests {
                             "2:8: type mismatch, found I32 but expected Boolean."
                 ),
                 Arguments.of(
+                    "an if decorates its condition and both branches",
+                    "let a = 1;\nif (a < 3) {\n    println a;\n} else {\n    println 0;\n}",
+                    ""
+                ),
+                Arguments.of("an if with empty branches is not a diagnostic", "if (true) {} else {}", ""),
+                Arguments.of("a boolean condition is accepted by an if", "let b = true;\nif (b) {}", ""),
+                Arguments.of(
+                    "an integer condition is rejected by an if in the same words as by a loop",
+                    "if (1) {}",
+                    "1:5: type mismatch, found I32 but expected Boolean."
+                ),
+                Arguments.of(
+                    "a float condition is rejected by an if too",
+                    "if (1.5) {}",
+                    "1:5: type mismatch, found F64 but expected Boolean."
+                ),
+                Arguments.of(
+                    "a broken if condition reports its own fault and the requirement (ADR 0003)",
+                    "if (1 + true) {}",
+                    "1:5: illegal binary operation 'I32 + Boolean'." + System.lineSeparator() +
+                            "1:5: type mismatch, found <invalid> but expected Boolean."
+                ),
+                Arguments.of(
+                    "a bad condition and broken statements in both branches are all reported",
+                    "if (1) { b + 1; } else { c + 1; }",
+                    "1:5: type mismatch, found I32 but expected Boolean." + System.lineSeparator() +
+                            "1:10: unknown symbol 'b'." + System.lineSeparator() +
+                            "1:26: unknown symbol 'c'."
+                ),
+                Arguments.of(
+                    "a declaration in a branch does not outlive the if",
+                    "if (true) { let b = 1; } else { let c = 2; }\nprintln b;\nprintln c;",
+                    "2:9: unknown symbol 'b'." + System.lineSeparator() +
+                            "3:9: unknown symbol 'c'."
+                ),
+                Arguments.of(
+                    "the two branches may each declare the same name",
+                    "if (true) { let a = 1; } else { let a = 2; }",
+                    ""
+                ),
+                Arguments.of(
+                    "a branch may not shadow a declaration from around the if",
+                    "let a = 1;\nif (true) {} else { let a = 2; }",
+                    "2:21: variable 'a' shadows variable 'a' declared at 1:1."
+                ),
+                Arguments.of(
+                    "an else if chain decorates every link",
+                    "let a = 7;\nif (a < 5) { println 0; } else if (a < 10) { println 1; } else { println 2; }",
+                    ""
+                ),
+                Arguments.of(
+                    "a bad condition in one link of a chain does not hide one in a later link",
+                    "if (1) {} else if (2) {} else { b + 1; }",
+                    "1:5: type mismatch, found I32 but expected Boolean." + System.lineSeparator() +
+                            "1:20: type mismatch, found I32 but expected Boolean." + System.lineSeparator() +
+                            "1:33: unknown symbol 'b'."
+                ),
+                Arguments.of(
+                    "ifs and loops nest without diagnostics",
+                    "let a = 1;\nif (a < 3) {\n    while (a < 2) {\n        if (a == 1) {\n            a = a + 1;\n        }\n    }\n}",
+                    ""
+                ),
+                Arguments.of(
                     "a broken expression statement reports once",
                     "b + 1;",
                     "1:1: unknown symbol 'b'."

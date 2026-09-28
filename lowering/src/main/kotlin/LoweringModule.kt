@@ -23,6 +23,9 @@ interface LoweringModule {
     fun bindWhileStatement(whileStatementLowerer: WhileStatementLowerer): IWhileStatementLowerer
 
     @Binds
+    fun bindIfStatement(ifStatementLowerer: IfStatementLowerer): IIfStatementLowerer
+
+    @Binds
     fun bindVarDeclaration(varDeclarationLowerer: VarDeclarationLowerer): IVarDeclarationLowerer
 
     @Binds

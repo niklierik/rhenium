@@ -8,6 +8,7 @@ import me.eriknikli.rhenium.ast.tree.expressions.operators.BinaryOpExpression
 import me.eriknikli.rhenium.ast.tree.expressions.operators.UnaryOpExpression
 import me.eriknikli.rhenium.ast.tree.statements.BlockStatement
 import me.eriknikli.rhenium.ast.tree.statements.ExpressionStatement
+import me.eriknikli.rhenium.ast.tree.statements.IfStatement
 import me.eriknikli.rhenium.ast.tree.statements.PrintStatement
 import me.eriknikli.rhenium.ast.tree.statements.WhileStatement
 import me.eriknikli.rhenium.ast.tree.statements.vars.VarAssignmentStatement
@@ -58,6 +59,17 @@ class AstBuilderTests {
         assertEquals(1, diagnostics.size)
         assertEquals(1, diagnostics.head.line)
         assertEquals(6, diagnostics.head.column)
+    }
+
+    @Test
+    fun `else is followed by a block or an if and nothing else`() {
+        val stream = CharStreams.fromString("if (true) {} else while (true) {}")
+
+        val diagnostics = astBuilder.parse(stream).leftOrNull()
+            ?: fail("expected diagnostics, but the source parsed successfully")
+
+        assertEquals(1, diagnostics.head.line)
+        assertEquals(19, diagnostics.head.column)
     }
 
     @Test
@@ -147,6 +159,31 @@ class AstBuilderTests {
                     "(root (while (boolean true) (block (while (boolean false) (block)))))"
                 ),
                 Arguments.of(
+                    "an if holds its condition and its branch",
+                    "if (true) { println 1; }",
+                    "(root (if (boolean true) (block (println (i32 1)))))"
+                ),
+                Arguments.of(
+                    "an if with an else holds both branches",
+                    "if (true) {} else { println 1; }",
+                    "(root (if (boolean true) (block) (block (println (i32 1)))))"
+                ),
+                Arguments.of(
+                    "an else if is an if nested in the else side",
+                    "if (true) {} else if (false) { println 1; }",
+                    "(root (if (boolean true) (block) (if (boolean false) (block (println (i32 1))))))"
+                ),
+                Arguments.of(
+                    "an else if chain may end in an else",
+                    "if (true) {} else if (false) {} else {}",
+                    "(root (if (boolean true) (block) (if (boolean false) (block) (block))))"
+                ),
+                Arguments.of(
+                    "ifs and while loops nest",
+                    "if (true) { while (false) { if (false) {} } }",
+                    "(root (if (boolean true) (block (while (boolean false) (block (if (boolean false) (block)))))))"
+                ),
+                Arguments.of(
                     "println takes a whole expression",
                     "println 1 + 2;",
                     "(root (println (+ (i32 1) (i32 2))))"
@@ -213,6 +250,11 @@ class AstBuilderTests {
                 (listOf("block") + statements.map { it.sexpr() }).joinToString(" ", "(", ")")
 
             is WhileStatement -> "(while ${condition.sexpr()} ${body.sexpr()})"
+
+            is IfStatement -> {
+                val elseSide = elseBranch?.let { " ${it.sexpr()}" } ?: ""
+                "(if ${condition.sexpr()} ${thenBranch.sexpr()}$elseSide)"
+            }
 
             is PrintStatement -> {
                 val keyword = if (newLine) "println" else "print"
