@@ -25,6 +25,11 @@ enum class BinaryOperatorFailure {
             is WrittenOperator.Increment -> IllegalIncrement(parserContext, left, operator)
         }
 
-        MIXED_SIGNEDNESS -> MixedSignedness(parserContext, left, right, operator)
+        MIXED_SIGNEDNESS -> {
+            check(operator !is WrittenOperator.Increment) {
+                "A type cannot mix signedness with itself, yet $left did."
+            }
+            MixedSignedness(parserContext, left, right, operator)
+        }
     }
 }
