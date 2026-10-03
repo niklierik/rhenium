@@ -309,7 +309,13 @@ class LoweringTests {
                             "(= re_a (cast int32_t (+ (cast uint32_t re_a) (cast uint32_t (cast int32_t 2)))))"
                 ),
                 Arguments.of(
-                    "u32 compound assignment needs no detour",
+                    "u32 compound addition needs no detour",
+                    "let a = U32(1);\na += U32(2);",
+                    "(decl uint32_t re_a (cast uint32_t 1u)) " +
+                            "(= re_a (cast uint32_t (+ re_a (cast uint32_t 2u))))"
+                ),
+                Arguments.of(
+                    "u32 compound subtraction needs no detour",
                     "let a = U32(1);\na -= U32(2);",
                     "(decl uint32_t re_a (cast uint32_t 1u)) " +
                             "(= re_a (cast uint32_t (- re_a (cast uint32_t 2u))))"

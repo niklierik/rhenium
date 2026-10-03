@@ -7,6 +7,6 @@ written uses `-=`. Add the `+=` case so the claim the ticket made is the claim t
 
 **Blocked by:** None (can start immediately)
 
-**Status:** ready-for-agent
+**Status:** resolved
 
-- [ ] A lowering case shows `U32 +=` assigning the cast sum with no detour
+- [x] A lowering case shows `U32 +=` assigning the cast sum with no detour
