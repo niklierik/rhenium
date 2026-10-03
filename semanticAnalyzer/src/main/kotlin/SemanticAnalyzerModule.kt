@@ -26,6 +26,9 @@ interface SemanticAnalyzerModule {
     fun bindBinaryOpDecorator(instance: BinaryOpNodeDecorator): IBinaryOpNodeDecorator
 
     @Binds
+    fun bindBinaryOperatorTypeRule(instance: BinaryOperatorTypeRule): IBinaryOperatorTypeRule
+
+    @Binds
     fun bindVarDeclarationDecorator(instance: VarDeclarationStatementDecorator): IVarDeclarationStatementDecorator
 
     @Binds
