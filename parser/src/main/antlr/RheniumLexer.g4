@@ -26,6 +26,8 @@ MINUS_EQUALS: '-=';
 STAR_EQUALS: '*=';
 SLASH_EQUALS: '/=';
 PERCENT_EQUALS: '%=';
+AND_EQUALS: '&&=';
+OR_EQUALS: '||=';
 PLUSPLUS: '++';
 PLUS: '+';
 MINUSMINUS: '--';

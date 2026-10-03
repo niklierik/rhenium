@@ -450,6 +450,16 @@ class SemanticAnalyzerTests {
                     "2:6: illegal binary operation 'Boolean + I32'."
                 ),
                 Arguments.of(
+                    "a boolean folds checks in with the logical compound assignments",
+                    "let ok = true;\nok &&= 1 < 2;\nok ||= false;",
+                    ""
+                ),
+                Arguments.of(
+                    "a number has no logical compound assignment",
+                    "let n = 1;\nn &&= true;",
+                    "2:1: illegal compound assignment 'I32 &&= Boolean'."
+                ),
+                Arguments.of(
                     "compound assignments accumulate inside a loop body",
                     "let s = 0;\nlet i = 0;\nwhile (i < 4) {\n    s += i;\n    i += 1;\n}",
                     ""

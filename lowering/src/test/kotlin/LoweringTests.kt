@@ -320,6 +320,11 @@ class LoweringTests {
                     "(decl int32_t re_a (cast int32_t 6)) (= re_a (cast int32_t (/ re_a (cast int32_t 2))))"
                 ),
                 Arguments.of(
+                    "boolean compound assignment keeps the logical operator nested, so it short-circuits",
+                    "let a = true;\na &&= false;\na ||= true;",
+                    "(decl boolean_t re_a true) (= re_a (&& re_a false)) (= re_a (|| re_a true))"
+                ),
+                Arguments.of(
                     "ifs and while loops nest as the source does",
                     "while (true) { if (false) {} }",
                     "(while true (block (if false (block))))"

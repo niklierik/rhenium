@@ -39,7 +39,9 @@ varAssignmentStatement:
     leftValue EQUALS expression SEMICOLON;
 
 compoundAssignmentStatement:
-    leftValue op=(PLUS_EQUALS | MINUS_EQUALS | STAR_EQUALS | SLASH_EQUALS | PERCENT_EQUALS) expression SEMICOLON;
+    leftValue
+    op=(PLUS_EQUALS | MINUS_EQUALS | STAR_EQUALS | SLASH_EQUALS | PERCENT_EQUALS | AND_EQUALS | OR_EQUALS)
+    expression SEMICOLON;
 
 printStatement:
     PRINT expression SEMICOLON

@@ -8,10 +8,10 @@ evaluated once `ok` already settles the result.
 
 **Blocked by:** 02
 
-**Status:** ready-for-agent
+**Status:** resolved
 
-- [ ] Lexer tokens for `&&=` and `||=`, taken by the compound assignment rule
-- [ ] Accepted on two `Boolean`s; `n &&= true` with an `I32` `n` reports
+- [x] Lexer tokens for `&&=` and `||=`, taken by the compound assignment rule
+- [x] Accepted on two `Boolean`s; `n &&= true` with an `I32` `n` reports
       `illegal compound assignment 'I32 &&= Boolean'.`
-- [ ] Lowering case shows a nested `&&` inside the assignment, with no cast
-- [ ] Roadmap updated
+- [x] Lowering case shows a nested `&&` inside the assignment, with no cast
+- [x] Roadmap updated

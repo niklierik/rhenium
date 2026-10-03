@@ -113,6 +113,8 @@ class AstBuilderTests {
                 Arguments.of("compound multiplication", "a *= 1;", "(root (*= a (i32 1)))"),
                 Arguments.of("compound division", "a /= 1;", "(root (/= a (i32 1)))"),
                 Arguments.of("compound remainder", "a %= 1;", "(root (%= a (i32 1)))"),
+                Arguments.of("compound and", "a &&= true;", "(root (&&= a (boolean true)))"),
+                Arguments.of("compound or", "a ||= true;", "(root (||= a (boolean true)))"),
                 Arguments.of(
                     "multiplication binds tighter than addition",
                     "let a = 1 + 2 * 3;",

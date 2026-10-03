@@ -85,6 +85,8 @@ class StatementVisitor
         RheniumParser.STAR_EQUALS -> Operator.STAR
         RheniumParser.SLASH_EQUALS -> Operator.SLASH
         RheniumParser.PERCENT_EQUALS -> Operator.PERCENT
+        RheniumParser.AND_EQUALS -> Operator.AND
+        RheniumParser.OR_EQUALS -> Operator.OR
         else -> throw IllegalStateException("Unhandled compound assignment operator '${token.text}'.")
     }
 
