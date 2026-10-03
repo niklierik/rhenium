@@ -303,6 +303,23 @@ class LoweringTests {
                     "(if true (block) (if false (block) (block)))"
                 ),
                 Arguments.of(
+                    "compound assignment lowers to an assignment of the detoured arithmetic",
+                    "let a = I32(1);\na += I32(2);",
+                    "(decl int32_t re_a (cast int32_t 1)) " +
+                            "(= re_a (cast int32_t (+ (cast uint32_t re_a) (cast uint32_t (cast int32_t 2)))))"
+                ),
+                Arguments.of(
+                    "u32 compound assignment needs no detour",
+                    "let a = U32(1);\na -= U32(2);",
+                    "(decl uint32_t re_a (cast uint32_t 1u)) " +
+                            "(= re_a (cast uint32_t (- re_a (cast uint32_t 2u))))"
+                ),
+                Arguments.of(
+                    "compound division does not detour",
+                    "let a = I32(6);\na /= I32(2);",
+                    "(decl int32_t re_a (cast int32_t 6)) (= re_a (cast int32_t (/ re_a (cast int32_t 2))))"
+                ),
+                Arguments.of(
                     "ifs and while loops nest as the source does",
                     "while (true) { if (false) {} }",
                     "(while true (block (if false (block))))"

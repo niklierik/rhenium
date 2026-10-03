@@ -11,6 +11,7 @@ import me.eriknikli.rhenium.ast.tree.statements.ExpressionStatement
 import me.eriknikli.rhenium.ast.tree.statements.IfStatement
 import me.eriknikli.rhenium.ast.tree.statements.PrintStatement
 import me.eriknikli.rhenium.ast.tree.statements.WhileStatement
+import me.eriknikli.rhenium.ast.tree.statements.vars.CompoundAssignmentStatement
 import me.eriknikli.rhenium.ast.tree.statements.vars.VarAssignmentStatement
 import me.eriknikli.rhenium.ast.tree.statements.vars.VarDeclarationStatement
 import me.eriknikli.rhenium.common.diagnostics.render
@@ -72,6 +73,18 @@ class AstBuilderTests {
         assertEquals(19, diagnostics.head.column)
     }
 
+    @ParameterizedTest(name = "Run {index}, name {0}")
+    @MethodSource("provideSyntaxErrors")
+    fun `test syntax errors`(name: String, sourceCode: String, expectedColumn: Int) {
+        val stream = CharStreams.fromString(sourceCode)
+
+        val diagnostics = astBuilder.parse(stream).leftOrNull()
+            ?: fail("expected diagnostics, but the source parsed successfully")
+
+        assertEquals(1, diagnostics.head.line)
+        assertEquals(expectedColumn, diagnostics.head.column)
+    }
+
     @Test
     fun `syntax errors are reported instead of printed`() {
         val stream = CharStreams.fromString("let a = ;")
@@ -95,6 +108,11 @@ class AstBuilderTests {
                 Arguments.of("float literal", "let a = 1.5;", "(root (let a (f64 1.5)))"),
                 Arguments.of("typed float literal", "let a = F32(1.5);", "(root (let a (f32 1.5)))"),
                 Arguments.of("assignment", "a = false;", "(root (= a (boolean false)))"),
+                Arguments.of("compound addition", "a += 1;", "(root (+= a (i32 1)))"),
+                Arguments.of("compound subtraction", "a -= 1;", "(root (-= a (i32 1)))"),
+                Arguments.of("compound multiplication", "a *= 1;", "(root (*= a (i32 1)))"),
+                Arguments.of("compound division", "a /= 1;", "(root (/= a (i32 1)))"),
+                Arguments.of("compound remainder", "a %= 1;", "(root (%= a (i32 1)))"),
                 Arguments.of(
                     "multiplication binds tighter than addition",
                     "let a = 1 + 2 * 3;",
@@ -193,6 +211,14 @@ class AstBuilderTests {
         }
 
         @JvmStatic
+        fun provideSyntaxErrors(): Stream<Arguments> {
+            return Stream.of(
+                Arguments.of("a compound assignment is not an expression", "y = x += 1;", 7),
+                Arguments.of("compound assignments do not chain", "a += b += c;", 8)
+            )
+        }
+
+        @JvmStatic
         fun provideDiagnostics(): Stream<Arguments> {
             return Stream.of(
                 Arguments.of(
@@ -244,6 +270,8 @@ class AstBuilderTests {
             }
 
             is VarAssignmentStatement -> "(= ${leftValue.sexpr()} ${rightValue.sexpr()})"
+            is CompoundAssignmentStatement ->
+                "(${operator.cString}= ${leftValue.sexpr()} ${rightValue.sexpr()})"
             is ExpressionStatement -> "(expr ${expression.sexpr()})"
 
             is BlockStatement ->

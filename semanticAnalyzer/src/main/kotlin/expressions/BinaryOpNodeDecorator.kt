@@ -70,6 +70,6 @@ constructor() : IBinaryOpNodeDecorator {
             IllegalBinaryOperation(expression.parserContext, left, right, expression.operator)
 
         BinaryOperatorFailure.MIXED_SIGNEDNESS ->
-            MixedSignedness(expression.parserContext, left, right, expression.operator)
+            MixedSignedness(expression.parserContext, left, right, expression.operator.cString)
     }
 }

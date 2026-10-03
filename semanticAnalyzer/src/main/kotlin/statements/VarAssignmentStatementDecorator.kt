@@ -7,12 +7,9 @@ import arrow.core.raise.zipOrAccumulate
 import dagger.Lazy
 import me.eriknikli.rhenium.ast.tree.statements.vars.VarAssignmentStatement
 import me.eriknikli.rhenium.common.diagnostics.Diagnosed
-import me.eriknikli.rhenium.semanticAnalyzer.diagnostics.ImmutableLeftValue
-import me.eriknikli.rhenium.semanticAnalyzer.diagnostics.NotAnLValue
 import me.eriknikli.rhenium.semanticAnalyzer.diagnostics.TypeMismatch
 import me.eriknikli.rhenium.semanticAnalyzer.expressions.ExpressionNodeDecoratorContext
 import me.eriknikli.rhenium.semanticAnalyzer.expressions.IExpressionNodeDecorator
-import me.eriknikli.rhenium.semanticContext.tree.expressions.LeftValueContext
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -29,6 +26,11 @@ constructor() : IVarAssignmentStatementDecorator {
 
     private val expressionNodeDecorator by lazy { expressionNodeDecoratorProvider.get() }
 
+    @Inject
+    lateinit var mutableLeftValueDecoratorProvider: Lazy<IMutableLeftValueDecorator>
+
+    private val mutableLeftValueDecorator by lazy { mutableLeftValueDecoratorProvider.get() }
+
     override fun decorate(
         statement: VarAssignmentStatement,
         context: StatementDecoratorContext
@@ -37,22 +39,7 @@ constructor() : IVarAssignmentStatementDecorator {
         statement.context.relevantScope = scope
 
         val (targetType, valueType) = zipOrAccumulate(
-            {
-                val leftValue = statement.leftValue
-                expressionNodeDecorator
-                    .decorateExpression(leftValue, ExpressionNodeDecoratorContext(scope))
-                    .bindNel()
-
-                val leftValueContext = leftValue.context
-                if (leftValueContext !is LeftValueContext) {
-                    raise(NotAnLValue(leftValue.parserContext))
-                }
-                ensure(leftValueContext.symbol.mutable) {
-                    ImmutableLeftValue(leftValue.parserContext, leftValue)
-                }
-
-                leftValueContext.type
-            },
+            { mutableLeftValueDecorator.decorate(statement.leftValue, scope).bindNel() },
             {
                 expressionNodeDecorator
                     .decorateExpression(statement.rightValue, ExpressionNodeDecoratorContext(scope))

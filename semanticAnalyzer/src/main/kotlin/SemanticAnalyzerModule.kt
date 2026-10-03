@@ -38,6 +38,14 @@ interface SemanticAnalyzerModule {
     fun bindVarAssignment(instance: VarAssignmentStatementDecorator): IVarAssignmentStatementDecorator
 
     @Binds
+    fun bindMutableLeftValueDecorator(instance: MutableLeftValueDecorator): IMutableLeftValueDecorator
+
+    @Binds
+    fun bindCompoundAssignment(
+        instance: CompoundAssignmentStatementDecorator
+    ): ICompoundAssignmentStatementDecorator
+
+    @Binds
     fun bindIdentifierDecorator(instance: IdentifierNodeDecorator): IIdentifierNodeDecorator
 
     @Binds

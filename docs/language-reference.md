@@ -93,10 +93,21 @@ kept nested rather than flattened during lowering — see
 ## Assignment
 
 Assignment is **not** an expression. It may appear once and yields no value, so `a = b = c` is
-rejected. The forms are `=`, `+=`, `-=`, `*=`, `/=`, `%=` and `??=`, plus `x++` and `x--`.
+rejected. The forms are `=`, `+=`, `-=`, `*=`, `/=`, `%=`, `&&=` and `||=`, plus `x++` and `x--`;
+`??=` joins them when nullable types land.
 
 All of them require an l-value: a primary other than a function call or an optional access
 (`object?.field`).
+
+A **compound assignment** `x op= e` means exactly `x = x op e` — the same type rules, the same
+arithmetic, the same short-circuit — so `x += 1` with an `I8` `x` is rejected, as `x = x + 1` is, and
+is written `x += I8(1)`. Because the left value is named twice, it must be one whose evaluation has no
+side effects: `obj.count += 1` and `arr[i] += e` are allowed, `arr[next()] += e` is not.
+
+`x++` and `x--` are a compound assignment of one, where the one has `x`'s own type, so they work on
+every numeric type. They are **postfix only** and are **statements of their own**: unlike C, `y = x++`,
+`print x++` and `x++ + 1` are rejected, so no line depends on when its side effects happen. There is no
+prefix `++x`.
 
 ## Control flow
 

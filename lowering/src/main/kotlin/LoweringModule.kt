@@ -32,6 +32,9 @@ interface LoweringModule {
     fun bindVarAssignment(varAssignmentLowerer: VarAssignmentLowerer): IVarAssignmentLowerer
 
     @Binds
+    fun bindCompoundAssignment(compoundAssignmentLowerer: CompoundAssignmentLowerer): ICompoundAssignmentLowerer
+
+    @Binds
     fun bindExpressionStatement(expressionStatementLowerer: ExpressionStatementLowerer): IExpressionStatementLowerer
 
     @Binds

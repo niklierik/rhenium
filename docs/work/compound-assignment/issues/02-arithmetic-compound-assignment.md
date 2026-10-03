@@ -10,19 +10,19 @@ where the binary operator takes it — never C's own `+=`.
 
 **Blocked by:** 01
 
-**Status:** ready-for-agent
+**Status:** resolved
 
-- [ ] Lexer tokens for the five operators; a `statement` alternative for compound assignment
-- [ ] Compound assignment statement node, context, decorator, lowerer, with `@Binds` in each module
-- [ ] Accepted and rejected exactly where `x = x op e` is: `f32 += i32` accepted; `i8 += 1` reports
+- [x] Lexer tokens for the five operators; a `statement` alternative for compound assignment
+- [x] Compound assignment statement node, context, decorator, lowerer, with `@Binds` in each module
+- [x] Accepted and rejected exactly where `x = x op e` is: `f32 += i32` accepted; `i8 += 1` reports
       `type mismatch, found I32 but expected I8.`
-- [ ] `flag += 1` reports `illegal compound assignment 'Boolean += I32'.`
-- [ ] `u32 += i32` reports `cannot mix signed and unsigned operands in 'U32 += I32'.`
-- [ ] A `const` target reports the existing immutable-left-value diagnostic
-- [ ] An unknown target reports once; a broken left and right side are both reported
-- [ ] Lowering cases: `I32 +=` with the detour, `U32 +=` without, `/=` without
-- [ ] AST case with the renderer taught the node; `y = x += 1;` and `a += b += c;` pinned as parse failures
-- [ ] Language reference states the side-effect-free left-value rule and defers `??=` to nullables
-- [ ] CLAUDE.md reminds that a new binary operator must decide its compound form
-- [ ] Roadmap lists arithmetic compound assignment as implemented
-- [ ] Hand-run: the summing loop above prints `6`
+- [x] `flag += 1` reports `illegal compound assignment 'Boolean += I32'.`
+- [x] `u32 += i32` reports `cannot mix signed and unsigned operands in 'U32 += I32'.`
+- [x] A `const` target reports the existing immutable-left-value diagnostic
+- [x] An unknown target reports once; a broken left and right side are both reported
+- [x] Lowering cases: `I32 +=` with the detour, `U32 +=` without, `/=` without
+- [x] AST case with the renderer taught the node; `y = x += 1;` and `a += b += c;` pinned as parse failures
+- [x] Language reference states the side-effect-free left-value rule and defers `??=` to nullables
+- [x] CLAUDE.md reminds that a new binary operator must decide its compound form
+- [x] Roadmap lists arithmetic compound assignment as implemented
+- [x] Hand-run: the summing loop above prints `6`

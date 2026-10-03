@@ -7,6 +7,7 @@ import arrow.core.raise.mapOrAccumulate
 import arrow.core.raise.zipOrAccumulate
 import dagger.Lazy
 import me.eriknikli.rhenium.ast.diagnostics.UnhandledParseRule
+import me.eriknikli.rhenium.ast.tree.expressions.operators.Operator
 import me.eriknikli.rhenium.ast.tree.statements.BlockStatement
 import me.eriknikli.rhenium.ast.tree.statements.ElseBranch
 import me.eriknikli.rhenium.ast.tree.statements.ExpressionStatement
@@ -14,6 +15,7 @@ import me.eriknikli.rhenium.ast.tree.statements.IfStatement
 import me.eriknikli.rhenium.ast.tree.statements.PrintStatement
 import me.eriknikli.rhenium.ast.tree.statements.Statement
 import me.eriknikli.rhenium.ast.tree.statements.WhileStatement
+import me.eriknikli.rhenium.ast.tree.statements.vars.CompoundAssignmentStatement
 import me.eriknikli.rhenium.ast.tree.statements.vars.VarAssignmentStatement
 import me.eriknikli.rhenium.ast.tree.statements.vars.VarDeclarationStatement
 import me.eriknikli.rhenium.ast.visitors.expressions.IExpressionVisitor
@@ -21,6 +23,7 @@ import me.eriknikli.rhenium.ast.visitors.expressions.ILeftValueVisitor
 import me.eriknikli.rhenium.common.diagnostics.Diagnosed
 import me.eriknikli.rhenium.parser.RheniumParser
 import me.eriknikli.rhenium.parser.RheniumParserBaseVisitor
+import org.antlr.v4.runtime.Token
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -63,6 +66,26 @@ class StatementVisitor
         ) { leftValue, rightValue ->
             VarAssignmentStatement(ctx, leftValue, rightValue)
         }
+    }
+
+    override fun visitCompoundAssignmentStatement(
+        ctx: RheniumParser.CompoundAssignmentStatementContext
+    ): Diagnosed<Statement> = either {
+        zipOrAccumulate(
+            { leftValueVisitor.get().visitLeftValue(ctx.leftValue()).bindNel() },
+            { expressionVisitor.get().visitExpression(ctx.expression()).bindNel() }
+        ) { leftValue, rightValue ->
+            CompoundAssignmentStatement(ctx, leftValue, compoundOperatorOf(ctx.op), rightValue)
+        }
+    }
+
+    private fun compoundOperatorOf(token: Token): Operator = when (token.type) {
+        RheniumParser.PLUS_EQUALS -> Operator.PLUS
+        RheniumParser.MINUS_EQUALS -> Operator.MINUS
+        RheniumParser.STAR_EQUALS -> Operator.STAR
+        RheniumParser.SLASH_EQUALS -> Operator.SLASH
+        RheniumParser.PERCENT_EQUALS -> Operator.PERCENT
+        else -> throw IllegalStateException("Unhandled compound assignment operator '${token.text}'.")
     }
 
     override fun visitExpressionStatement(

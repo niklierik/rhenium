@@ -10,6 +10,7 @@ root:
 statement:
     varDeclarationStatement
     | varAssignmentStatement
+    | compoundAssignmentStatement
     | printStatement
     | expressionStatement
     | whileStatement
@@ -36,6 +37,9 @@ typeName:
 
 varAssignmentStatement:
     leftValue EQUALS expression SEMICOLON;
+
+compoundAssignmentStatement:
+    leftValue op=(PLUS_EQUALS | MINUS_EQUALS | STAR_EQUALS | SLASH_EQUALS | PERCENT_EQUALS) expression SEMICOLON;
 
 printStatement:
     PRINT expression SEMICOLON

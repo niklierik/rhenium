@@ -16,7 +16,8 @@ From `plan.md` on the `plans` branch. MSc thesis project, defense planned for sp
 ## What the compiler implements today
 
 Literals, unary and binary arithmetic, relational and equality operators, grouping,
-`let` / `const` declarations with an optional declared type, assignment, expression statements,
+`let` / `const` declarations with an optional declared type, assignment, compound assignment with
+`+=`, `-=`, `*=`, `/=` and `%=`, expression statements,
 braced blocks with a scope of their own, `while` loops, `if` / `else if` / `else`, the type rules over those, and a transpiler
 that emits every statement into a single C `main()`.
 
@@ -46,6 +47,11 @@ own `&&` and `||`; see [ADR 0002](adr/0002-expressions-stay-nested-in-the-action
 an ordering or arithmetic operator, and a number under a logical operator are each an illegal binary
 operation. See
 [docs/work/logical-operators/issues/01-logical-operators-accept-booleans.md](work/logical-operators/issues/01-logical-operators-accept-booleans.md).
+
+`x op= e` is a statement meaning exactly `x = x op e`, with the same type rules and the same
+arithmetic, so `x += 1` with an `I8` `x` is rejected as `x = x + 1` is. A diagnostic names the operator
+that was written: `illegal compound assignment 'Boolean += I32'.` See
+[docs/work/compound-assignment/spec.md](work/compound-assignment/spec.md).
 
 `print` and `println` write a value to standard output. They are a placeholder for the `Console` of
 [the standard library](standard-library.md), reserved keywords rather than calls because the language

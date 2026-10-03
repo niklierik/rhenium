@@ -403,6 +403,58 @@ class SemanticAnalyzerTests {
                     ""
                 ),
                 Arguments.of(
+                    "every arithmetic compound assignment is accepted on an integer",
+                    "let a = 1;\na += 2;\na -= 2;\na *= 2;\na /= 2;\na %= 2;",
+                    ""
+                ),
+                Arguments.of(
+                    "a float accumulates an integer, as the plain assignment would",
+                    "let f = F32(1.0);\nf += 1;",
+                    ""
+                ),
+                Arguments.of(
+                    "a compound assignment narrows no more than the plain assignment",
+                    "let a = I8(1);\na += 1;",
+                    "2:1: type mismatch, found I32 but expected I8."
+                ),
+                Arguments.of(
+                    "a boolean is not accumulated into, and the message names the compound operator",
+                    "let b = true;\nb += 1;",
+                    "2:1: illegal compound assignment 'Boolean += I32'."
+                ),
+                Arguments.of(
+                    "a float has no remainder to accumulate",
+                    "let f = 1.5;\nf %= 2.0;",
+                    "2:1: illegal compound assignment 'F64 %= F64'."
+                ),
+                Arguments.of(
+                    "a compound assignment mixing signedness names the compound operator",
+                    "let u = U32(1);\nu += I32(1);",
+                    "2:1: cannot mix signed and unsigned operands in 'U32 += I32'."
+                ),
+                Arguments.of(
+                    "compound assignment to an immutable variable",
+                    "const a = 1;\na += 2;",
+                    "2:1: cannot assign to 'a', it is not mutable. Declare it with 'let'."
+                ),
+                Arguments.of("compound assignment to an unknown symbol reports once", "b += 1;", "1:1: unknown symbol 'b'."),
+                Arguments.of(
+                    "both sides of a compound assignment are reported",
+                    "b += c;",
+                    "1:1: unknown symbol 'b'." + System.lineSeparator() +
+                            "1:6: unknown symbol 'c'."
+                ),
+                Arguments.of(
+                    "a poisoned right side of a compound assignment reports once",
+                    "let a = 1;\na += true + 1;",
+                    "2:6: illegal binary operation 'Boolean + I32'."
+                ),
+                Arguments.of(
+                    "compound assignments accumulate inside a loop body",
+                    "let s = 0;\nlet i = 0;\nwhile (i < 4) {\n    s += i;\n    i += 1;\n}",
+                    ""
+                ),
+                Arguments.of(
                     "every statement is analysed, and diagnostics come out in source order",
                     "const a = 1;\na = 2;\nb = 3;\nlet c: F32 = 1;\nlet a = 9;",
                     """
