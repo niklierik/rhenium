@@ -67,6 +67,13 @@ constructor() : IBinaryOpNodeDecorator {
             return InvalidType.right()
         }
 
+        if (left == BooleanType && right == BooleanType) {
+            return when (operator) {
+                Operator.AND, Operator.OR, Operator.EQUALS, Operator.NOT_EQUALS -> BooleanType.right()
+                else -> IllegalBinaryOperation(expression.parserContext, left, right, operator).leftNel()
+            }
+        }
+
         if (!left.isNumeric() || !right.isNumeric()) {
             return IllegalBinaryOperation(expression.parserContext, left, right, operator).leftNel()
         }

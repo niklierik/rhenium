@@ -328,6 +328,56 @@ class SemanticAnalyzerTests {
                     "1:1: type mismatch, found I32 but expected Boolean."
                 ),
                 Arguments.of(
+                    "a conjunction of booleans is a boolean",
+                    "let a: Boolean = true && false;",
+                    ""
+                ),
+                Arguments.of(
+                    "a logical operator rejects a number",
+                    "let a = true || 1;",
+                    "1:9: illegal binary operation 'Boolean || I32'."
+                ),
+                Arguments.of(
+                    "a disjunction of booleans is a boolean",
+                    "let a: Boolean = true || false;",
+                    ""
+                ),
+                Arguments.of(
+                    "booleans can be compared for equality",
+                    "let a: Boolean = true == false;",
+                    ""
+                ),
+                Arguments.of(
+                    "booleans can be compared for inequality",
+                    "let a: Boolean = true != false;",
+                    ""
+                ),
+                Arguments.of(
+                    "a logical operator rejects two numbers",
+                    "let a = 1 && 2;",
+                    "1:9: illegal binary operation 'I32 && I32'."
+                ),
+                Arguments.of(
+                    "a boolean cannot be compared to a number",
+                    "let a = true == 1;",
+                    "1:9: illegal binary operation 'Boolean == I32'."
+                ),
+                Arguments.of(
+                    "booleans have no ordering",
+                    "let a = true < false;",
+                    "1:9: illegal binary operation 'Boolean < Boolean'."
+                ),
+                Arguments.of(
+                    "a broken operand of a logical operator is reported once",
+                    "let a = unknown && true;",
+                    "1:9: unknown symbol 'unknown'."
+                ),
+                Arguments.of(
+                    "a logical operator can be a loop condition",
+                    "let running = true;\nlet done = false;\nwhile (running && !done) {}",
+                    ""
+                ),
+                Arguments.of(
                     "mixing an integer with a float still resolves",
                     "let a: F64 = I32(1) + F64(1.0);",
                     ""

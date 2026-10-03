@@ -40,6 +40,13 @@ either a block or another `if`, so `else if` is not a construct of its own. Ever
 `while` condition, with the same wording and the same exception to the poison-type convention. There is
 no conditional expression form yet. See [docs/work/if-statement/spec.md](work/if-statement/spec.md).
 
+`&&` and `||` take two `Boolean` operands and short-circuit, because the emitted C nests them as C's
+own `&&` and `||`; see [ADR 0002](adr/0002-expressions-stay-nested-in-the-action-tree.md). `==` and
+`!=` accept two `Boolean`s as well as two numbers. A `Boolean` mixed with a number, a `Boolean` under
+an ordering or arithmetic operator, and a number under a logical operator are each an illegal binary
+operation. See
+[docs/work/logical-operators/issues/01-logical-operators-accept-booleans.md](work/logical-operators/issues/01-logical-operators-accept-booleans.md).
+
 `print` and `println` write a value to standard output. They are a placeholder for the `Console` of
 [the standard library](standard-library.md), reserved keywords rather than calls because the language
 has neither functions nor strings yet, and they are removed when `Console` lands. See
@@ -51,16 +58,6 @@ Everything else in these documents is unbuilt.
 
 - `^` (Pow) exists as a lexer token and has type rules in `BinaryOpNodeDecorator`, but **no parser
   rule** — it cannot be written in a program yet.
-- `&&` and `||` are the mirror image: lexer tokens, parser rules and AST nodes all exist, but
-  `BinaryOpNodeDecorator` has **no case** for them, so every use is rejected as an illegal binary
-  operation whatever the operand types. The short-circuit guarantee they are promised in
-  [the language reference](language-reference.md) is therefore not yet observable. Lowering is
-  already shaped for it — see
-  [ADR 0002](adr/0002-expressions-stay-nested-in-the-action-tree.md) — so what is missing is the
-  type rule, not the emission. The gate that rejects them is a blanket non-numeric check that runs
-  before the per-operator rules, which is also why `Boolean == Boolean` is rejected although the
-  equality case would accept it. A `while` condition is therefore a comparison, a `Boolean` variable,
-  a literal or `!x` until this lands.
 - There is no `entry`, no `namespace` and no `Project.json` handling. The compiler takes a single
   `.re` file path on the command line and compiles that.
 - Division by zero and `MIN / -1` are undefined. Diagnosing them needs a way to fail at runtime, and
