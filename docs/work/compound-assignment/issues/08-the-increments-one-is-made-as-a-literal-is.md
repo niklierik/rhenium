@@ -9,7 +9,7 @@ one too.
 
 **Blocked by:** 05
 
-**Status:** ready-for-agent
+**Status:** resolved
 
-- [ ] The unsigned-suffix rule for a numeric constant exists in one place
-- [ ] The increment lowering cases for `I8`, `U8`, `F32` and `F64` pass unchanged
+- [x] The unsigned-suffix rule for a numeric constant exists in one place
+- [x] The increment lowering cases for `I8`, `U8`, `F32` and `F64` pass unchanged

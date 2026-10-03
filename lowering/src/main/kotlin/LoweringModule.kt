@@ -56,5 +56,8 @@ interface LoweringModule {
     fun bindBinaryActionFactory(binaryActionFactory: BinaryActionFactory): IBinaryActionFactory
 
     @Binds
+    fun bindNumericConstantFactory(numericConstantFactory: NumericConstantFactory): INumericConstantFactory
+
+    @Binds
     fun bindUnaryOp(unaryOpLowerer: UnaryOpLowerer): IUnaryOpLowerer
 }
