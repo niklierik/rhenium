@@ -42,7 +42,7 @@ constructor(
 
         val binaryPath = File("${options.inputPath}.o").absolutePath
 
-        "clang ${options.inputPath}.c -o $binaryPath -lm".runCommand()
+        "clang ${options.inputPath}.c -o $binaryPath -lm -Wno-parentheses-equality".runCommand()
         binaryPath.runCommand()
     }
 }
