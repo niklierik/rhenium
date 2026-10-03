@@ -17,12 +17,12 @@ constructor() : IBinaryOpLowerer {
     lateinit var expressionLowererProvider: Lazy<IExpressionLowerer>
 
     @Inject
-    lateinit var binaryActionBuilder: IBinaryActionBuilder
+    lateinit var binaryActionFactory: IBinaryActionFactory
 
     private val expressionLowerer by lazy { expressionLowererProvider.get() }
 
     override fun lower(node: BinaryOpExpression): Action {
-        return binaryActionBuilder.build(
+        return binaryActionFactory.build(
             node.context.type,
             node.operator,
             expressionLowerer.lower(node.left),

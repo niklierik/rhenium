@@ -53,7 +53,7 @@ interface LoweringModule {
     fun bindBinaryOp(binaryOpLowerer: BinaryOpLowerer): IBinaryOpLowerer
 
     @Binds
-    fun bindBinaryActionBuilder(binaryActionBuilder: BinaryActionBuilder): IBinaryActionBuilder
+    fun bindBinaryActionFactory(binaryActionFactory: BinaryActionFactory): IBinaryActionFactory
 
     @Binds
     fun bindUnaryOp(unaryOpLowerer: UnaryOpLowerer): IUnaryOpLowerer

@@ -11,14 +11,14 @@ import me.eriknikli.rhenium.semanticContext.scope.types.isNumeric
 import javax.inject.Inject
 import javax.inject.Singleton
 
-interface IBinaryActionBuilder {
+interface IBinaryActionFactory {
     fun build(type: ExpressionType, operator: Operator, left: Action, right: Action): Action
 }
 
 @Singleton
-class BinaryActionBuilder
+class BinaryActionFactory
 @Inject
-constructor() : IBinaryActionBuilder {
+constructor() : IBinaryActionFactory {
     override fun build(type: ExpressionType, operator: Operator, left: Action, right: Action): Action {
         if (!type.isNumeric()) {
             return BinaryAction(operator.cString, left, right)

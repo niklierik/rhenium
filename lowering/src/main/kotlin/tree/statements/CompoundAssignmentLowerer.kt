@@ -4,7 +4,7 @@ import dagger.Lazy
 import me.eriknikli.rhenium.ast.tree.statements.vars.CompoundAssignmentStatement
 import me.eriknikli.rhenium.lowering.INodeLowerer
 import me.eriknikli.rhenium.lowering.actions.AssignmentAction
-import me.eriknikli.rhenium.lowering.tree.expressions.IBinaryActionBuilder
+import me.eriknikli.rhenium.lowering.tree.expressions.IBinaryActionFactory
 import me.eriknikli.rhenium.lowering.tree.expressions.IExpressionLowerer
 import me.eriknikli.rhenium.lowering.tree.expressions.ILeftValueLowerer
 import javax.inject.Inject
@@ -23,14 +23,14 @@ constructor() : ICompoundAssignmentLowerer {
     lateinit var leftValueLowerer: Lazy<ILeftValueLowerer>
 
     @Inject
-    lateinit var binaryActionBuilder: IBinaryActionBuilder
+    lateinit var binaryActionFactory: IBinaryActionFactory
 
     override fun lower(node: CompoundAssignmentStatement): AssignmentAction {
         val target = leftValueLowerer.get().lower(node.leftValue)
 
         return AssignmentAction(
             target,
-            binaryActionBuilder.build(
+            binaryActionFactory.build(
                 node.context.type,
                 node.operator,
                 target,
