@@ -11,6 +11,7 @@ statement:
     varDeclarationStatement
     | varAssignmentStatement
     | compoundAssignmentStatement
+    | incrementStatement
     | printStatement
     | expressionStatement
     | whileStatement
@@ -42,6 +43,9 @@ compoundAssignmentStatement:
     leftValue
     op=(PLUS_EQUALS | MINUS_EQUALS | STAR_EQUALS | SLASH_EQUALS | PERCENT_EQUALS | AND_EQUALS | OR_EQUALS)
     expression SEMICOLON;
+
+incrementStatement:
+    leftValue op=(PLUSPLUS | MINUSMINUS) SEMICOLON;
 
 printStatement:
     PRINT expression SEMICOLON

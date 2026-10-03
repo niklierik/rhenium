@@ -35,6 +35,9 @@ interface LoweringModule {
     fun bindCompoundAssignment(compoundAssignmentLowerer: CompoundAssignmentLowerer): ICompoundAssignmentLowerer
 
     @Binds
+    fun bindIncrement(incrementLowerer: IncrementLowerer): IIncrementLowerer
+
+    @Binds
     fun bindExpressionStatement(expressionStatementLowerer: ExpressionStatementLowerer): IExpressionStatementLowerer
 
     @Binds

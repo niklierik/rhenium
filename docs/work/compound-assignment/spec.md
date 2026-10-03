@@ -1,6 +1,6 @@
 # Compound assignment and increment / decrement statements
 
-**Status:** ready-for-agent
+**Status:** resolved
 
 ## Problem Statement
 

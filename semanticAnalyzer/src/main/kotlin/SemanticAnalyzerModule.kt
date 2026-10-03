@@ -46,6 +46,9 @@ interface SemanticAnalyzerModule {
     ): ICompoundAssignmentStatementDecorator
 
     @Binds
+    fun bindIncrement(instance: IncrementStatementDecorator): IIncrementStatementDecorator
+
+    @Binds
     fun bindIdentifierDecorator(instance: IdentifierNodeDecorator): IIdentifierNodeDecorator
 
     @Binds

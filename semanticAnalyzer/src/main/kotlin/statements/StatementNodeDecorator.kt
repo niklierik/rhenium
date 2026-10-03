@@ -8,6 +8,7 @@ import me.eriknikli.rhenium.ast.tree.statements.PrintStatement
 import me.eriknikli.rhenium.ast.tree.statements.Statement
 import me.eriknikli.rhenium.ast.tree.statements.WhileStatement
 import me.eriknikli.rhenium.ast.tree.statements.vars.CompoundAssignmentStatement
+import me.eriknikli.rhenium.ast.tree.statements.vars.IncrementStatement
 import me.eriknikli.rhenium.ast.tree.statements.vars.VarAssignmentStatement
 import me.eriknikli.rhenium.ast.tree.statements.vars.VarDeclarationStatement
 import me.eriknikli.rhenium.common.diagnostics.Diagnosed
@@ -46,6 +47,10 @@ constructor(
     private val compoundAssignmentStatementDecorator by lazy { compoundAssignmentStatementDecoratorProvider.get() }
 
     @Inject
+    lateinit var incrementStatementDecoratorProvider: Lazy<IIncrementStatementDecorator>
+    private val incrementStatementDecorator by lazy { incrementStatementDecoratorProvider.get() }
+
+    @Inject
     lateinit var expressionStatementDecoratorProvider: Lazy<IExpressionStatementDecorator>
     private val expressionStatementDecorator by lazy { expressionStatementDecoratorProvider.get() }
 
@@ -80,6 +85,11 @@ constructor(
             )
 
             is CompoundAssignmentStatement -> compoundAssignmentStatementDecorator.decorate(
+                statement,
+                StatementDecoratorContext(scope)
+            )
+
+            is IncrementStatement -> incrementStatementDecorator.decorate(
                 statement,
                 StatementDecoratorContext(scope)
             )

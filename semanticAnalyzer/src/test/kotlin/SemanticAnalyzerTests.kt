@@ -460,6 +460,32 @@ class SemanticAnalyzerTests {
                     "2:1: illegal compound assignment 'I32 &&= Boolean'."
                 ),
                 Arguments.of(
+                    "every numeric type steps by one, a narrow one included",
+                    "let a = I8(1);\na++;\nlet b = U64(1);\nb--;\nlet c = F32(1.0);\nc++;\nlet d = 1.5;\nd--;",
+                    ""
+                ),
+                Arguments.of(
+                    "a boolean has no increment",
+                    "let b = true;\nb++;",
+                    "2:1: illegal increment 'Boolean++'."
+                ),
+                Arguments.of(
+                    "a boolean has no decrement",
+                    "let b = true;\nb--;",
+                    "2:1: illegal decrement 'Boolean--'."
+                ),
+                Arguments.of(
+                    "incrementing an immutable variable",
+                    "const a = 1;\na++;",
+                    "2:1: cannot assign to 'a', it is not mutable. Declare it with 'let'."
+                ),
+                Arguments.of("incrementing an unknown symbol reports once", "b++;", "1:1: unknown symbol 'b'."),
+                Arguments.of(
+                    "incrementing a poisoned variable reports nothing more",
+                    "let a: Foo = 1;\na++;",
+                    "1:8: unknown type 'Foo'."
+                ),
+                Arguments.of(
                     "compound assignments accumulate inside a loop body",
                     "let s = 0;\nlet i = 0;\nwhile (i < 4) {\n    s += i;\n    i += 1;\n}",
                     ""

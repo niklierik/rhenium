@@ -12,6 +12,7 @@ import me.eriknikli.rhenium.ast.tree.statements.IfStatement
 import me.eriknikli.rhenium.ast.tree.statements.PrintStatement
 import me.eriknikli.rhenium.ast.tree.statements.WhileStatement
 import me.eriknikli.rhenium.ast.tree.statements.vars.CompoundAssignmentStatement
+import me.eriknikli.rhenium.ast.tree.statements.vars.IncrementStatement
 import me.eriknikli.rhenium.ast.tree.statements.vars.VarAssignmentStatement
 import me.eriknikli.rhenium.ast.tree.statements.vars.VarDeclarationStatement
 import me.eriknikli.rhenium.common.diagnostics.render
@@ -115,6 +116,8 @@ class AstBuilderTests {
                 Arguments.of("compound remainder", "a %= 1;", "(root (%= a (i32 1)))"),
                 Arguments.of("compound and", "a &&= true;", "(root (&&= a (boolean true)))"),
                 Arguments.of("compound or", "a ||= true;", "(root (||= a (boolean true)))"),
+                Arguments.of("increment", "a++;", "(root (++ a))"),
+                Arguments.of("decrement", "a--;", "(root (-- a))"),
                 Arguments.of(
                     "multiplication binds tighter than addition",
                     "let a = 1 + 2 * 3;",
@@ -216,7 +219,11 @@ class AstBuilderTests {
         fun provideSyntaxErrors(): Stream<Arguments> {
             return Stream.of(
                 Arguments.of("a compound assignment is not an expression", "y = x += 1;", 7),
-                Arguments.of("compound assignments do not chain", "a += b += c;", 8)
+                Arguments.of("compound assignments do not chain", "a += b += c;", 8),
+                Arguments.of("an increment is not a value to assign", "y = x++;", 6),
+                Arguments.of("an increment is not a value to print", "print x++;", 8),
+                Arguments.of("an increment is not an operand", "x++ + 1;", 5),
+                Arguments.of("there is no prefix increment", "++x;", 1)
             )
         }
 
@@ -272,6 +279,7 @@ class AstBuilderTests {
             }
 
             is VarAssignmentStatement -> "(= ${leftValue.sexpr()} ${rightValue.sexpr()})"
+            is IncrementStatement -> "(${operator.cString}${operator.cString} ${leftValue.sexpr()})"
             is CompoundAssignmentStatement ->
                 "(${operator.cString}= ${leftValue.sexpr()} ${rightValue.sexpr()})"
             is ExpressionStatement -> "(expr ${expression.sexpr()})"

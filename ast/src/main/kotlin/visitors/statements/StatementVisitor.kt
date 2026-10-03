@@ -16,6 +16,7 @@ import me.eriknikli.rhenium.ast.tree.statements.PrintStatement
 import me.eriknikli.rhenium.ast.tree.statements.Statement
 import me.eriknikli.rhenium.ast.tree.statements.WhileStatement
 import me.eriknikli.rhenium.ast.tree.statements.vars.CompoundAssignmentStatement
+import me.eriknikli.rhenium.ast.tree.statements.vars.IncrementStatement
 import me.eriknikli.rhenium.ast.tree.statements.vars.VarAssignmentStatement
 import me.eriknikli.rhenium.ast.tree.statements.vars.VarDeclarationStatement
 import me.eriknikli.rhenium.ast.visitors.expressions.IExpressionVisitor
@@ -88,6 +89,18 @@ class StatementVisitor
         RheniumParser.AND_EQUALS -> Operator.AND
         RheniumParser.OR_EQUALS -> Operator.OR
         else -> throw IllegalStateException("Unhandled compound assignment operator '${token.text}'.")
+    }
+
+    override fun visitIncrementStatement(
+        ctx: RheniumParser.IncrementStatementContext
+    ): Diagnosed<Statement> = leftValueVisitor.get()
+        .visitLeftValue(ctx.leftValue())
+        .map { IncrementStatement(ctx, it, incrementOperatorOf(ctx.op)) }
+
+    private fun incrementOperatorOf(token: Token): Operator = when (token.type) {
+        RheniumParser.PLUSPLUS -> Operator.PLUS
+        RheniumParser.MINUSMINUS -> Operator.MINUS
+        else -> throw IllegalStateException("Unhandled increment operator '${token.text}'.")
     }
 
     override fun visitExpressionStatement(

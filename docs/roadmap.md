@@ -17,7 +17,7 @@ From `plan.md` on the `plans` branch. MSc thesis project, defense planned for sp
 
 Literals, unary and binary arithmetic, relational and equality operators, grouping,
 `let` / `const` declarations with an optional declared type, assignment, compound assignment with
-`+=`, `-=`, `*=`, `/=`, `%=`, `&&=` and `||=`, expression statements,
+`+=`, `-=`, `*=`, `/=`, `%=`, `&&=` and `||=`, `x++` and `x--`, expression statements,
 braced blocks with a scope of their own, `while` loops, `if` / `else if` / `else`, the type rules over those, and a transpiler
 that emits every statement into a single C `main()`.
 
@@ -51,7 +51,9 @@ operation. See
 `x op= e` is a statement meaning exactly `x = x op e`, with the same type rules and the same
 arithmetic, so `x += 1` with an `I8` `x` is rejected as `x = x + 1` is. A diagnostic names the operator
 that was written: `illegal compound assignment 'Boolean += I32'.` `ok &&= e` still skips `e` once `ok`
-is false, because it lowers to the same nested `&&`. See
+is false, because it lowers to the same nested `&&`. `x++` and `x--` add or subtract a one of `x`'s
+own type, so they work on every numeric type and `I8(127)` incremented wraps to `-128`. They are
+postfix only and statements of their own, so `y = x++;` does not parse. See
 [docs/work/compound-assignment/spec.md](work/compound-assignment/spec.md).
 
 `print` and `println` write a value to standard output. They are a placeholder for the `Console` of

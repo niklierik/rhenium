@@ -8,15 +8,15 @@
 
 **Blocked by:** 01
 
-**Status:** ready-for-agent
+**Status:** resolved
 
-- [ ] A `statement` alternative using the existing `++` and `--` tokens; no `expression` alternative
-- [ ] Increment statement node, context, decorator, lowerer, with `@Binds` in each module
-- [ ] Accepted on every integer and float type
-- [ ] `flag++` reports `illegal increment 'Boolean++'.`; `flag--` reports `illegal decrement 'Boolean--'.`
-- [ ] A `const` target reports the existing immutable-left-value diagnostic; an unknown target reports once
-- [ ] Lowering cases on `I8`, `U8`, `F32` and `F64`, each with a one of the matching type
-- [ ] AST case with the renderer taught the node; `y = x++;`, `print x++;` and `x++ + 1;` pinned as
+- [x] A `statement` alternative using the existing `++` and `--` tokens; no `expression` alternative
+- [x] Increment statement node, context, decorator, lowerer, with `@Binds` in each module
+- [x] Accepted on every integer and float type
+- [x] `flag++` reports `illegal increment 'Boolean++'.`; `flag--` reports `illegal decrement 'Boolean--'.`
+- [x] A `const` target reports the existing immutable-left-value diagnostic; an unknown target reports once
+- [x] Lowering cases on `I8`, `U8`, `F32` and `F64`, each with a one of the matching type
+- [x] AST case with the renderer taught the node; `y = x++;`, `print x++;` and `x++ + 1;` pinned as
       parse failures
-- [ ] Roadmap updated
-- [ ] Hand-run: `let x = I8(127); x++; println x;` prints `-128`
+- [x] Roadmap updated
+- [x] Hand-run: `let x = I8(127); x++; println x;` prints `-128`

@@ -325,6 +325,30 @@ class LoweringTests {
                     "(decl boolean_t re_a true) (= re_a (&& re_a false)) (= re_a (|| re_a true))"
                 ),
                 Arguments.of(
+                    "an i8 increment adds a one of its own type, through the detour",
+                    "let a = I8(1);\na++;",
+                    "(decl int8_t re_a (cast int8_t 1)) " +
+                            "(= re_a (cast int8_t (+ (cast uint32_t re_a) (cast uint32_t (cast int8_t 1)))))"
+                ),
+                Arguments.of(
+                    "a u8 decrement subtracts an unsigned one, through the detour",
+                    "let a = U8(1);\na--;",
+                    "(decl uint8_t re_a (cast uint8_t 1u)) " +
+                            "(= re_a (cast uint8_t (- (cast uint32_t re_a) (cast uint32_t (cast uint8_t 1u)))))"
+                ),
+                Arguments.of(
+                    "an f32 increment adds an f32 one",
+                    "let a = F32(1.5);\na++;",
+                    "(decl float32_t re_a (cast float32_t 1.5)) " +
+                            "(= re_a (cast float32_t (+ re_a (cast float32_t 1))))"
+                ),
+                Arguments.of(
+                    "an f64 decrement subtracts an f64 one",
+                    "let a = F64(1.5);\na--;",
+                    "(decl float64_t re_a (cast float64_t 1.5)) " +
+                            "(= re_a (cast float64_t (- re_a (cast float64_t 1))))"
+                ),
+                Arguments.of(
                     "ifs and while loops nest as the source does",
                     "while (true) { if (false) {} }",
                     "(while true (block (if false (block))))"

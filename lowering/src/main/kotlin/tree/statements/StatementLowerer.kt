@@ -8,6 +8,7 @@ import me.eriknikli.rhenium.ast.tree.statements.PrintStatement
 import me.eriknikli.rhenium.ast.tree.statements.Statement
 import me.eriknikli.rhenium.ast.tree.statements.WhileStatement
 import me.eriknikli.rhenium.ast.tree.statements.vars.CompoundAssignmentStatement
+import me.eriknikli.rhenium.ast.tree.statements.vars.IncrementStatement
 import me.eriknikli.rhenium.ast.tree.statements.vars.VarAssignmentStatement
 import me.eriknikli.rhenium.ast.tree.statements.vars.VarDeclarationStatement
 import me.eriknikli.rhenium.lowering.INodeLowerer
@@ -31,6 +32,9 @@ constructor() : IStatementLowerer {
     lateinit var compoundAssignmentLowerer: Lazy<ICompoundAssignmentLowerer>
 
     @Inject
+    lateinit var incrementLowerer: Lazy<IIncrementLowerer>
+
+    @Inject
     lateinit var expressionStatementLowerer: Lazy<IExpressionStatementLowerer>
 
     @Inject
@@ -50,6 +54,7 @@ constructor() : IStatementLowerer {
             is VarDeclarationStatement -> varDeclarationLowerer.get().lower(node)
             is VarAssignmentStatement -> varAssignmentLowerer.get().lower(node)
             is CompoundAssignmentStatement -> compoundAssignmentLowerer.get().lower(node)
+            is IncrementStatement -> incrementLowerer.get().lower(node)
             is ExpressionStatement -> expressionStatementLowerer.get().lower(node)
             is PrintStatement -> printStatementLowerer.get().lower(node)
             is BlockStatement -> blockStatementLowerer.get().lower(node)
