@@ -5,17 +5,13 @@ import arrow.core.raise.either
 import arrow.core.raise.ensure
 import arrow.core.raise.zipOrAccumulate
 import dagger.Lazy
+import me.eriknikli.rhenium.ast.tree.expressions.operators.WrittenOperator
 import me.eriknikli.rhenium.ast.tree.statements.vars.CompoundAssignmentStatement
 import me.eriknikli.rhenium.common.diagnostics.Diagnosed
-import me.eriknikli.rhenium.common.diagnostics.Diagnostic
-import me.eriknikli.rhenium.semanticAnalyzer.diagnostics.IllegalCompoundAssignment
-import me.eriknikli.rhenium.semanticAnalyzer.diagnostics.MixedSignedness
 import me.eriknikli.rhenium.semanticAnalyzer.diagnostics.TypeMismatch
-import me.eriknikli.rhenium.semanticAnalyzer.expressions.BinaryOperatorFailure
 import me.eriknikli.rhenium.semanticAnalyzer.expressions.ExpressionNodeDecoratorContext
 import me.eriknikli.rhenium.semanticAnalyzer.expressions.IBinaryOperatorTypeRule
 import me.eriknikli.rhenium.semanticAnalyzer.expressions.IExpressionNodeDecorator
-import me.eriknikli.rhenium.semanticContext.scope.types.ExpressionType
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -58,7 +54,14 @@ constructor() : ICompoundAssignmentStatementDecorator {
 
         val resultType = binaryOperatorTypeRule
             .resolve(targetType, valueType, statement.operator)
-            .mapLeft { failure -> failure.toDiagnostic(targetType, valueType, statement).nel() }
+            .mapLeft { failure ->
+                failure.toDiagnostic(
+                    statement.parserContext,
+                    targetType,
+                    valueType,
+                    WrittenOperator.Compound(statement.operator)
+                ).nel()
+            }
             .bind()
 
         statement.context.type = resultType
@@ -66,17 +69,5 @@ constructor() : ICompoundAssignmentStatementDecorator {
         ensure(resultType.canAssignTo(targetType)) {
             TypeMismatch(statement.parserContext, resultType, listOf(targetType)).nel()
         }
-    }
-
-    private fun BinaryOperatorFailure.toDiagnostic(
-        left: ExpressionType,
-        right: ExpressionType,
-        statement: CompoundAssignmentStatement
-    ): Diagnostic = when (this) {
-        BinaryOperatorFailure.ILLEGAL_OPERATION ->
-            IllegalCompoundAssignment(statement.parserContext, left, right, statement.operator)
-
-        BinaryOperatorFailure.MIXED_SIGNEDNESS ->
-            MixedSignedness(statement.parserContext, left, right, "${statement.operator.cString}=")
     }
 }

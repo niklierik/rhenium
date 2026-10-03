@@ -15,9 +15,9 @@ type again instead of a string, and the `op=` spelling is no longer assembled in
 
 **Blocked by:** None (can start immediately)
 
-**Status:** ready-for-agent
+**Status:** resolved
 
-- [ ] The written operator's spelling (`+`, `+=`, `++`) is produced in exactly one place
-- [ ] The mixed-signedness diagnostic takes a domain type, not a string
-- [ ] The three decorators share one mapping from a rule failure to a diagnostic
-- [ ] Every existing analyzer test passes with unchanged expected messages
+- [x] The written operator's spelling (`+`, `+=`, `++`) is produced in exactly one place
+- [x] The mixed-signedness diagnostic takes a domain type, not a string
+- [x] The three decorators share one mapping from a rule failure to a diagnostic
+- [x] Every existing analyzer test passes with unchanged expected messages

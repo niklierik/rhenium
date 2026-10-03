@@ -3,10 +3,9 @@ package me.eriknikli.rhenium.semanticAnalyzer.statements
 import arrow.core.nel
 import arrow.core.raise.either
 import dagger.Lazy
+import me.eriknikli.rhenium.ast.tree.expressions.operators.WrittenOperator
 import me.eriknikli.rhenium.ast.tree.statements.vars.IncrementStatement
 import me.eriknikli.rhenium.common.diagnostics.Diagnosed
-import me.eriknikli.rhenium.semanticAnalyzer.diagnostics.IllegalIncrement
-import me.eriknikli.rhenium.semanticAnalyzer.expressions.BinaryOperatorFailure
 import me.eriknikli.rhenium.semanticAnalyzer.expressions.IBinaryOperatorTypeRule
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -38,14 +37,12 @@ constructor() : IIncrementStatementDecorator {
         statement.context.type = binaryOperatorTypeRule
             .resolve(type, type, statement.operator)
             .mapLeft { failure ->
-                when (failure) {
-                    BinaryOperatorFailure.ILLEGAL_OPERATION ->
-                        IllegalIncrement(statement.parserContext, type, statement.operator).nel()
-
-                    BinaryOperatorFailure.MIXED_SIGNEDNESS -> throw IllegalStateException(
-                        "A type cannot mix signedness with itself, yet $type did."
-                    )
-                }
+                failure.toDiagnostic(
+                    statement.parserContext,
+                    type,
+                    type,
+                    WrittenOperator.Increment(statement.operator)
+                ).nel()
             }
             .bind()
     }
