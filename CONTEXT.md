@@ -147,6 +147,18 @@ _Avoid_: Binding, entry, definition
 A symbol that can appear on the left of an assignment. Types are symbols but are not left values.
 _Avoid_: LHS, assignable, target, variable reference
 
+**Compound assignment**:
+The statement `x op= e`, which means exactly `x = x op e` — the same type rules, the same arithmetic,
+the same diagnostics. It is a statement, never an expression, and its left value must be one whose
+evaluation has no side effects, so naming it twice changes nothing. Every binary operator that exists
+and makes sense to accumulate into gets one.
+_Avoid_: Shorthand operator, augmented assignment, op-assign — it is not an operator, it yields no value
+
+**Increment statement** / **Decrement statement**:
+The statements `x++` and `x--`: a compound assignment of one, where the one has the left value's own
+type. Postfix only, and only as a statement of their own — never inside an expression.
+_Avoid_: Increment operator, postfix operator, `++` expression
+
 **Global scope**:
 The outermost scope, seeded with the primitive types before any source is analyzed.
 _Avoid_: Root scope, builtin scope, prelude
