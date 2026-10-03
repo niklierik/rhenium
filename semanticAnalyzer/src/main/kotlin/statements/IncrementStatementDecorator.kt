@@ -35,13 +35,13 @@ constructor() : IIncrementStatementDecorator {
         val type = mutableLeftValueDecorator.decorate(statement.leftValue, context.scope).bind()
 
         statement.context.type = binaryOperatorTypeRule
-            .resolve(type, type, statement.operator)
+            .resolve(type, type, statement.step.operator)
             .mapLeft { failure ->
                 failure.toDiagnostic(
                     statement.parserContext,
                     type,
                     type,
-                    WrittenOperator.Increment(statement.operator)
+                    WrittenOperator.Increment(statement.step)
                 ).nel()
             }
             .bind()

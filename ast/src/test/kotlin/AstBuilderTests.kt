@@ -279,7 +279,7 @@ class AstBuilderTests {
             }
 
             is VarAssignmentStatement -> "(= ${leftValue.sexpr()} ${rightValue.sexpr()})"
-            is IncrementStatement -> "(${operator.cString}${operator.cString} ${leftValue.sexpr()})"
+            is IncrementStatement -> "(${step.spelling} ${leftValue.sexpr()})"
             is CompoundAssignmentStatement ->
                 "(${operator.cString}= ${leftValue.sexpr()} ${rightValue.sexpr()})"
             is ExpressionStatement -> "(expr ${expression.sexpr()})"

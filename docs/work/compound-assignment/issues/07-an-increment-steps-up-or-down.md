@@ -10,8 +10,8 @@ reported with.
 
 **Blocked by:** 06
 
-**Status:** ready-for-agent
+**Status:** resolved
 
-- [ ] The increment statement node carries the two-valued step, not an operator
-- [ ] Nothing outside the step type decides between "increment" and "decrement"
-- [ ] Every existing test passes unchanged
+- [x] The increment statement node carries the two-valued step, not an operator
+- [x] Nothing outside the step type decides between "increment" and "decrement"
+- [x] Every existing test passes unchanged

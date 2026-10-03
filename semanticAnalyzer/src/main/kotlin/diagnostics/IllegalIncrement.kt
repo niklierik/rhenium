@@ -10,5 +10,5 @@ data class IllegalIncrement(
     val type: ExpressionType,
     val operator: WrittenOperator.Increment
 ) : ContextDiagnostic {
-    override val message: String = "illegal ${operator.word} '$type${operator.spelling}'."
+    override val message: String = "illegal ${operator.step.word} '$type${operator.spelling}'."
 }

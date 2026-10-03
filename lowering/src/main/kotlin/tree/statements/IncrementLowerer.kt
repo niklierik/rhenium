@@ -29,6 +29,6 @@ constructor() : IIncrementLowerer {
         val target = leftValueLowerer.get().lower(node.leftValue)
         val one = CastAction(type, ConstantAction(if (type is UnsignedIntType) "1u" else "1"))
 
-        return AssignmentAction(target, binaryActionFactory.build(type, node.operator, target, one))
+        return AssignmentAction(target, binaryActionFactory.build(type, node.step.operator, target, one))
     }
 }

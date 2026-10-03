@@ -17,6 +17,7 @@ import me.eriknikli.rhenium.ast.tree.statements.Statement
 import me.eriknikli.rhenium.ast.tree.statements.WhileStatement
 import me.eriknikli.rhenium.ast.tree.statements.vars.CompoundAssignmentStatement
 import me.eriknikli.rhenium.ast.tree.statements.vars.IncrementStatement
+import me.eriknikli.rhenium.ast.tree.statements.vars.Step
 import me.eriknikli.rhenium.ast.tree.statements.vars.VarAssignmentStatement
 import me.eriknikli.rhenium.ast.tree.statements.vars.VarDeclarationStatement
 import me.eriknikli.rhenium.ast.visitors.expressions.IExpressionVisitor
@@ -95,11 +96,11 @@ class StatementVisitor
         ctx: RheniumParser.IncrementStatementContext
     ): Diagnosed<Statement> = leftValueVisitor.get()
         .visitLeftValue(ctx.leftValue())
-        .map { IncrementStatement(ctx, it, incrementOperatorOf(ctx.op)) }
+        .map { IncrementStatement(ctx, it, stepOf(ctx.op)) }
 
-    private fun incrementOperatorOf(token: Token): Operator = when (token.type) {
-        RheniumParser.PLUSPLUS -> Operator.PLUS
-        RheniumParser.MINUSMINUS -> Operator.MINUS
+    private fun stepOf(token: Token): Step = when (token.type) {
+        RheniumParser.PLUSPLUS -> Step.UP
+        RheniumParser.MINUSMINUS -> Step.DOWN
         else -> throw IllegalStateException("Unhandled increment operator '${token.text}'.")
     }
 
