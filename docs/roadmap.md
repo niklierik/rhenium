@@ -75,4 +75,4 @@ Everything else in these documents is unbuilt.
 - There is no warning severity. `Diagnostic` carries only a line, a column and a message, and a
   diagnostic *is* the `Either` left, so producing one halts lowering and makes the compiler exit
   non-zero. Anything that should be reported without failing the build — a `while (true)` that cannot
-  terminate, an unused variable — needs `Diagnosed` reshaped first.
+  terminate, an unused variable — needs `Diagnosed` reshaped first. See [docs/work/warnings/spec.md](work/warnings/spec.md).

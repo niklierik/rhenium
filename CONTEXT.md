@@ -96,6 +96,19 @@ statement in an else branch, not a construct of its own. Every block statement a
 typed as a possible else branch, because a sealed type is what makes lowering exhaustive over the two.
 _Avoid_: Else clause, alternative, otherwise
 
+**Loop control statement**:
+`break` or `continue` — a statement that transfers control within the innermost enclosing loop, ending
+it or starting its next iteration. Legal anywhere inside a loop body, however deeply nested in blocks
+and if statements, and nowhere else.
+_Avoid_: Jump statement, escape, exit — `jump` would also take in `return` and `goto`, which leave more
+than a loop
+
+**Unreachable statement**:
+A statement that follows a loop control statement in the same block, so control can never arrive at it.
+Only that local case counts; nothing is inferred from an if statement whose every branch leaves the
+loop.
+_Avoid_: Dead code, unused code — `unused` is about values and variables, not control
+
 ### Types and values
 
 **Expression type**:
@@ -136,7 +149,8 @@ _Avoid_: Unique name, generated name, symbol name
 The variables and symbols available at a point in the program. Every block has one, holding what that
 block declares; lookup walks outwards through the enclosing ones, so an inner block sees what encloses
 it and nothing sees what an inner block declared. Distinct from a **block**, which is the action that
-owns the list of child actions.
+owns the list of child actions. A scope may belong to a loop, and a loop control statement is legal
+wherever lookup outwards meets one.
 _Avoid_: Frame, environment, namespace, context — `context` is the per-node semantic state
 
 **Symbol**:
