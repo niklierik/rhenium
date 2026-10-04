@@ -16,6 +16,8 @@ statement:
     | expressionStatement
     | whileStatement
     | ifStatement
+    | breakStatement
+    | continueStatement
     | block;
 
 block:
@@ -23,6 +25,12 @@ block:
 
 whileStatement:
     WHILE OPEN_BRACKET condition=expression CLOSE_BRACKET body=block;
+
+breakStatement:
+    BREAK SEMICOLON;
+
+continueStatement:
+    CONTINUE SEMICOLON;
 
 ifStatement:
     IF OPEN_BRACKET condition=expression CLOSE_BRACKET thenBranch=block (ELSE (elseIf=ifStatement | elseBlock=block))?;

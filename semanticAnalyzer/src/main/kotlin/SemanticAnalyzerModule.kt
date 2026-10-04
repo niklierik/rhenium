@@ -68,4 +68,10 @@ interface SemanticAnalyzerModule {
 
     @Binds
     fun bindIfStatementDecorator(instance: IfStatementDecorator): IIfStatementDecorator
+
+    @Binds
+    fun bindBreakStatementDecorator(instance: BreakStatementDecorator): IBreakStatementDecorator
+
+    @Binds
+    fun bindContinueStatementDecorator(instance: ContinueStatementDecorator): IContinueStatementDecorator
 }

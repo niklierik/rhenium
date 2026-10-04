@@ -13,6 +13,8 @@ FALSE: 'false';
 IF: 'if';
 ELSE: 'else';
 WHILE: 'while';
+BREAK: 'break';
+CONTINUE: 'continue';
 
 EQUALSEQUALS: '==';
 NOTEQUALS: '!=';

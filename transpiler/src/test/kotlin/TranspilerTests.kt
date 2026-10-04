@@ -187,6 +187,14 @@ class TranspilerTests {
                     "while((re_a_1<3)){}"
                 ),
                 Arguments.of(
+                    "break and continue print as C's own, inside the loop that holds them",
+                    WhileAction(
+                        ConstantAction("1"),
+                        BlockAction(Block(mutableListOf(ContinueAction, BreakAction)))
+                    ),
+                    "while(1){continue;break;}"
+                ),
+                Arguments.of(
                     "an if parenthesises its condition and leaves the braces to its branch",
                     IfAction(
                         ConstantAction("1"),

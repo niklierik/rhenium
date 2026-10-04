@@ -26,6 +26,12 @@ interface LoweringModule {
     fun bindIfStatement(ifStatementLowerer: IfStatementLowerer): IIfStatementLowerer
 
     @Binds
+    fun bindBreakStatement(breakStatementLowerer: BreakStatementLowerer): IBreakStatementLowerer
+
+    @Binds
+    fun bindContinueStatement(continueStatementLowerer: ContinueStatementLowerer): IContinueStatementLowerer
+
+    @Binds
     fun bindVarDeclaration(varDeclarationLowerer: VarDeclarationLowerer): IVarDeclarationLowerer
 
     @Binds

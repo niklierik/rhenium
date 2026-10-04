@@ -7,6 +7,8 @@ import me.eriknikli.rhenium.ast.tree.expressions.literals.Literal
 import me.eriknikli.rhenium.ast.tree.expressions.operators.BinaryOpExpression
 import me.eriknikli.rhenium.ast.tree.expressions.operators.UnaryOpExpression
 import me.eriknikli.rhenium.ast.tree.statements.BlockStatement
+import me.eriknikli.rhenium.ast.tree.statements.BreakStatement
+import me.eriknikli.rhenium.ast.tree.statements.ContinueStatement
 import me.eriknikli.rhenium.ast.tree.statements.ExpressionStatement
 import me.eriknikli.rhenium.ast.tree.statements.IfStatement
 import me.eriknikli.rhenium.ast.tree.statements.PrintStatement
@@ -207,6 +209,11 @@ class AstBuilderTests {
                     "(root (if (boolean true) (block (while (boolean false) (block (if (boolean false) (block)))))))"
                 ),
                 Arguments.of(
+                    "break and continue are statements of their own",
+                    "while (true) { break; continue; }",
+                    "(root (while (boolean true) (block (break) (continue))))"
+                ),
+                Arguments.of(
                     "println takes a whole expression",
                     "println 1 + 2;",
                     "(root (println (+ (i32 1) (i32 2))))"
@@ -223,7 +230,9 @@ class AstBuilderTests {
                 Arguments.of("an increment is not a value to assign", "y = x++;", 6),
                 Arguments.of("an increment is not a value to print", "print x++;", 8),
                 Arguments.of("an increment is not an operand", "x++ + 1;", 5),
-                Arguments.of("there is no prefix increment", "++x;", 1)
+                Arguments.of("there is no prefix increment", "++x;", 1),
+                Arguments.of("break is not a variable name", "let break = 1;", 5),
+                Arguments.of("break takes no label", "while (true) { break outer; }", 22)
             )
         }
 
@@ -288,6 +297,8 @@ class AstBuilderTests {
                 (listOf("block") + statements.map { it.sexpr() }).joinToString(" ", "(", ")")
 
             is WhileStatement -> "(while ${condition.sexpr()} ${body.sexpr()})"
+            is BreakStatement -> "(break)"
+            is ContinueStatement -> "(continue)"
 
             is IfStatement -> {
                 val elseSide = elseBranch?.let { " ${it.sexpr()}" } ?: ""

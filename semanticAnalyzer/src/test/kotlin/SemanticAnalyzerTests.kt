@@ -180,6 +180,11 @@ class SemanticAnalyzerTests {
                     ""
                 ),
                 Arguments.of("an if with empty branches is not a diagnostic", "if (true) {} else {}", ""),
+                Arguments.of(
+                    "break and continue in a loop body are not diagnostics",
+                    "while (true) {\n    continue;\n}\nwhile (true) {\n    break;\n}",
+                    ""
+                ),
                 Arguments.of("a boolean condition is accepted by an if", "let b = true;\nif (b) {}", ""),
                 Arguments.of(
                     "an integer condition is rejected by an if in the same words as by a loop",

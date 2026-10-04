@@ -2,6 +2,8 @@ package me.eriknikli.rhenium.semanticAnalyzer.statements
 
 import dagger.Lazy
 import me.eriknikli.rhenium.ast.tree.statements.BlockStatement
+import me.eriknikli.rhenium.ast.tree.statements.BreakStatement
+import me.eriknikli.rhenium.ast.tree.statements.ContinueStatement
 import me.eriknikli.rhenium.ast.tree.statements.ExpressionStatement
 import me.eriknikli.rhenium.ast.tree.statements.IfStatement
 import me.eriknikli.rhenium.ast.tree.statements.PrintStatement
@@ -70,6 +72,14 @@ constructor(
     lateinit var ifStatementDecoratorProvider: Lazy<IIfStatementDecorator>
     private val ifStatementDecorator by lazy { ifStatementDecoratorProvider.get() }
 
+    @Inject
+    lateinit var breakStatementDecoratorProvider: Lazy<IBreakStatementDecorator>
+    private val breakStatementDecorator by lazy { breakStatementDecoratorProvider.get() }
+
+    @Inject
+    lateinit var continueStatementDecoratorProvider: Lazy<IContinueStatementDecorator>
+    private val continueStatementDecorator by lazy { continueStatementDecoratorProvider.get() }
+
     override fun decorateStatement(
         statement: Statement,
         statementDecoratorContext: StatementDecoratorContext
@@ -115,6 +125,16 @@ constructor(
             )
 
             is IfStatement -> ifStatementDecorator.decorate(
+                statement,
+                StatementDecoratorContext(scope)
+            )
+
+            is BreakStatement -> breakStatementDecorator.decorate(
+                statement,
+                StatementDecoratorContext(scope)
+            )
+
+            is ContinueStatement -> continueStatementDecorator.decorate(
                 statement,
                 StatementDecoratorContext(scope)
             )

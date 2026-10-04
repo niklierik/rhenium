@@ -358,6 +358,11 @@ class LoweringTests {
                     "ifs and while loops nest as the source does",
                     "while (true) { if (false) {} }",
                     "(while true (block (if false (block))))"
+                ),
+                Arguments.of(
+                    "break and continue lower inside the loop body, however deeply nested",
+                    "while (true) { continue; if (false) { break; } }",
+                    "(while true (block (continue) (if false (block (break)))))"
                 )
             )
         }
@@ -388,6 +393,8 @@ class LoweringTests {
             is ExpressionStatementAction -> "(expr ${value.sexpr()})"
             is VarRefAction -> cName
             is ConstantAction -> cLiteral
+            is BreakAction -> "(break)"
+            is ContinueAction -> "(continue)"
         }
     }
 }

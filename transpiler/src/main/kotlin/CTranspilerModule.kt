@@ -25,6 +25,12 @@ interface CTranspilerModule {
     fun bindIfTranspiler(transpiler: CIfTranspiler): IIfTranspiler
 
     @Binds
+    fun bindBreakTranspiler(transpiler: CBreakTranspiler): IBreakTranspiler
+
+    @Binds
+    fun bindContinueTranspiler(transpiler: CContinueTranspiler): IContinueTranspiler
+
+    @Binds
     fun bindFunctionTranspiler(transpiler: CFunctionTranspiler): IFunctionTranspiler
 
     @Binds

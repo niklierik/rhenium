@@ -9,6 +9,8 @@ import dagger.Lazy
 import me.eriknikli.rhenium.ast.diagnostics.UnhandledParseRule
 import me.eriknikli.rhenium.ast.tree.expressions.operators.Operator
 import me.eriknikli.rhenium.ast.tree.statements.BlockStatement
+import me.eriknikli.rhenium.ast.tree.statements.BreakStatement
+import me.eriknikli.rhenium.ast.tree.statements.ContinueStatement
 import me.eriknikli.rhenium.ast.tree.statements.ElseBranch
 import me.eriknikli.rhenium.ast.tree.statements.ExpressionStatement
 import me.eriknikli.rhenium.ast.tree.statements.IfStatement
@@ -124,6 +126,14 @@ class StatementVisitor
             WhileStatement(ctx, condition, body)
         }
     }
+
+    override fun visitBreakStatement(
+        ctx: RheniumParser.BreakStatementContext
+    ): Diagnosed<Statement> = BreakStatement(ctx).right()
+
+    override fun visitContinueStatement(
+        ctx: RheniumParser.ContinueStatementContext
+    ): Diagnosed<Statement> = ContinueStatement(ctx).right()
 
     override fun visitIfStatement(
         ctx: RheniumParser.IfStatementContext
