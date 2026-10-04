@@ -1,15 +1,17 @@
 package me.eriknikli.rhenium.semanticContext.scope
 
-class Scope {
+class Scope(private val isLoop: Boolean = false) {
     private var parent: Scope? = null
 
     private val symbolTable = HashMap<String, Symbol>()
 
-    fun createChild(): Scope {
-        val child = Scope()
+    fun createChild(isLoop: Boolean = false): Scope {
+        val child = Scope(isLoop)
         child.parent = this
         return child
     }
+
+    fun isInsideLoop(): Boolean = isLoop || parent?.isInsideLoop() == true
 
     fun getSymbol(name: String): Symbol? {
         val directSymbol = getDirectSymbol(name)

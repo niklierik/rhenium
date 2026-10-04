@@ -185,6 +185,38 @@ class SemanticAnalyzerTests {
                     "while (true) {\n    continue;\n}\nwhile (true) {\n    break;\n}",
                     ""
                 ),
+                Arguments.of("break outside a loop is rejected", "break;", "1:1: 'break' is not inside a loop."),
+                Arguments.of("continue outside a loop is rejected", "continue;", "1:1: 'continue' is not inside a loop."),
+                Arguments.of(
+                    "a block with no loop around it does not make break legal",
+                    "{\n    break;\n}",
+                    "2:5: 'break' is not inside a loop."
+                ),
+                Arguments.of(
+                    "an if with no loop around it does not make continue legal",
+                    "if (true) {\n    continue;\n}",
+                    "2:5: 'continue' is not inside a loop."
+                ),
+                Arguments.of(
+                    "break inside an if inside a loop acts on the loop",
+                    "while (true) {\n    if (true) {\n        break;\n    }\n}",
+                    ""
+                ),
+                Arguments.of(
+                    "continue inside a nested block inside a loop acts on the loop",
+                    "while (true) {\n    {\n        continue;\n    }\n}",
+                    ""
+                ),
+                Arguments.of(
+                    "break inside a nested loop is legal",
+                    "while (true) {\n    while (false) {\n        break;\n    }\n}",
+                    ""
+                ),
+                Arguments.of(
+                    "a loop does not make break legal after it ends",
+                    "while (true) {}\nbreak;",
+                    "2:1: 'break' is not inside a loop."
+                ),
                 Arguments.of("a boolean condition is accepted by an if", "let b = true;\nif (b) {}", ""),
                 Arguments.of(
                     "an integer condition is rejected by an if in the same words as by a loop",

@@ -37,7 +37,10 @@ constructor() : IWhileStatementDecorator {
             },
             {
                 statementNodeDecorator
-                    .decorateStatement(statement.body, StatementDecoratorContext(context.scope))
+                    .decorateStatement(
+                        statement.body,
+                        StatementDecoratorContext(context.scope.createChild(isLoop = true))
+                    )
                     .bindNel()
             }
         ) { _, _ -> }
