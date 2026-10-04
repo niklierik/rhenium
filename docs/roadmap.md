@@ -18,7 +18,7 @@ From `plan.md` on the `plans` branch. MSc thesis project, defense planned for sp
 Literals, unary and binary arithmetic, relational and equality operators, grouping,
 `let` / `const` declarations with an optional declared type, assignment, compound assignment with
 `+=`, `-=`, `*=`, `/=`, `%=`, `&&=` and `||=`, `x++` and `x--`, expression statements,
-braced blocks with a scope of their own, `while` loops, `if` / `else if` / `else`, the type rules over those, and a transpiler
+braced blocks with a scope of their own, `while` loops, `break` and `continue`, `if` / `else if` / `else`, the type rules over those, and a transpiler
 that emits every statement into a single C `main()`.
 
 A block is a statement, so blocks nest and stand on their own. What a block declares stops existing at
@@ -32,8 +32,8 @@ report separately, `variable 'a' is already declared at 1:1.` within one block a
 grammar, so a braceless body is a syntax error and the body's scope comes from the block. A condition
 that is already broken is reported *and* told that a loop wants a `Boolean`, which departs from the
 poison-type convention on purpose; see
-[ADR 0003](adr/0003-a-while-condition-is-checked-even-when-poisoned.md). There is no `break`, no
-`continue` and no `do`-`while`. See [docs/work/while-loop/spec.md](work/while-loop/spec.md).
+[ADR 0003](adr/0003-a-while-condition-is-checked-even-when-poisoned.md). There is no `do`-`while`. See
+[docs/work/while-loop/spec.md](work/while-loop/spec.md).
 
 `if (condition) { ... }` runs its block when the condition holds, optionally followed by `else` and
 either a block or another `if`, so `else if` is not a construct of its own. Every branch is braced, and
@@ -47,6 +47,13 @@ own `&&` and `||`; see [ADR 0002](adr/0002-expressions-stay-nested-in-the-action
 an ordering or arithmetic operator, and a number under a logical operator are each an illegal binary
 operation. See
 [docs/work/logical-operators/issues/01-logical-operators-accept-booleans.md](work/logical-operators/issues/01-logical-operators-accept-booleans.md).
+
+`break;` ends the innermost enclosing loop and `continue;` starts its next iteration. Together they
+are loop control statements: legal anywhere inside a loop body, however deeply nested in blocks and
+`if`s, and reported as `'break' is not inside a loop.` anywhere else. A statement after one in the
+same block is reported as `unreachable statement after 'break' at 2:5.` — an error only until there are
+warnings; see [docs/work/warnings/spec.md](work/warnings/spec.md). There are no labels. See
+[docs/work/break-continue/spec.md](work/break-continue/spec.md).
 
 `x op= e` is a statement meaning exactly `x = x op e`, with the same type rules and the same
 arithmetic, so `x += 1` with an `I8` `x` is rejected as `x = x + 1` is. A diagnostic names the operator

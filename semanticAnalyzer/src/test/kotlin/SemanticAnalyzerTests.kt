@@ -217,6 +217,42 @@ class SemanticAnalyzerTests {
                     "while (true) {}\nbreak;",
                     "2:1: 'break' is not inside a loop."
                 ),
+                Arguments.of(
+                    "a statement after break is unreachable",
+                    "let x = 0;\nwhile (true) {\n    break;\n    x = 1;\n}",
+                    "4:5: unreachable statement after 'break' at 3:5."
+                ),
+                Arguments.of(
+                    "only the first unreachable statement in a block is reported",
+                    "let x = 0;\nwhile (true) {\n    continue;\n    x = 1;\n    x = 2;\n}",
+                    "4:5: unreachable statement after 'continue' at 3:5."
+                ),
+                Arguments.of(
+                    "an error inside an unreachable statement is still reported",
+                    "while (true) {\n    break;\n    println b;\n}",
+                    """
+                    3:5: unreachable statement after 'break' at 2:5.
+                    3:13: unknown symbol 'b'.
+                    """.trimIndent()
+                ),
+                Arguments.of(
+                    "a break outside a loop with code after it reports only that it is outside a loop",
+                    "let x = 0;\nbreak;\nx = 1;\n{\n    continue;\n    x = 2;\n}",
+                    """
+                    2:1: 'break' is not inside a loop.
+                    5:5: 'continue' is not inside a loop.
+                    """.trimIndent()
+                ),
+                Arguments.of(
+                    "a statement after an if whose branches all break is not unreachable",
+                    "let x = 0;\nwhile (true) {\n    if (true) {\n        break;\n    } else {\n        break;\n    }\n    x = 1;\n}",
+                    ""
+                ),
+                Arguments.of(
+                    "an unreachable statement inside a nested block is reported there",
+                    "let x = 0;\nwhile (true) {\n    if (true) {\n        break;\n        x = 1;\n    }\n}",
+                    "5:9: unreachable statement after 'break' at 4:9."
+                ),
                 Arguments.of("a boolean condition is accepted by an if", "let b = true;\nif (b) {}", ""),
                 Arguments.of(
                     "an integer condition is rejected by an if in the same words as by a loop",

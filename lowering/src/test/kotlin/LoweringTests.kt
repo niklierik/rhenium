@@ -361,8 +361,8 @@ class LoweringTests {
                 ),
                 Arguments.of(
                     "break and continue lower inside the loop body, however deeply nested",
-                    "while (true) { continue; if (false) { break; } }",
-                    "(while true (block (continue) (if false (block (break)))))"
+                    "while (true) { if (false) { break; } continue; }",
+                    "(while true (block (if false (block (break))) (continue)))"
                 )
             )
         }

@@ -8,16 +8,16 @@ the [warnings spec](../../warnings/spec.md) is where it becomes a warning.
 
 **Blocked by:** 01, 02
 
-**Status:** ready-for-agent
+**Status:** resolved
 
-- [ ] `UnreachableStatement` exists in its own file, implements `ContextDiagnostic`, and names the
+- [x] `UnreachableStatement` exists in its own file, implements `ContextDiagnostic`, and names the
       loop control statement's keyword and location
-- [ ] The block statement decorator reports it once per block, at the first statement after a loop
+- [x] The block statement decorator reports it once per block, at the first statement after a loop
       control statement, and still decorates every statement in the block
-- [ ] A loop control statement outside a loop suppresses the check, pinned by a test
-- [ ] Analyzer cases: one statement after `break` rejected; two after `continue` give one diagnostic;
+- [x] A loop control statement outside a loop suppresses the check, pinned by a test
+- [x] Analyzer cases: one statement after `break` rejected; two after `continue` give one diagnostic;
       an error inside a dead statement still reported; a statement after an if whose branches all
       `break` accepted; a loop control statement as the last statement accepted
-- [ ] The roadmap's "What the compiler implements today" describes `break` and `continue`, and the
+- [x] The roadmap's "What the compiler implements today" describes `break` and `continue`, and the
       spec is marked resolved
-- [ ] The build is green and no existing behaviour changed
+- [x] The build is green and no existing behaviour changed
