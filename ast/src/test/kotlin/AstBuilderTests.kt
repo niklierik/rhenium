@@ -209,9 +209,14 @@ class AstBuilderTests {
                     "(root (if (boolean true) (block (while (boolean false) (block (if (boolean false) (block)))))))"
                 ),
                 Arguments.of(
-                    "break and continue are statements of their own",
-                    "while (true) { break; continue; }",
-                    "(root (while (boolean true) (block (break) (continue))))"
+                    "break is a statement of its own",
+                    "while (true) { break; }",
+                    "(root (while (boolean true) (block (break))))"
+                ),
+                Arguments.of(
+                    "continue is a statement of its own",
+                    "while (true) { continue; }",
+                    "(root (while (boolean true) (block (continue))))"
                 ),
                 Arguments.of(
                     "println takes a whole expression",

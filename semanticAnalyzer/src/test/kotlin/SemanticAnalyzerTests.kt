@@ -218,6 +218,11 @@ class SemanticAnalyzerTests {
                     "2:1: 'break' is not inside a loop."
                 ),
                 Arguments.of(
+                    "a loop control statement as the last statement of a body is not a diagnostic",
+                    "let i = 0;\nwhile (true) {\n    i++;\n    break;\n}",
+                    ""
+                ),
+                Arguments.of(
                     "a statement after break is unreachable",
                     "let x = 0;\nwhile (true) {\n    break;\n    x = 1;\n}",
                     "4:5: unreachable statement after 'break' at 3:5."

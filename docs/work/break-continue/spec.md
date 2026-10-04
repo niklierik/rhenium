@@ -124,9 +124,13 @@ statement, each the keyword followed by a semicolon. Two rules rather than one w
 so every tree has one node kind per keyword without inspecting a token.
 
 **The five trees each gain two members**, in the order the project's conventions require: a break
-statement node and a continue statement node, their semantic contexts, decorators, lowerers and action
+statement node and a continue statement node, their semantic contexts, lowerers and action
 transpilers, plus the `@Binds` entries. The source-level and action-level names share their word and
 are told apart by tree, as the while and block pairs are.
+
+**Both nodes are loop control statements**, a sealed supertype in the AST that carries the keyword it
+is written with. The two share one decorator, because the rule they obey is one rule, and both
+diagnostics take the statement rather than a keyword string, so each keyword is spelled once.
 
 **The actions are `data object`s, `BreakAction` and `ContinueAction`.** They carry nothing. They print
 as `break;` and `continue;`. C's semantics match Rhenium's exactly inside the C `while` the while action

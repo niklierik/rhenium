@@ -6,6 +6,7 @@ import org.antlr.v4.runtime.ParserRuleContext
 
 data class BreakStatement(
     override val parserContext: ParserRuleContext
-) : Statement {
+) : LoopControlStatement {
     override val context: StatementContext = BreakStatementContext()
+    override val keyword: String = "break"
 }

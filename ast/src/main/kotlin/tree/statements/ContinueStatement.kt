@@ -6,6 +6,7 @@ import org.antlr.v4.runtime.ParserRuleContext
 
 data class ContinueStatement(
     override val parserContext: ParserRuleContext
-) : Statement {
+) : LoopControlStatement {
     override val context: StatementContext = ContinueStatementContext()
+    override val keyword: String = "continue"
 }

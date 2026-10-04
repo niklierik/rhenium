@@ -6,8 +6,7 @@ import arrow.core.raise.mapOrAccumulate
 import arrow.core.raise.zipOrAccumulate
 import dagger.Lazy
 import me.eriknikli.rhenium.ast.tree.statements.BlockStatement
-import me.eriknikli.rhenium.ast.tree.statements.BreakStatement
-import me.eriknikli.rhenium.ast.tree.statements.ContinueStatement
+import me.eriknikli.rhenium.ast.tree.statements.LoopControlStatement
 import me.eriknikli.rhenium.ast.tree.statements.Statement
 import me.eriknikli.rhenium.common.diagnostics.Diagnosed
 import me.eriknikli.rhenium.semanticAnalyzer.diagnostics.UnreachableStatement
@@ -49,17 +48,10 @@ constructor() : IBlockStatementDecorator {
             return@either
         }
 
-        val (index, keyword) = statements.withIndex()
-            .firstNotNullOfOrNull { (index, it) -> loopControlKeywordOf(it)?.let { keyword -> index to keyword } }
-            ?: return@either
+        val index = statements.indexOfFirst { it is LoopControlStatement }
+        val loopControl = statements.getOrNull(index) as? LoopControlStatement ?: return@either
         val unreachable = statements.getOrNull(index + 1) ?: return@either
 
-        raise(UnreachableStatement(unreachable.parserContext, keyword, statements[index].parserContext).nel())
-    }
-
-    private fun loopControlKeywordOf(statement: Statement): String? = when (statement) {
-        is BreakStatement -> "break"
-        is ContinueStatement -> "continue"
-        else -> null
+        raise(UnreachableStatement(unreachable.parserContext, loopControl).nel())
     }
 }
