@@ -1,4 +1,5 @@
 import arrow.core.getOrElse
+import me.eriknikli.rhenium.common.diagnostics.hasErrors
 import me.eriknikli.rhenium.common.diagnostics.render
 import me.eriknikli.rhenium.lowering.actions.*
 import org.antlr.v4.runtime.CharStreams
@@ -21,8 +22,11 @@ class LoweringTests {
         val ast = astBuilder.parse(CharStreams.fromString(sourceCode))
             .getOrElse { fail("expected the source to parse, got:\n${it.render()}") }
 
-        semanticAnalyzer.decorateSemanticContext(ast)
-            .getOrElse { fail("expected the source to analyze, got:\n${it.render()}") }
+        semanticAnalyzer.decorateSemanticContext(ast).onLeft {
+            if (it.hasErrors()) {
+                fail("expected the source to analyze, got:\n${it.render()}")
+            }
+        }
 
         assertEquals(expectedActions, lowerer.lower(ast).body())
     }
@@ -363,6 +367,11 @@ class LoweringTests {
                     "break and continue lower inside the loop body, however deeply nested",
                     "while (true) { if (false) { break; } continue; }",
                     "(while true (block (if false (block (break))) (continue)))"
+                ),
+                Arguments.of(
+                    "a statement after break is lowered after it",
+                    "while (true) { break; println; }",
+                    """(while true (block (break) (print "\n")))"""
                 )
             )
         }

@@ -225,18 +225,18 @@ class SemanticAnalyzerTests {
                 Arguments.of(
                     "a statement after break is unreachable",
                     "let x = 0;\nwhile (true) {\n    break;\n    x = 1;\n}",
-                    "4:5: error: unreachable statement after 'break' at 3:5."
+                    "4:5: warning: unreachable statement after 'break' at 3:5."
                 ),
                 Arguments.of(
                     "only the first unreachable statement in a block is reported",
                     "let x = 0;\nwhile (true) {\n    continue;\n    x = 1;\n    x = 2;\n}",
-                    "4:5: error: unreachable statement after 'continue' at 3:5."
+                    "4:5: warning: unreachable statement after 'continue' at 3:5."
                 ),
                 Arguments.of(
                     "an error inside an unreachable statement is still reported",
                     "while (true) {\n    break;\n    println b;\n}",
                     """
-                    3:5: error: unreachable statement after 'break' at 2:5.
+                    3:5: warning: unreachable statement after 'break' at 2:5.
                     3:13: error: unknown symbol 'b'.
                     """.trimIndent()
                 ),
@@ -249,6 +249,15 @@ class SemanticAnalyzerTests {
                     """.trimIndent()
                 ),
                 Arguments.of(
+                    "errors and warnings are reported together in position order",
+                    "println a;\nwhile (true) {\n    break;\n    println 1;\n}\nprintln b;",
+                    """
+                    1:9: error: unknown symbol 'a'.
+                    4:5: warning: unreachable statement after 'break' at 3:5.
+                    6:9: error: unknown symbol 'b'.
+                    """.trimIndent()
+                ),
+                Arguments.of(
                     "a statement after an if whose branches all break is not unreachable",
                     "let x = 0;\nwhile (true) {\n    if (true) {\n        break;\n    } else {\n        break;\n    }\n    x = 1;\n}",
                     ""
@@ -256,7 +265,7 @@ class SemanticAnalyzerTests {
                 Arguments.of(
                     "an unreachable statement inside a nested block is reported there",
                     "let x = 0;\nwhile (true) {\n    if (true) {\n        break;\n        x = 1;\n    }\n}",
-                    "5:9: error: unreachable statement after 'break' at 4:9."
+                    "5:9: warning: unreachable statement after 'break' at 4:9."
                 ),
                 Arguments.of("a boolean condition is accepted by an if", "let b = true;\nif (b) {}", ""),
                 Arguments.of(

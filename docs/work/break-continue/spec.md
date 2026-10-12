@@ -59,9 +59,8 @@ while (c) {
 }
 ```
 
-reports `unreachable statement after 'break' at 2:5.` at `x = 1;`. This is an error for now only
-because the compiler has no warnings; it is meant to be a warning, and the
-[warnings spec](../warnings/spec.md) is where it becomes one.
+reports `unreachable statement after 'break' at 2:5.` at `x = 1;`. It was an error until the
+[warnings spec](../warnings/spec.md) made it a warning.
 
 ## User Stories
 
@@ -164,9 +163,8 @@ loop control statement does not make what follows it unreachable.
 statements after it. Removing it fixes both, so the second diagnostic would be noise. The top level of
 a program is never inside a loop, so the root needs no unreachable check of its own.
 
-**The unreachable-statement error is temporary.** It is meant to be a warning. The
-[warnings spec](../warnings/spec.md) records it as one of the first two uses of warning severity, and
-the roadmap's known-gaps entry for warnings points there. No ADR: turning an error into a warning only
+**The unreachable-statement error was temporary.** It was meant to be a warning, and the
+[warnings spec](../warnings/spec.md) has since made it one. No ADR: turning an error into a warning only
 accepts more programs, so it is cheap to reverse.
 
 ## Testing Decisions

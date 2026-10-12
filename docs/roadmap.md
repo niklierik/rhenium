@@ -51,8 +51,7 @@ operation. See
 `break;` ends the innermost enclosing loop and `continue;` starts its next iteration. Together they
 are loop control statements: legal anywhere inside a loop body, however deeply nested in blocks and
 `if`s, and reported as `'break' is not inside a loop.` anywhere else. A statement after one in the
-same block is reported as `unreachable statement after 'break' at 2:5.` — an error only until there are
-warnings; see [docs/work/warnings/spec.md](work/warnings/spec.md). There are no labels. See
+same block is reported as `unreachable statement after 'break' at 2:5.`, a warning. There are no labels. See
 [docs/work/break-continue/spec.md](work/break-continue/spec.md).
 
 `x op= e` is a statement meaning exactly `x = x op e`, with the same type rules and the same
@@ -68,6 +67,10 @@ postfix only and statements of their own, so `y = x++;` does not parse. See
 has neither functions nor strings yet, and they are removed when `Console` lands. See
 [docs/work/print/spec.md](work/print/spec.md).
 
+Every diagnostic is an error or a warning, printed as `3:5: warning: message`. An error stops the
+program being compiled; a warning is printed before the program runs and does not. The only warning
+today is the unreachable statement. See [docs/work/warnings/spec.md](work/warnings/spec.md).
+
 Everything else in these documents is unbuilt.
 
 ## Known gaps worth knowing before you start
@@ -79,7 +82,6 @@ Everything else in these documents is unbuilt.
 - Division by zero and `MIN / -1` are undefined. Diagnosing them needs a way to fail at runtime, and
   there is no panic and no `Result` yet. See
   [docs/work/integer-arithmetic/spec.md](work/integer-arithmetic/spec.md).
-- There is no warning severity. `Diagnostic` carries only a line, a column and a message, and a
-  diagnostic *is* the `Either` left, so producing one halts lowering and makes the compiler exit
-  non-zero. Anything that should be reported without failing the build — a `while (true)` that cannot
-  terminate, an unused variable — needs `Diagnosed` reshaped first. See [docs/work/warnings/spec.md](work/warnings/spec.md).
+- A warning can only be raised from a `Unit`-valued check in the decorate stage, because a warning is
+  still the `Either` left. A warning that needs to sit on a value — an unused value, a constant
+  condition — needs `Diagnosed` reshaped first. See [docs/work/warnings/spec.md](work/warnings/spec.md).

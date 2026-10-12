@@ -10,7 +10,7 @@ data class UnreachableStatement(
     override val parserContext: ParserRuleContext,
     val loopControl: LoopControlStatement
 ) : ContextDiagnostic {
-    override val severity: Severity = Severity.ERROR
+    override val severity: Severity = Severity.WARNING
     override val message: String =
         "unreachable statement after '${loopControl.keyword}' at ${loopControl.parserContext.location}."
 }
