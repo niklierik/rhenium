@@ -42,7 +42,11 @@ constructor(
             transpiler.transpile(actions, it)
         }
 
-        "clang ${options.cPath} -o ${options.binaryPath} -lm -Wno-parentheses-equality".runCommand()
+        val clangExitCode =
+            "clang ${options.cPath} -o ${options.binaryPath} -lm -Wno-parentheses-equality".runCommand()
+        if (clangExitCode != 0) {
+            return Compilation(diagnostics, null)
+        }
 
         return Compilation(diagnostics, options.binaryPath)
     }

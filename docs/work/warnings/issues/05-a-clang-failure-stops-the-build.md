@@ -7,9 +7,9 @@ non-zero instead of running a missing or stale binary. Clang's own output still 
 
 **Blocked by:** 04
 
-**Status:** ready-for-agent
+**Status:** resolved
 
-- [ ] Running a command reports its exit code
-- [ ] Compiling hands back no program when clang exits non-zero
-- [ ] Checked by hand: a clang failure exits non-zero and runs nothing
-- [ ] The build is green
+- [x] Running a command reports its exit code
+- [x] Compiling hands back no program when clang exits non-zero
+- [x] Checked by hand: a clang failure exits non-zero and runs nothing
+- [x] The build is green
