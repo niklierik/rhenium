@@ -7,4 +7,6 @@ typealias Diagnosed<A> = EitherNel<Diagnostic, A>
 
 fun NonEmptyList<Diagnostic>.render(): String =
     sortedWith(compareBy({ it.line }, { it.column }))
-        .joinToString(System.lineSeparator()) { "${it.line}:${it.column}: ${it.message}" }
+        .joinToString(System.lineSeparator()) {
+            "${it.line}:${it.column}: ${it.severity.name.lowercase()}: ${it.message}"
+        }

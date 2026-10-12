@@ -40,7 +40,7 @@ class SemanticAnalyzerTests {
                 Arguments.of(
                     "a declaration does not outlive the block that holds it",
                     "{ let b = 1; }\nprintln b;",
-                    "2:9: unknown symbol 'b'."
+                    "2:9: error: unknown symbol 'b'."
                 ),
                 Arguments.of(
                     "sibling blocks may each declare the same name",
@@ -55,49 +55,49 @@ class SemanticAnalyzerTests {
                 Arguments.of(
                     "a block does not see a declaration that comes after it",
                     "{ println a; }\nlet a = 1;",
-                    "1:11: unknown symbol 'a'."
+                    "1:11: error: unknown symbol 'a'."
                 ),
                 Arguments.of(
                     "a declaration may not shadow one from an enclosing block",
                     "let a = 1;\n{ let a = 2; }",
-                    "2:3: variable 'a' shadows variable 'a' declared at 1:1."
+                    "2:3: error: variable 'a' shadows variable 'a' declared at 1:1."
                 ),
                 Arguments.of(
                     "shadowing is reported however deeply the blocks nest",
                     "let a = 1;\n{\n    {\n        let a = 2;\n    }\n}",
-                    "4:9: variable 'a' shadows variable 'a' declared at 1:1."
+                    "4:9: error: variable 'a' shadows variable 'a' declared at 1:1."
                 ),
                 Arguments.of(
                     "a shadow of a poisoned variable is reported alongside what poisoned it",
                     "let a = b;\n{ let a = 1; }",
-                    "1:9: unknown symbol 'b'." + System.lineSeparator() +
-                            "2:3: variable 'a' shadows variable 'a' declared at 1:1."
+                    "1:9: error: unknown symbol 'b'." + System.lineSeparator() +
+                            "2:3: error: variable 'a' shadows variable 'a' declared at 1:1."
                 ),
                 Arguments.of(
                     "a shadow is reported beside an unrelated error in the same declaration",
                     "let a = 1;\n{ let a = b; }",
-                    "2:3: variable 'a' shadows variable 'a' declared at 1:1." + System.lineSeparator() +
-                            "2:11: unknown symbol 'b'."
+                    "2:3: error: variable 'a' shadows variable 'a' declared at 1:1." + System.lineSeparator() +
+                            "2:11: error: unknown symbol 'b'."
                 ),
                 Arguments.of(
                     "a type name is taken, at the top level",
                     "let Boolean = 1;",
-                    "1:1: variable 'Boolean' is already declared."
+                    "1:1: error: variable 'Boolean' is already declared."
                 ),
                 Arguments.of(
                     "a type name is taken inside a block too, so a declared type never resolves to a variable",
                     "{ let Boolean = 1; }",
-                    "1:3: variable 'Boolean' is already declared."
+                    "1:3: error: variable 'Boolean' is already declared."
                 ),
                 Arguments.of(
                     "a declaration that collides with a type name leaves the type name alone",
                     "{ let Boolean = 1; let b: Boolean = true; }",
-                    "1:3: variable 'Boolean' is already declared."
+                    "1:3: error: variable 'Boolean' is already declared."
                 ),
                 Arguments.of(
                     "a broken statement inside a block reports once",
                     "{ b + 1; }",
-                    "1:3: unknown symbol 'b'."
+                    "1:3: error: unknown symbol 'b'."
                 ),
                 Arguments.of(
                     "a loop decorates its condition and its body",
@@ -108,25 +108,25 @@ class SemanticAnalyzerTests {
                 Arguments.of(
                     "a declaration in a loop body does not outlive the loop",
                     "while (true) { let b = 1; }\nprintln b;",
-                    "2:9: unknown symbol 'b'."
+                    "2:9: error: unknown symbol 'b'."
                 ),
                 Arguments.of(
                     "a loop body may not shadow a declaration from around the loop",
                     "let a = 1;\nwhile (true) { let a = 2; }",
-                    "2:16: variable 'a' shadows variable 'a' declared at 1:1."
+                    "2:16: error: variable 'a' shadows variable 'a' declared at 1:1."
                 ),
                 Arguments.of(
                     "a broken condition and a broken body statement are both reported",
                     "while (b) { c + 1; }",
-                    "1:8: unknown symbol 'b'." + System.lineSeparator() +
-                            "1:8: type mismatch, found <invalid> but expected Boolean." + System.lineSeparator() +
-                            "1:13: unknown symbol 'c'."
+                    "1:8: error: unknown symbol 'b'." + System.lineSeparator() +
+                            "1:8: error: type mismatch, found <invalid> but expected Boolean." + System.lineSeparator() +
+                            "1:13: error: unknown symbol 'c'."
                 ),
                 Arguments.of(
                     "a broken statement inside a loop body reports once and hides nothing after it",
                     "while (true) { b + 1; c + 1; }",
-                    "1:16: unknown symbol 'b'." + System.lineSeparator() +
-                            "1:23: unknown symbol 'c'."
+                    "1:16: error: unknown symbol 'b'." + System.lineSeparator() +
+                            "1:23: error: unknown symbol 'c'."
                 ),
                 Arguments.of(
                     "nested loops with a valid body produce no diagnostics",
@@ -136,10 +136,10 @@ class SemanticAnalyzerTests {
                 Arguments.of(
                     "every loop in a program is reported",
                     "while (b) {}\nwhile (c) {}",
-                    "1:8: unknown symbol 'b'." + System.lineSeparator() +
-                            "1:8: type mismatch, found <invalid> but expected Boolean." + System.lineSeparator() +
-                            "2:8: unknown symbol 'c'." + System.lineSeparator() +
-                            "2:8: type mismatch, found <invalid> but expected Boolean."
+                    "1:8: error: unknown symbol 'b'." + System.lineSeparator() +
+                            "1:8: error: type mismatch, found <invalid> but expected Boolean." + System.lineSeparator() +
+                            "2:8: error: unknown symbol 'c'." + System.lineSeparator() +
+                            "2:8: error: type mismatch, found <invalid> but expected Boolean."
                 ),
                 Arguments.of(
                     "a relational condition is a boolean, so the loop accepts it",
@@ -149,30 +149,30 @@ class SemanticAnalyzerTests {
                 Arguments.of(
                     "an integer condition is rejected, because a loop wants a boolean and not c's zero test",
                     "while (1) {}",
-                    "1:8: type mismatch, found I32 but expected Boolean."
+                    "1:8: error: type mismatch, found I32 but expected Boolean."
                 ),
                 Arguments.of(
                     "a float condition is rejected too",
                     "while (1.5) {}",
-                    "1:8: type mismatch, found F64 but expected Boolean."
+                    "1:8: error: type mismatch, found F64 but expected Boolean."
                 ),
                 Arguments.of(
                     "a condition that is broken reports its own fault and the loop's requirement (ADR 0003)",
                     "while (1 + true) {}",
-                    "1:8: illegal binary operation 'I32 + Boolean'." + System.lineSeparator() +
-                            "1:8: type mismatch, found <invalid> but expected Boolean."
+                    "1:8: error: illegal binary operation 'I32 + Boolean'." + System.lineSeparator() +
+                            "1:8: error: type mismatch, found <invalid> but expected Boolean."
                 ),
                 Arguments.of(
                     "a non-boolean condition and a broken body statement are both reported",
                     "while (1) { b + 1; }",
-                    "1:8: type mismatch, found I32 but expected Boolean." + System.lineSeparator() +
-                            "1:13: unknown symbol 'b'."
+                    "1:8: error: type mismatch, found I32 but expected Boolean." + System.lineSeparator() +
+                            "1:13: error: unknown symbol 'b'."
                 ),
                 Arguments.of(
                     "every loop with a non-boolean condition is reported",
                     "while (1) {}\nwhile (2) {}",
-                    "1:8: type mismatch, found I32 but expected Boolean." + System.lineSeparator() +
-                            "2:8: type mismatch, found I32 but expected Boolean."
+                    "1:8: error: type mismatch, found I32 but expected Boolean." + System.lineSeparator() +
+                            "2:8: error: type mismatch, found I32 but expected Boolean."
                 ),
                 Arguments.of(
                     "an if decorates its condition and both branches",
@@ -185,17 +185,17 @@ class SemanticAnalyzerTests {
                     "while (true) {\n    continue;\n}\nwhile (true) {\n    break;\n}",
                     ""
                 ),
-                Arguments.of("break outside a loop is rejected", "break;", "1:1: 'break' is not inside a loop."),
-                Arguments.of("continue outside a loop is rejected", "continue;", "1:1: 'continue' is not inside a loop."),
+                Arguments.of("break outside a loop is rejected", "break;", "1:1: error: 'break' is not inside a loop."),
+                Arguments.of("continue outside a loop is rejected", "continue;", "1:1: error: 'continue' is not inside a loop."),
                 Arguments.of(
                     "a block with no loop around it does not make break legal",
                     "{\n    break;\n}",
-                    "2:5: 'break' is not inside a loop."
+                    "2:5: error: 'break' is not inside a loop."
                 ),
                 Arguments.of(
                     "an if with no loop around it does not make continue legal",
                     "if (true) {\n    continue;\n}",
-                    "2:5: 'continue' is not inside a loop."
+                    "2:5: error: 'continue' is not inside a loop."
                 ),
                 Arguments.of(
                     "break inside an if inside a loop acts on the loop",
@@ -215,7 +215,7 @@ class SemanticAnalyzerTests {
                 Arguments.of(
                     "a loop does not make break legal after it ends",
                     "while (true) {}\nbreak;",
-                    "2:1: 'break' is not inside a loop."
+                    "2:1: error: 'break' is not inside a loop."
                 ),
                 Arguments.of(
                     "a loop control statement as the last statement of a body is not a diagnostic",
@@ -225,27 +225,27 @@ class SemanticAnalyzerTests {
                 Arguments.of(
                     "a statement after break is unreachable",
                     "let x = 0;\nwhile (true) {\n    break;\n    x = 1;\n}",
-                    "4:5: unreachable statement after 'break' at 3:5."
+                    "4:5: error: unreachable statement after 'break' at 3:5."
                 ),
                 Arguments.of(
                     "only the first unreachable statement in a block is reported",
                     "let x = 0;\nwhile (true) {\n    continue;\n    x = 1;\n    x = 2;\n}",
-                    "4:5: unreachable statement after 'continue' at 3:5."
+                    "4:5: error: unreachable statement after 'continue' at 3:5."
                 ),
                 Arguments.of(
                     "an error inside an unreachable statement is still reported",
                     "while (true) {\n    break;\n    println b;\n}",
                     """
-                    3:5: unreachable statement after 'break' at 2:5.
-                    3:13: unknown symbol 'b'.
+                    3:5: error: unreachable statement after 'break' at 2:5.
+                    3:13: error: unknown symbol 'b'.
                     """.trimIndent()
                 ),
                 Arguments.of(
                     "a break outside a loop with code after it reports only that it is outside a loop",
                     "let x = 0;\nbreak;\nx = 1;\n{\n    continue;\n    x = 2;\n}",
                     """
-                    2:1: 'break' is not inside a loop.
-                    5:5: 'continue' is not inside a loop.
+                    2:1: error: 'break' is not inside a loop.
+                    5:5: error: 'continue' is not inside a loop.
                     """.trimIndent()
                 ),
                 Arguments.of(
@@ -256,37 +256,37 @@ class SemanticAnalyzerTests {
                 Arguments.of(
                     "an unreachable statement inside a nested block is reported there",
                     "let x = 0;\nwhile (true) {\n    if (true) {\n        break;\n        x = 1;\n    }\n}",
-                    "5:9: unreachable statement after 'break' at 4:9."
+                    "5:9: error: unreachable statement after 'break' at 4:9."
                 ),
                 Arguments.of("a boolean condition is accepted by an if", "let b = true;\nif (b) {}", ""),
                 Arguments.of(
                     "an integer condition is rejected by an if in the same words as by a loop",
                     "if (1) {}",
-                    "1:5: type mismatch, found I32 but expected Boolean."
+                    "1:5: error: type mismatch, found I32 but expected Boolean."
                 ),
                 Arguments.of(
                     "a float condition is rejected by an if too",
                     "if (1.5) {}",
-                    "1:5: type mismatch, found F64 but expected Boolean."
+                    "1:5: error: type mismatch, found F64 but expected Boolean."
                 ),
                 Arguments.of(
                     "a broken if condition reports its own fault and the requirement (ADR 0003)",
                     "if (1 + true) {}",
-                    "1:5: illegal binary operation 'I32 + Boolean'." + System.lineSeparator() +
-                            "1:5: type mismatch, found <invalid> but expected Boolean."
+                    "1:5: error: illegal binary operation 'I32 + Boolean'." + System.lineSeparator() +
+                            "1:5: error: type mismatch, found <invalid> but expected Boolean."
                 ),
                 Arguments.of(
                     "a bad condition and broken statements in both branches are all reported",
                     "if (1) { b + 1; } else { c + 1; }",
-                    "1:5: type mismatch, found I32 but expected Boolean." + System.lineSeparator() +
-                            "1:10: unknown symbol 'b'." + System.lineSeparator() +
-                            "1:26: unknown symbol 'c'."
+                    "1:5: error: type mismatch, found I32 but expected Boolean." + System.lineSeparator() +
+                            "1:10: error: unknown symbol 'b'." + System.lineSeparator() +
+                            "1:26: error: unknown symbol 'c'."
                 ),
                 Arguments.of(
                     "a declaration in a branch does not outlive the if",
                     "if (true) { let b = 1; } else { let c = 2; }\nprintln b;\nprintln c;",
-                    "2:9: unknown symbol 'b'." + System.lineSeparator() +
-                            "3:9: unknown symbol 'c'."
+                    "2:9: error: unknown symbol 'b'." + System.lineSeparator() +
+                            "3:9: error: unknown symbol 'c'."
                 ),
                 Arguments.of(
                     "the two branches may each declare the same name",
@@ -296,7 +296,7 @@ class SemanticAnalyzerTests {
                 Arguments.of(
                     "a branch may not shadow a declaration from around the if",
                     "let a = 1;\nif (true) {} else { let a = 2; }",
-                    "2:21: variable 'a' shadows variable 'a' declared at 1:1."
+                    "2:21: error: variable 'a' shadows variable 'a' declared at 1:1."
                 ),
                 Arguments.of(
                     "an else if chain decorates every link",
@@ -306,9 +306,9 @@ class SemanticAnalyzerTests {
                 Arguments.of(
                     "a bad condition in one link of a chain does not hide one in a later link",
                     "if (1) {} else if (2) {} else { b + 1; }",
-                    "1:5: type mismatch, found I32 but expected Boolean." + System.lineSeparator() +
-                            "1:20: type mismatch, found I32 but expected Boolean." + System.lineSeparator() +
-                            "1:33: unknown symbol 'b'."
+                    "1:5: error: type mismatch, found I32 but expected Boolean." + System.lineSeparator() +
+                            "1:20: error: type mismatch, found I32 but expected Boolean." + System.lineSeparator() +
+                            "1:33: error: unknown symbol 'b'."
                 ),
                 Arguments.of(
                     "ifs and loops nest without diagnostics",
@@ -318,77 +318,77 @@ class SemanticAnalyzerTests {
                 Arguments.of(
                     "a broken expression statement reports once",
                     "b + 1;",
-                    "1:1: unknown symbol 'b'."
+                    "1:1: error: unknown symbol 'b'."
                 ),
-                Arguments.of("unknown symbol", "b = 3;", "1:1: unknown symbol 'b'."),
+                Arguments.of("unknown symbol", "b = 3;", "1:1: error: unknown symbol 'b'."),
                 Arguments.of(
                     "assignment to an immutable variable",
                     "const a = 1;\na = 2;",
-                    "2:1: cannot assign to 'a', it is not mutable. Declare it with 'let'."
+                    "2:1: error: cannot assign to 'a', it is not mutable. Declare it with 'let'."
                 ),
                 Arguments.of(
                     "declared type does not accept the value",
                     "let c: F32 = 1;",
-                    "1:1: type mismatch, found I32 but expected F32."
+                    "1:1: error: type mismatch, found I32 but expected F32."
                 ),
                 Arguments.of(
                     "unknown declared type",
                     "let a: Foo = 1;",
-                    "1:8: unknown type 'Foo'."
+                    "1:8: error: unknown type 'Foo'."
                 ),
                 Arguments.of(
                     "redeclaration points at the first declaration",
                     "let a = 1;\nlet a = 9;",
-                    "2:1: variable 'a' is already declared at 1:1."
+                    "2:1: error: variable 'a' is already declared at 1:1."
                 ),
                 Arguments.of(
                     "boolean operand of an arithmetic operator",
                     "let a = true + 1;",
-                    "1:9: illegal binary operation 'Boolean + I32'."
+                    "1:9: error: illegal binary operation 'Boolean + I32'."
                 ),
                 Arguments.of(
                     "negating a boolean",
                     "let a = -true;",
-                    "1:10: operator '-' cannot be applied to Boolean, expected " +
+                    "1:10: error: operator '-' cannot be applied to Boolean, expected " +
                             "I64 or I32 or I16 or I8 or F64 or F32."
                 ),
                 Arguments.of(
                     "one unknown symbol yields one diagnostic, not a cascade",
                     "let a = unknown + 1;",
-                    "1:9: unknown symbol 'unknown'."
+                    "1:9: error: unknown symbol 'unknown'."
                 ),
                 Arguments.of(
                     "a poisoned declaration does not make later uses fail again",
                     "let a: Foo = 1;\na = 2;",
-                    "1:8: unknown type 'Foo'."
+                    "1:8: error: unknown type 'Foo'."
                 ),
                 Arguments.of(
                     "both operands are reported",
                     "let a = left + right;",
                     """
-                    1:9: unknown symbol 'left'.
-                    1:16: unknown symbol 'right'.
+                    1:9: error: unknown symbol 'left'.
+                    1:16: error: unknown symbol 'right'.
                     """.trimIndent()
                 ),
                 Arguments.of(
                     "signed and unsigned operands cannot be mixed",
                     "let a = I32(1) + U32(1);",
-                    "1:9: cannot mix signed and unsigned operands in 'I32 + U32'."
+                    "1:9: error: cannot mix signed and unsigned operands in 'I32 + U32'."
                 ),
                 Arguments.of(
                     "the operand order does not change the diagnostic",
                     "let a = U32(1) + I32(1);",
-                    "1:9: cannot mix signed and unsigned operands in 'U32 + I32'."
+                    "1:9: error: cannot mix signed and unsigned operands in 'U32 + I32'."
                 ),
                 Arguments.of(
                     "a relational operator cannot mix signedness either",
                     "let a = I32(-1) < U32(1);",
-                    "1:9: cannot mix signed and unsigned operands in 'I32 < U32'."
+                    "1:9: error: cannot mix signed and unsigned operands in 'I32 < U32'."
                 ),
                 Arguments.of(
                     "nor can an equality operator",
                     "let a = I32(-1) == U32(1);",
-                    "1:9: cannot mix signed and unsigned operands in 'I32 == U32'."
+                    "1:9: error: cannot mix signed and unsigned operands in 'I32 == U32'."
                 ),
                 Arguments.of(
                     "comparing two operands of one signedness still resolves",
@@ -403,7 +403,7 @@ class SemanticAnalyzerTests {
                 Arguments.of(
                     "a boolean declaration still rejects a number",
                     "let a: Boolean = 1;",
-                    "1:1: type mismatch, found I32 but expected Boolean."
+                    "1:1: error: type mismatch, found I32 but expected Boolean."
                 ),
                 Arguments.of(
                     "a conjunction of booleans is a boolean",
@@ -413,7 +413,7 @@ class SemanticAnalyzerTests {
                 Arguments.of(
                     "a logical operator rejects a number",
                     "let a = true || 1;",
-                    "1:9: illegal binary operation 'Boolean || I32'."
+                    "1:9: error: illegal binary operation 'Boolean || I32'."
                 ),
                 Arguments.of(
                     "a disjunction of booleans is a boolean",
@@ -433,22 +433,22 @@ class SemanticAnalyzerTests {
                 Arguments.of(
                     "a logical operator rejects two numbers",
                     "let a = 1 && 2;",
-                    "1:9: illegal binary operation 'I32 && I32'."
+                    "1:9: error: illegal binary operation 'I32 && I32'."
                 ),
                 Arguments.of(
                     "a boolean cannot be compared to a number",
                     "let a = true == 1;",
-                    "1:9: illegal binary operation 'Boolean == I32'."
+                    "1:9: error: illegal binary operation 'Boolean == I32'."
                 ),
                 Arguments.of(
                     "booleans have no ordering",
                     "let a = true < false;",
-                    "1:9: illegal binary operation 'Boolean < Boolean'."
+                    "1:9: error: illegal binary operation 'Boolean < Boolean'."
                 ),
                 Arguments.of(
                     "a broken operand of a logical operator is reported once",
                     "let a = unknown && true;",
-                    "1:9: unknown symbol 'unknown'."
+                    "1:9: error: unknown symbol 'unknown'."
                 ),
                 Arguments.of(
                     "a logical operator can be a loop condition",
@@ -463,17 +463,17 @@ class SemanticAnalyzerTests {
                 Arguments.of(
                     "a float has no remainder operator",
                     "let a = F64(1.0) % F64(2.0);",
-                    "1:9: illegal binary operation 'F64 % F64'."
+                    "1:9: error: illegal binary operation 'F64 % F64'."
                 ),
                 Arguments.of(
                     "the narrower float has no remainder operator either",
                     "let a = F32(1.0) % F32(2.0);",
-                    "1:9: illegal binary operation 'F32 % F32'."
+                    "1:9: error: illegal binary operation 'F32 % F32'."
                 ),
                 Arguments.of(
                     "one float operand is enough to rule out a remainder",
                     "let a = I32(1) % F64(2.0);",
-                    "1:9: illegal binary operation 'I32 % F64'."
+                    "1:9: error: illegal binary operation 'I32 % F64'."
                 ),
                 Arguments.of(
                     "integer remainder still resolves",
@@ -493,39 +493,39 @@ class SemanticAnalyzerTests {
                 Arguments.of(
                     "a compound assignment narrows no more than the plain assignment",
                     "let a = I8(1);\na += 1;",
-                    "2:1: type mismatch, found I32 but expected I8."
+                    "2:1: error: type mismatch, found I32 but expected I8."
                 ),
                 Arguments.of(
                     "a boolean is not accumulated into, and the message names the compound operator",
                     "let b = true;\nb += 1;",
-                    "2:1: illegal compound assignment 'Boolean += I32'."
+                    "2:1: error: illegal compound assignment 'Boolean += I32'."
                 ),
                 Arguments.of(
                     "a float has no remainder to accumulate",
                     "let f = 1.5;\nf %= 2.0;",
-                    "2:1: illegal compound assignment 'F64 %= F64'."
+                    "2:1: error: illegal compound assignment 'F64 %= F64'."
                 ),
                 Arguments.of(
                     "a compound assignment mixing signedness names the compound operator",
                     "let u = U32(1);\nu += I32(1);",
-                    "2:1: cannot mix signed and unsigned operands in 'U32 += I32'."
+                    "2:1: error: cannot mix signed and unsigned operands in 'U32 += I32'."
                 ),
                 Arguments.of(
                     "compound assignment to an immutable variable",
                     "const a = 1;\na += 2;",
-                    "2:1: cannot assign to 'a', it is not mutable. Declare it with 'let'."
+                    "2:1: error: cannot assign to 'a', it is not mutable. Declare it with 'let'."
                 ),
-                Arguments.of("compound assignment to an unknown symbol reports once", "b += 1;", "1:1: unknown symbol 'b'."),
+                Arguments.of("compound assignment to an unknown symbol reports once", "b += 1;", "1:1: error: unknown symbol 'b'."),
                 Arguments.of(
                     "both sides of a compound assignment are reported",
                     "b += c;",
-                    "1:1: unknown symbol 'b'." + System.lineSeparator() +
-                            "1:6: unknown symbol 'c'."
+                    "1:1: error: unknown symbol 'b'." + System.lineSeparator() +
+                            "1:6: error: unknown symbol 'c'."
                 ),
                 Arguments.of(
                     "a poisoned right side of a compound assignment reports once",
                     "let a = 1;\na += true + 1;",
-                    "2:6: illegal binary operation 'Boolean + I32'."
+                    "2:6: error: illegal binary operation 'Boolean + I32'."
                 ),
                 Arguments.of(
                     "a boolean folds checks in with the logical compound assignments",
@@ -535,7 +535,7 @@ class SemanticAnalyzerTests {
                 Arguments.of(
                     "a number has no logical compound assignment",
                     "let n = 1;\nn &&= true;",
-                    "2:1: illegal compound assignment 'I32 &&= Boolean'."
+                    "2:1: error: illegal compound assignment 'I32 &&= Boolean'."
                 ),
                 Arguments.of(
                     "every numeric type steps by one, a narrow one included",
@@ -545,23 +545,23 @@ class SemanticAnalyzerTests {
                 Arguments.of(
                     "a boolean has no increment",
                     "let b = true;\nb++;",
-                    "2:1: illegal increment 'Boolean++'."
+                    "2:1: error: illegal increment 'Boolean++'."
                 ),
                 Arguments.of(
                     "a boolean has no decrement",
                     "let b = true;\nb--;",
-                    "2:1: illegal decrement 'Boolean--'."
+                    "2:1: error: illegal decrement 'Boolean--'."
                 ),
                 Arguments.of(
                     "incrementing an immutable variable",
                     "const a = 1;\na++;",
-                    "2:1: cannot assign to 'a', it is not mutable. Declare it with 'let'."
+                    "2:1: error: cannot assign to 'a', it is not mutable. Declare it with 'let'."
                 ),
-                Arguments.of("incrementing an unknown symbol reports once", "b++;", "1:1: unknown symbol 'b'."),
+                Arguments.of("incrementing an unknown symbol reports once", "b++;", "1:1: error: unknown symbol 'b'."),
                 Arguments.of(
                     "incrementing a poisoned variable reports nothing more",
                     "let a: Foo = 1;\na++;",
-                    "1:8: unknown type 'Foo'."
+                    "1:8: error: unknown type 'Foo'."
                 ),
                 Arguments.of(
                     "compound assignments accumulate inside a loop body",
@@ -572,10 +572,10 @@ class SemanticAnalyzerTests {
                     "every statement is analysed, and diagnostics come out in source order",
                     "const a = 1;\na = 2;\nb = 3;\nlet c: F32 = 1;\nlet a = 9;",
                     """
-                    2:1: cannot assign to 'a', it is not mutable. Declare it with 'let'.
-                    3:1: unknown symbol 'b'.
-                    4:1: type mismatch, found I32 but expected F32.
-                    5:1: variable 'a' is already declared at 1:1.
+                    2:1: error: cannot assign to 'a', it is not mutable. Declare it with 'let'.
+                    3:1: error: unknown symbol 'b'.
+                    4:1: error: type mismatch, found I32 but expected F32.
+                    5:1: error: variable 'a' is already declared at 1:1.
                     """.trimIndent()
                 )
             )

@@ -2,6 +2,7 @@ package me.eriknikli.rhenium.ast.diagnostics
 
 import me.eriknikli.rhenium.ast.tree.expressions.literals.LiteralType
 import me.eriknikli.rhenium.common.diagnostics.ContextDiagnostic
+import me.eriknikli.rhenium.common.diagnostics.Severity
 import org.antlr.v4.runtime.ParserRuleContext
 
 data class UnknownPrimitiveType(
@@ -9,6 +10,7 @@ data class UnknownPrimitiveType(
     val actual: String,
     val expectedTypes: List<LiteralType>
 ) : ContextDiagnostic {
+    override val severity: Severity = Severity.ERROR
     override val message: String =
         "unknown primitive type '$actual', expected one of: ${expectedTypes.joinToString(", ")}."
 }

@@ -9,12 +9,12 @@ behaviour changes.
 
 **Blocked by:** None (can start immediately)
 
-**Status:** ready-for-agent
+**Status:** resolved
 
-- [ ] A two-value severity — error, warning — exists, and the diagnostic interface has an abstract
+- [x] A two-value severity — error, warning — exists, and the diagnostic interface has an abstract
       severity property
-- [ ] Every existing diagnostic kind declares error as a property of its class, never a constructor
+- [x] Every existing diagnostic kind declares error as a property of its class, never a constructor
       argument
-- [ ] Rendering prints `line:column: severity: message` in lower case, still ordered by position
-- [ ] Every expected diagnostic string in the AST, analyzer and lowering seams gains `error:`
-- [ ] The build is green and no other behaviour changed
+- [x] Rendering prints `line:column: severity: message` in lower case, still ordered by position
+- [x] Every expected diagnostic string in the AST, analyzer and lowering seams gains `error:`
+- [x] The build is green and no other behaviour changed
