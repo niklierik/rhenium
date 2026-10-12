@@ -10,14 +10,14 @@ yet, so observable behaviour is unchanged.
 
 **Blocked by:** 01
 
-**Status:** ready-for-agent
+**Status:** resolved
 
-- [ ] A partition helper next to the renderer answers whether a list of diagnostics contains an error
-- [ ] Compiling returns every diagnostic produced: a parse failure's; a decorate failure's, warnings
+- [x] A partition helper next to the renderer answers whether a list of diagnostics contains an error
+- [x] Compiling returns every diagnostic produced: a parse failure's; a decorate failure's, warnings
       included, when it contains an error, with nothing written next to the source; otherwise the
       decorate stage's warnings, after the program is built
-- [ ] The binary's path lives on the compiler options, shared by compiling and the entry point
-- [ ] The entry point prints every diagnostic to standard error, exits non-zero on any error, and
+- [x] The binary's path lives on the compiler options, shared by compiling and the entry point
+- [x] The entry point prints every diagnostic to standard error, exits non-zero on any error, and
       otherwise runs the binary
-- [ ] Checked by hand: a program with an error exits non-zero without running; a clean program runs
-- [ ] The build is green
+- [x] Checked by hand: a program with an error exits non-zero without running; a clean program runs
+- [x] The build is green

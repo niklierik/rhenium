@@ -1,3 +1,8 @@
 package me.eriknikli.rhenium.app
 
-data class CompilerOptions(val inputPath: String)
+import java.io.File
+
+data class CompilerOptions(val inputPath: String) {
+    val binaryPath: String
+        get() = File("$inputPath.o").absolutePath
+}

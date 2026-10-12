@@ -1,21 +1,21 @@
 package me.eriknikli.rhenium.app
 
-import arrow.core.raise.either
+import arrow.core.getOrElse
 import me.eriknikli.rhenium.ast.IAstBuilder
-import me.eriknikli.rhenium.common.diagnostics.Diagnosed
+import me.eriknikli.rhenium.common.diagnostics.Diagnostic
+import me.eriknikli.rhenium.common.diagnostics.hasErrors
 import me.eriknikli.rhenium.common.runCommand
 import me.eriknikli.rhenium.lowering.ILowerer
 import me.eriknikli.rhenium.semanticAnalyzer.ISemanticAnalyzer
 import me.eriknikli.rhenium.transpiler.ITranspiler
 import org.antlr.v4.runtime.CharStreams
-import java.io.File
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.io.path.Path
 import kotlin.io.path.outputStream
 
 interface IRheniumCompiler {
-    fun compile(options: CompilerOptions): Diagnosed<Unit>
+    fun compile(options: CompilerOptions): List<Diagnostic>
 }
 
 @Singleton
@@ -27,11 +27,14 @@ constructor(
     private val lowerer: ILowerer,
     private val transpiler: ITranspiler
 ) : IRheniumCompiler {
-    override fun compile(options: CompilerOptions): Diagnosed<Unit> = either {
+    override fun compile(options: CompilerOptions): List<Diagnostic> {
         val stream = CharStreams.fromFileName(options.inputPath)
 
-        val ast = astBuilder.parse(stream).bind()
-        semanticAnalyzer.decorateSemanticContext(ast).bind()
+        val ast = astBuilder.parse(stream).getOrElse { return it }
+        val diagnostics = semanticAnalyzer.decorateSemanticContext(ast).fold({ it }, { emptyList() })
+        if (diagnostics.hasErrors()) {
+            return diagnostics
+        }
 
         val actions = lowerer.lower(ast)
 
@@ -40,9 +43,8 @@ constructor(
             transpiler.transpile(actions, it)
         }
 
-        val binaryPath = File("${options.inputPath}.o").absolutePath
+        "clang ${options.inputPath}.c -o ${options.binaryPath} -lm -Wno-parentheses-equality".runCommand()
 
-        "clang ${options.inputPath}.c -o $binaryPath -lm -Wno-parentheses-equality".runCommand()
-        binaryPath.runCommand()
+        return diagnostics
     }
 }

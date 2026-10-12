@@ -1,6 +1,8 @@
 package me.eriknikli.rhenium.app
 
+import me.eriknikli.rhenium.common.diagnostics.hasErrors
 import me.eriknikli.rhenium.common.diagnostics.render
+import me.eriknikli.rhenium.common.runCommand
 import java.io.File
 import kotlin.system.exitProcess
 
@@ -18,8 +20,15 @@ fun main(args: Array<String>) {
     val factory = DaggerRheniumCompilerFactory.create()
     val compiler = factory.makeCompiler()
 
-    compiler.compile(CompilerOptions(path)).onLeft { diagnostics ->
+    val options = CompilerOptions(path)
+    val diagnostics = compiler.compile(options)
+
+    if (diagnostics.isNotEmpty()) {
         System.err.println(diagnostics.render())
+    }
+    if (diagnostics.hasErrors()) {
         exitProcess(1)
     }
+
+    options.binaryPath.runCommand()
 }
