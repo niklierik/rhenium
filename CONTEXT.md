@@ -65,10 +65,24 @@ _Avoid_: Generator, codegen, backend, compiler
 ### Errors
 
 **Diagnostic**:
-A message about something the user got wrong, carrying a line, a column and text. Diagnostics are
+A message about the user's program, carrying a line, a column, text and a severity. Diagnostics are
 values that are returned and accumulated, never thrown; a thrown exception is a compiler bug rather
 than bad input.
-_Avoid_: Error, warning, exception, failure
+_Avoid_: Exception, failure, message
+
+**Severity**:
+Whether a diagnostic is an error or a warning. Severity belongs to the kind of diagnostic, not to one
+occurrence of it.
+_Avoid_: Level, priority
+
+**Error**:
+A diagnostic that stops the program being compiled.
+_Avoid_: Failure, fatal diagnostic
+
+**Warning**:
+A diagnostic about a program that still compiles: legal, but probably not what the user meant. A
+warning never means "illegal but tolerated".
+_Avoid_: Lint, hint, notice
 
 **Poison type**:
 `InvalidType` — the type a failed expression takes. It absorbs every operation and assignment so that
