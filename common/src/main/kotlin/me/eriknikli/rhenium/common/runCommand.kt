@@ -9,6 +9,8 @@ fun String.runCommand(workingDir: File = File(".")): Int {
         .redirectOutput(ProcessBuilder.Redirect.INHERIT)
         .redirectError(ProcessBuilder.Redirect.INHERIT)
         .start()
-    process.waitFor(60, TimeUnit.MINUTES)
-    return process.exitValue()
+    if (!process.waitFor(60, TimeUnit.MINUTES)) {
+        process.destroyForcibly()
+    }
+    return process.waitFor()
 }

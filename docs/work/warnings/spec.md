@@ -139,9 +139,10 @@ block at the first dead statement, the dead statements are still decorated, and 
 statement outside a loop still suppresses it. Only its severity changes. The dead statements are
 lowered and emitted after the loop control statement, which C accepts.
 
-**Documents.** The glossary already defines diagnostic, severity, error and warning. On completion the
-roadmap's known-gaps entry for warnings is replaced by a line in "what the compiler implements today",
-and the break-continue spec's note that the unreachable error is temporary points here as done.
+**Documents.** The glossary defines diagnostic, severity, error and warning. On completion the roadmap
+gains a line in "what the compiler implements today", its known-gaps entry for warnings is narrowed to
+warnings that need a value path, and the break-continue spec's note that the unreachable error is
+temporary points here as done.
 
 ## Testing Decisions
 
