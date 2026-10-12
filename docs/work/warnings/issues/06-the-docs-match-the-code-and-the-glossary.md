@@ -9,11 +9,11 @@ roadmap's known-gaps bullet about warnings on a value is kept and the spec recor
 
 **Blocked by:** 04, 05
 
-**Status:** ready-for-agent
+**Status:** resolved
 
-- [ ] The contributor guide no longer says a left means there is no value, nor that only one function
+- [x] The contributor guide no longer says a left means there is no value, nor that only one function
       asks whether a diagnostic is an error, and describes what compiling hands back
-- [ ] The warnings spec and tickets no longer use "fatal", "level" or "failure" for diagnostics;
+- [x] The warnings spec and tickets no longer use "fatal", "level" or "failure" for diagnostics;
       ticket 02's file is renamed to match
-- [ ] The spec records the roadmap's known-gaps bullet as intended
-- [ ] The build is green
+- [x] The spec records the roadmap's known-gaps bullet as intended
+- [x] The build is green

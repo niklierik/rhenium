@@ -72,8 +72,8 @@ now reports `3:5: warning: unreachable statement after 'break' at 2:5.` and the 
     occurrence, so that the same mistake is always reported the same way.
 13. As a compiler contributor, I want `Diagnosed` and every walker's accumulation left as they are, so
     that adding warnings touches no decorator's signature.
-14. As a compiler contributor, I want the decision "is any of this fatal" made once, after every
-    diagnostic is collected, so that no walker has to know about severity.
+14. As a compiler contributor, I want the decision "does any of this stop the build" made once, after
+    every diagnostic is collected, so that no walker has to know about severity.
 15. As a compiler contributor, I want a written rule for where a warning may be raised, so that a
     future warning cannot poison a value it was only meant to comment on.
 16. As a compiler contributor, I want a program with only warnings to be lowered from its fully
@@ -91,7 +91,7 @@ now reports `3:5: warning: unreachable statement after 'break' at 2:5.` and the 
 
 ## Implementation Decisions
 
-**A severity is a level on the diagnostic, nothing more.** A two-value severity — error, warning —
+**A severity is a property of the diagnostic, nothing more.** A two-value severity — error, warning —
 and a severity property on the diagnostic interface. The property is **abstract**: every diagnostic
 kind declares its own, so a new diagnostic does not compile until its author chooses. It is fixed per
 kind — a property of the class, never a constructor argument. The unreachable statement is a warning;
@@ -105,7 +105,7 @@ of this spec assumed a reshape to carry warnings beside a value; grilling found 
 
 **A warning is raised only from a `Unit`-valued check that runs as its own sibling branch** — a branch
 of `zipOrAccumulate` or an element of `mapOrAccumulate` — never on a path that produces a value or
-guards a later check. A left on a value path still behaves as failure locally: a declaration would be
+guards a later check. A left on a value path still behaves as an error locally: a declaration would be
 poisoned and the checks after it skipped, so a warning there would poison real code and could hide an
 error. The unreachable check already has this shape. The rule is written into the "errors are values"
 conventions in the contributor guide. A future warning that genuinely needs a value path reopens this
@@ -118,20 +118,21 @@ decision; Arrow's `Ior` is the known alternative.
 `line:column: warning: message` — in lower case, ordering all diagnostics by position as today.
 
 **Partition helper.** A function next to the renderer answers whether a list of diagnostics contains
-an error. It is the only place that decides what is fatal.
+an error. It is the one definition of which diagnostics stop the build.
 
-**The compiler stops before running the program.** Compiling now returns every diagnostic produced:
+**The compiler stops before running the program.** Compiling hands back every diagnostic produced,
+together with the built program or with none:
 
-- a parse failure returns its diagnostics, all errors;
-- a decorate left that contains an error returns all its diagnostics, warnings included, and nothing is
-  written next to the source;
-- otherwise the program is lowered, transpiled and built with clang, and the warnings — if any — are
-  returned.
+- diagnostics from parsing, all errors, come back with no program;
+- a decorate left that contains an error comes back whole, warnings included, with no program, and
+  nothing is written next to the source;
+- otherwise the program is lowered, transpiled and built with clang, and the warnings — if any — come
+  back with the program, unless clang exits non-zero, which leaves no program.
 
-Running the binary moves out of compiling and into the entry point. The binary's path moves onto the
-compiler options so the two agree on it. The entry point prints every diagnostic to standard error,
-exits non-zero if any is an error, and otherwise runs the binary — so warnings always precede the
-program's output.
+Running the binary moves out of compiling and into the entry point. Both output paths — the C file and
+the binary — live on the compiler options. The entry point prints every diagnostic to standard error,
+exits non-zero when there is no program, and otherwise runs it — so warnings always precede the
+program's output. It never inspects a severity itself.
 
 **The unreachable statement keeps its message, position and suppression.** It is reported once per
 block at the first dead statement, the dead statements are still decorated, and a loop control
@@ -171,7 +172,8 @@ warning, checked to print both and exit non-zero. Not committed — there is sti
 - Unused-variable, unused-value and constant-condition warnings.
 - Treating warnings as errors, and silencing a warning by kind or by location.
 - Warnings from the parse stage, and from lowering.
-- Reshaping `Diagnosed` to `Ior` or any carrier that keeps a value beside a warning.
+- Reshaping `Diagnosed` to `Ior` or any carrier that keeps a value beside a warning. The roadmap keeps
+  this as a known gap on purpose, so the first warning that needs a value path finds it.
 - Propagating the program's own exit code.
 
 ## Further Notes

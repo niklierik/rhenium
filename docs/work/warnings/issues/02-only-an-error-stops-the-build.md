@@ -1,4 +1,4 @@
-# 02: The compiler decides what is fatal, the entry point runs the program
+# 02: Only an error stops the build, the entry point runs the program
 
 **Spec:** [../spec.md](../spec.md)
 
@@ -13,7 +13,7 @@ yet, so observable behaviour is unchanged.
 **Status:** resolved
 
 - [x] A partition helper next to the renderer answers whether a list of diagnostics contains an error
-- [x] Compiling returns every diagnostic produced: a parse failure's; a decorate failure's, warnings
+- [x] Compiling returns every diagnostic produced: those from parsing; those from decorating, warnings
       included, when it contains an error, with nothing written next to the source; otherwise the
       decorate stage's warnings, after the program is built
 - [x] The binary's path lives on the compiler options, shared by compiling and the entry point
