@@ -2,7 +2,6 @@ package me.eriknikli.rhenium.app
 
 import arrow.core.getOrElse
 import me.eriknikli.rhenium.ast.IAstBuilder
-import me.eriknikli.rhenium.common.diagnostics.Diagnostic
 import me.eriknikli.rhenium.common.diagnostics.hasErrors
 import me.eriknikli.rhenium.common.runCommand
 import me.eriknikli.rhenium.lowering.ILowerer
@@ -15,7 +14,7 @@ import kotlin.io.path.Path
 import kotlin.io.path.outputStream
 
 interface IRheniumCompiler {
-    fun compile(options: CompilerOptions): List<Diagnostic>
+    fun compile(options: CompilerOptions): Compilation
 }
 
 @Singleton
@@ -27,24 +26,24 @@ constructor(
     private val lowerer: ILowerer,
     private val transpiler: ITranspiler
 ) : IRheniumCompiler {
-    override fun compile(options: CompilerOptions): List<Diagnostic> {
+    override fun compile(options: CompilerOptions): Compilation {
         val stream = CharStreams.fromFileName(options.inputPath)
 
-        val ast = astBuilder.parse(stream).getOrElse { return it }
-        val diagnostics = semanticAnalyzer.decorateSemanticContext(ast).fold({ it }, { emptyList() })
+        val ast = astBuilder.parse(stream).getOrElse { return Compilation(it, null) }
+        val diagnostics = semanticAnalyzer.decorateSemanticContext(ast).leftOrNull() ?: emptyList()
         if (diagnostics.hasErrors()) {
-            return diagnostics
+            return Compilation(diagnostics, null)
         }
 
         val actions = lowerer.lower(ast)
 
-        val output = Path("${options.inputPath}.c").outputStream()
+        val output = Path(options.cPath).outputStream()
         output.use {
             transpiler.transpile(actions, it)
         }
 
-        "clang ${options.inputPath}.c -o ${options.binaryPath} -lm -Wno-parentheses-equality".runCommand()
+        "clang ${options.cPath} -o ${options.binaryPath} -lm -Wno-parentheses-equality".runCommand()
 
-        return diagnostics
+        return Compilation(diagnostics, options.binaryPath)
     }
 }
