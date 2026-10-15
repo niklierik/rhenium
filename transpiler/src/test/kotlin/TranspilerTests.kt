@@ -246,6 +246,16 @@ class TranspilerTests {
                     "for(int32_t re_i_1=0;(re_i_1<3);re_i_1=(re_i_1+1)){continue;}"
                 ),
                 Arguments.of(
+                    "an expression statement init clause brings its own semicolon, and an expression iteration none",
+                    ForAction(
+                        ExpressionStatementAction(AssignmentAction(VarRefAction("re_i_1"), ConstantAction("0"))),
+                        BinaryAction("<", VarRefAction("re_i_1"), ConstantAction("3")),
+                        VarRefAction("re_i_1"),
+                        BlockAction(Block(mutableListOf()))
+                    ),
+                    "for(re_i_1=0;(re_i_1<3);re_i_1){}"
+                ),
+                Arguments.of(
                     "a function writes its return type before its name",
                     FunctionAction("main", "int32_t", Block(mutableListOf(ReturnAction(ConstantAction("0"))))),
                     "int32_t main(){return 0;}"

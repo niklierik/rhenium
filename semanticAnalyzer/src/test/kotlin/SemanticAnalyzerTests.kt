@@ -253,6 +253,27 @@ class SemanticAnalyzerTests {
                     """.trimIndent()
                 ),
                 Arguments.of(
+                    "an init clause may assign a variable declared before the loop, which outlives it",
+                    "let i = 0;\nfor (i = 5; i < 3; i++) {}\nprintln i;",
+                    ""
+                ),
+                Arguments.of(
+                    "an init clause may be a compound assignment and an iteration expression an expression",
+                    "let i = 0;\nfor (i += 1; i < 3; i) {}",
+                    ""
+                ),
+                Arguments.of(
+                    "expressions in the init clause and iteration expression are decorated",
+                    "for (j; true; k) {}",
+                    "1:6: error: unknown symbol 'j'." + System.lineSeparator() +
+                            "1:15: error: unknown symbol 'k'."
+                ),
+                Arguments.of(
+                    "an init clause may not assign a constant",
+                    "const i = 0;\nfor (i = 1; i < 3; i) {}",
+                    "2:6: error: cannot assign to 'i', it is not mutable. Declare it with 'let'."
+                ),
+                Arguments.of(
                     "an if decorates its condition and both branches",
                     "let a = 1;\nif (a < 3) {\n    println a;\n} else {\n    println 0;\n}",
                     ""

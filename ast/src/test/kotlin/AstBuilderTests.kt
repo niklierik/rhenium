@@ -216,6 +216,22 @@ class AstBuilderTests {
                             "(block (for (let j (i32 0)) (< j (i32 3)) (+= j (i32 2)) (block)))))"
                 ),
                 Arguments.of(
+                    "an init clause may be an assignment",
+                    "for (i = 0; i < 3; i++) {}",
+                    "(root (for (= i (i32 0)) (< i (i32 3)) (++ i) (block)))"
+                ),
+                Arguments.of(
+                    "an init clause may be a compound assignment, and an iteration expression an expression",
+                    "for (i += 1; i < 3; i) {}",
+                    "(root (for (+= i (i32 1)) (< i (i32 3)) (expr i) (block)))"
+                ),
+                Arguments.of(
+                    "an init clause may be a decrement statement or an expression",
+                    "for (i--; true; i + 1) { for (1; true; i++) {} }",
+                    "(root (for (-- i) (boolean true) (expr (+ i (i32 1))) " +
+                            "(block (for (expr (i32 1)) (boolean true) (++ i) (block)))))"
+                ),
+                Arguments.of(
                     "ifs and while loops nest",
                     "if (true) { while (false) { if (false) {} } }",
                     "(root (if (boolean true) (block (while (boolean false) (block (if (boolean false) (block)))))))"
@@ -253,7 +269,12 @@ class AstBuilderTests {
                 Arguments.of("a for statement has no empty init clause", "for (; true; i++) {}", 6),
                 Arguments.of("a for statement has no empty condition", "for (let i = 0; ; i++) {}", 17),
                 Arguments.of("a for statement has no empty iteration expression", "for (let i = 0; true; ) {}", 23),
-                Arguments.of("a for body is braced", "for (let i = 0; true; i++) i++;", 28)
+                Arguments.of("a for body is braced", "for (let i = 0; true; i++) i++;", 28),
+                Arguments.of("an iteration expression is not a declaration", "for (let i = 0; true; let j = 1) {}", 23),
+                Arguments.of("an init clause is not a block", "for ({} true; i++) {}", 6),
+                Arguments.of("an init clause is not a print", "for (print 1; true; i++) {}", 6),
+                Arguments.of("an init clause is not a loop", "for (while (true) {} true; i++) {}", 6),
+                Arguments.of("an iteration expression is not a loop control statement", "for (i = 0; true; break) {}", 19)
             )
         }
 

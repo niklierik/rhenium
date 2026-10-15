@@ -301,6 +301,25 @@ class LoweringTests {
                             "(block (if (== re_a (cast int32_t 1)) (block (continue))) (break)))"
                 ),
                 Arguments.of(
+                    "an assignment init clause lowers to an expression statement, and an expression iteration bare",
+                    "let a = 0;\nfor (a = 1; a < 3; a) {}",
+                    "(decl int32_t re_a (cast int32_t 0)) " +
+                            "(for (expr (= re_a (cast int32_t 1))) (< re_a (cast int32_t 3)) re_a (block))"
+                ),
+                Arguments.of(
+                    "an expression init clause lowers to an expression statement",
+                    "let a = 0;\nfor (a; a < 3; a + 1) {}",
+                    "(decl int32_t re_a (cast int32_t 0)) " +
+                            "(for (expr re_a) (< re_a (cast int32_t 3)) " +
+                            "(cast int32_t (+ (cast uint32_t re_a) (cast uint32_t (cast int32_t 1)))) (block))"
+                ),
+                Arguments.of(
+                    "an increment init clause lowers to an expression statement around its assignment",
+                    "let a = 0;\nfor (a++; a < 3; a += 1) {}",
+                    "(decl int32_t re_a (cast int32_t 0)) " +
+                            "(for (expr (= re_a (cast int32_t (+ (cast uint32_t re_a) (cast uint32_t (cast int32_t 1)))))) (< re_a (cast int32_t 3)) (= re_a (cast int32_t (+ (cast uint32_t re_a) (cast uint32_t (cast int32_t 1))))) (block))"
+                ),
+                Arguments.of(
                     "loops nest inside a for body as the source does",
                     "for (let a = 0; a < 3; a++) { while (false) {} }",
                     "(for (decl int32_t re_a (cast int32_t 0)) (< re_a (cast int32_t 3)) " +

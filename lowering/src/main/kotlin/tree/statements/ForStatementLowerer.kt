@@ -1,6 +1,7 @@
 package me.eriknikli.rhenium.lowering.tree.statements
 
 import dagger.Lazy
+import me.eriknikli.rhenium.ast.tree.statements.ExpressionStatement
 import me.eriknikli.rhenium.ast.tree.statements.ForStatement
 import me.eriknikli.rhenium.ast.tree.statements.Statement
 import me.eriknikli.rhenium.ast.tree.statements.vars.CompoundAssignmentStatement
@@ -55,6 +56,7 @@ constructor() : IForStatementLowerer {
         is VarAssignmentStatement -> varAssignmentLowerer.lower(node)
         is CompoundAssignmentStatement -> compoundAssignmentLowerer.lower(node)
         is IncrementStatement -> incrementLowerer.lower(node)
+        is ExpressionStatement -> expressionLowerer.lower(node.expression)
         else -> throw IllegalStateException(
             "Unhandled node ${node.javaClass} and cannot lower it as an iteration expression."
         )

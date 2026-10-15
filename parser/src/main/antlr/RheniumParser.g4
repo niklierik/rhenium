@@ -28,15 +28,23 @@ whileStatement:
     WHILE OPEN_BRACKET condition=expression CLOSE_BRACKET body=block;
 
 forStatement:
-    FOR OPEN_BRACKET initClause=varDeclarationStatement
+    FOR OPEN_BRACKET initClause
     condition=expression SEMICOLON
     iterationExpression
     CLOSE_BRACKET body=block;
 
+initClause:
+    varDeclarationStatement
+    | varAssignmentStatement
+    | compoundAssignmentStatement
+    | incrementStatement
+    | expressionStatement;
+
 iterationExpression:
     varAssignment
     | compoundAssignment
-    | increment;
+    | increment
+    | expression;
 
 breakStatement:
     BREAK SEMICOLON;

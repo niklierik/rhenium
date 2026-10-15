@@ -18,7 +18,7 @@ From `plan.md` on the `plans` branch. MSc thesis project, defense planned for sp
 Literals, unary and binary arithmetic, relational and equality operators, grouping,
 `let` / `const` declarations with an optional declared type, assignment, compound assignment with
 `+=`, `-=`, `*=`, `/=`, `%=`, `&&=` and `||=`, `x++` and `x--`, expression statements,
-braced blocks with a scope of their own, `while` loops, `break` and `continue`, `if` / `else if` / `else`, the type rules over those, and a transpiler
+braced blocks with a scope of their own, `while` loops, `for` statements, `break` and `continue`, `if` / `else if` / `else`, the type rules over those, and a transpiler
 that emits every statement into a single C `main()`.
 
 A block is a statement, so blocks nest and stand on their own. What a block declares stops existing at
@@ -47,6 +47,16 @@ own `&&` and `||`; see [ADR 0002](adr/0002-expressions-stay-nested-in-the-action
 an ordering or arithmetic operator, and a number under a logical operator are each an illegal binary
 operation. See
 [docs/work/logical-operators/issues/01-logical-operators-accept-booleans.md](work/logical-operators/issues/01-logical-operators-accept-booleans.md).
+
+`for (init clause; condition; iteration expression) { body }` is C's `for`, with every part required.
+The init clause is a declaration, an assignment, a compound assignment, `x++`/`x--` or an expression,
+and the iteration expression is any of those but a declaration; anything else in the header is a syntax
+error. The iteration expression runs after every pass, including one ended by `continue`. The loop has a
+scope of its own enclosing the body, so a variable the init clause declares is visible in all four parts,
+gone after the loop, and cannot be shadowed in the body. The condition is checked as a `while` condition
+is. An assignment's action is a C expression so that it can sit in the header; see
+[ADR 0004](adr/0004-an-assignment-action-is-a-c-expression.md). There is no `foreach`. See
+[docs/work/for-loop/spec.md](work/for-loop/spec.md).
 
 `break;` ends the innermost enclosing loop and `continue;` starts its next iteration. Together they
 are loop control statements: legal anywhere inside a loop body, however deeply nested in blocks and

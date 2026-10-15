@@ -111,7 +111,7 @@ prefix `++x`.
 
 ## Control flow
 
-`if` / `else if` / `else`, `while`, C-style `for (init; condition; increment)` and
+`if` / `else if` / `else`, `while`, C-style `for (init-clause; condition; iteration-expression)` and
 `foreach (const item of collection)`, with `break` and `continue`.
 
 **Braces are mandatory** — a braceless `if (condition) x = y;` is an error. There is no

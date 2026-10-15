@@ -144,13 +144,23 @@ class StatementVisitor
         ctx: RheniumParser.ForStatementContext
     ): Diagnosed<Statement> = either {
         zipOrAccumulate(
-            { visitVarDeclarationStatement(ctx.initClause).bindNel() },
+            { visitInitClause(ctx.initClause()).bindNel() },
             { expressionVisitor.get().visitExpression(ctx.condition).bindNel() },
             { visitIterationExpression(ctx.iterationExpression()).bindNel() },
             { blockStatementOf(ctx.body).bindNel() }
         ) { initClause, condition, iterationExpression, body ->
             ForStatement(ctx, initClause, condition, iterationExpression, body)
         }
+    }
+
+    override fun visitIterationExpression(
+        ctx: RheniumParser.IterationExpressionContext
+    ): Diagnosed<Statement> {
+        val expressionNode = ctx.expression() ?: return visitChildren(ctx)
+
+        return expressionVisitor.get()
+            .visitExpression(expressionNode)
+            .map { ExpressionStatement(ctx, it) }
     }
 
     override fun visitBreakStatement(

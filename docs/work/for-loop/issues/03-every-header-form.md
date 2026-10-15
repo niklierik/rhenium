@@ -10,15 +10,15 @@ the roadmap describe the for statement.
 
 **Blocked by:** 02
 
-**Status:** ready-for-agent
+**Status:** resolved
 
-- [ ] Each init clause form parses, decorates, lowers to an expression statement action or declaration,
+- [x] Each init clause form parses, decorates, lowers to an expression statement action or declaration,
       and prints
-- [ ] An expression as the iteration expression lowers to the bare expression action and prints
-- [ ] An init clause assigning a variable declared before the loop leaves its final value after the loop
-- [ ] A declaration as the iteration expression, a missing part, and a disallowed statement in the header
+- [x] An expression as the iteration expression lowers to the bare expression action and prints
+- [x] An init clause assigning a variable declared before the loop leaves its final value after the loop
+- [x] A declaration as the iteration expression, a missing part, and a disallowed statement in the header
       are each a syntax error
-- [ ] Tested at the AST, semantic analyzer and lowering seams for each new form
-- [ ] The language reference reads `for (init-clause; condition; iteration-expression)`, and the roadmap
+- [x] Tested at the AST, semantic analyzer and lowering seams for each new form
+- [x] The language reference reads `for (init-clause; condition; iteration-expression)`, and the roadmap
       has a paragraph for the for statement
-- [ ] The build is green
+- [x] The build is green
