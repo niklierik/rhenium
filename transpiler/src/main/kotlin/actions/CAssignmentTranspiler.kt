@@ -23,6 +23,5 @@ constructor() : IAssignmentTranspiler {
         actionTranspiler.transpile(action.target, output)
         output.writeText("=")
         actionTranspiler.transpile(action.value, output)
-        output.writeText(";")
     }
 }

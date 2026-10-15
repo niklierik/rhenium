@@ -131,9 +131,9 @@ class LoweringTests {
                     """(decl int64_t re_a (cast int64_t 42)) (print "%" PRId64 "\n" (cast int64_t re_a))"""
                 ),
                 Arguments.of(
-                    "assignment lowers to an assignment whose target is a reference",
+                    "an assignment statement lowers to an expression statement around an assignment to a reference",
                     "let a = I32(1);\na = I32(2);",
-                    "(decl int32_t re_a (cast int32_t 1)) (= re_a (cast int32_t 2))"
+                    "(decl int32_t re_a (cast int32_t 1)) (expr (= re_a (cast int32_t 2)))"
                 ),
                 Arguments.of(
                     "an expression statement discards its value",
@@ -310,53 +310,53 @@ class LoweringTests {
                     "compound assignment lowers to an assignment of the detoured arithmetic",
                     "let a = I32(1);\na += I32(2);",
                     "(decl int32_t re_a (cast int32_t 1)) " +
-                            "(= re_a (cast int32_t (+ (cast uint32_t re_a) (cast uint32_t (cast int32_t 2)))))"
+                            "(expr (= re_a (cast int32_t (+ (cast uint32_t re_a) (cast uint32_t (cast int32_t 2))))))"
                 ),
                 Arguments.of(
                     "u32 compound addition needs no detour",
                     "let a = U32(1);\na += U32(2);",
                     "(decl uint32_t re_a (cast uint32_t 1u)) " +
-                            "(= re_a (cast uint32_t (+ re_a (cast uint32_t 2u))))"
+                            "(expr (= re_a (cast uint32_t (+ re_a (cast uint32_t 2u)))))"
                 ),
                 Arguments.of(
                     "u32 compound subtraction needs no detour",
                     "let a = U32(1);\na -= U32(2);",
                     "(decl uint32_t re_a (cast uint32_t 1u)) " +
-                            "(= re_a (cast uint32_t (- re_a (cast uint32_t 2u))))"
+                            "(expr (= re_a (cast uint32_t (- re_a (cast uint32_t 2u)))))"
                 ),
                 Arguments.of(
                     "compound division does not detour",
                     "let a = I32(6);\na /= I32(2);",
-                    "(decl int32_t re_a (cast int32_t 6)) (= re_a (cast int32_t (/ re_a (cast int32_t 2))))"
+                    "(decl int32_t re_a (cast int32_t 6)) (expr (= re_a (cast int32_t (/ re_a (cast int32_t 2)))))"
                 ),
                 Arguments.of(
                     "boolean compound assignment keeps the logical operator nested, so it short-circuits",
                     "let a = true;\na &&= false;\na ||= true;",
-                    "(decl boolean_t re_a true) (= re_a (&& re_a false)) (= re_a (|| re_a true))"
+                    "(decl boolean_t re_a true) (expr (= re_a (&& re_a false))) (expr (= re_a (|| re_a true)))"
                 ),
                 Arguments.of(
                     "an i8 increment adds a one of its own type, through the detour",
                     "let a = I8(1);\na++;",
                     "(decl int8_t re_a (cast int8_t 1)) " +
-                            "(= re_a (cast int8_t (+ (cast uint32_t re_a) (cast uint32_t (cast int8_t 1)))))"
+                            "(expr (= re_a (cast int8_t (+ (cast uint32_t re_a) (cast uint32_t (cast int8_t 1))))))"
                 ),
                 Arguments.of(
                     "a u8 decrement subtracts an unsigned one, through the detour",
                     "let a = U8(1);\na--;",
                     "(decl uint8_t re_a (cast uint8_t 1u)) " +
-                            "(= re_a (cast uint8_t (- (cast uint32_t re_a) (cast uint32_t (cast uint8_t 1u)))))"
+                            "(expr (= re_a (cast uint8_t (- (cast uint32_t re_a) (cast uint32_t (cast uint8_t 1u))))))"
                 ),
                 Arguments.of(
                     "an f32 increment adds an f32 one",
                     "let a = F32(1.5);\na++;",
                     "(decl float32_t re_a (cast float32_t 1.5)) " +
-                            "(= re_a (cast float32_t (+ re_a (cast float32_t 1))))"
+                            "(expr (= re_a (cast float32_t (+ re_a (cast float32_t 1)))))"
                 ),
                 Arguments.of(
                     "an f64 decrement subtracts an f64 one",
                     "let a = F64(1.5);\na--;",
                     "(decl float64_t re_a (cast float64_t 1.5)) " +
-                            "(= re_a (cast float64_t (- re_a (cast float64_t 1))))"
+                            "(expr (= re_a (cast float64_t (- re_a (cast float64_t 1)))))"
                 ),
                 Arguments.of(
                     "ifs and while loops nest as the source does",

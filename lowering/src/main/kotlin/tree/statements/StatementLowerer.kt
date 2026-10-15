@@ -15,6 +15,7 @@ import me.eriknikli.rhenium.ast.tree.statements.vars.VarAssignmentStatement
 import me.eriknikli.rhenium.ast.tree.statements.vars.VarDeclarationStatement
 import me.eriknikli.rhenium.lowering.INodeLowerer
 import me.eriknikli.rhenium.lowering.actions.Action
+import me.eriknikli.rhenium.lowering.actions.ExpressionStatementAction
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -60,9 +61,9 @@ constructor() : IStatementLowerer {
     override fun lower(node: Statement): Action {
         return when (node) {
             is VarDeclarationStatement -> varDeclarationLowerer.get().lower(node)
-            is VarAssignmentStatement -> varAssignmentLowerer.get().lower(node)
-            is CompoundAssignmentStatement -> compoundAssignmentLowerer.get().lower(node)
-            is IncrementStatement -> incrementLowerer.get().lower(node)
+            is VarAssignmentStatement -> ExpressionStatementAction(varAssignmentLowerer.get().lower(node))
+            is CompoundAssignmentStatement -> ExpressionStatementAction(compoundAssignmentLowerer.get().lower(node))
+            is IncrementStatement -> ExpressionStatementAction(incrementLowerer.get().lower(node))
             is ExpressionStatement -> expressionStatementLowerer.get().lower(node)
             is PrintStatement -> printStatementLowerer.get().lower(node)
             is BlockStatement -> blockStatementLowerer.get().lower(node)

@@ -124,8 +124,13 @@ class TranspilerTests {
                     "int32_t re_a_1=1;"
                 ),
                 Arguments.of(
-                    "an assignment writes no type",
+                    "an assignment is a c expression, so it writes no type and no semicolon (ADR 0004)",
                     AssignmentAction(VarRefAction("re_a_1"), ConstantAction("2")),
+                    "re_a_1=2"
+                ),
+                Arguments.of(
+                    "an assignment statement is an expression statement around an assignment",
+                    ExpressionStatementAction(AssignmentAction(VarRefAction("re_a_1"), ConstantAction("2"))),
                     "re_a_1=2;"
                 ),
                 Arguments.of(
