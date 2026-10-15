@@ -110,6 +110,24 @@ statement in an else branch, not a construct of its own. Every block statement a
 typed as a possible else branch, because a sealed type is what makes lowering exhaustive over the two.
 _Avoid_: Else clause, alternative, otherwise
 
+**For statement**:
+`for (init clause; condition; iteration expression) { body }` — C's `for`, with every part required.
+The init clause runs once; then, for as long as the condition holds, the body runs and the iteration
+expression follows it, including after a `continue`. A variable the init clause declares is visible in
+the condition, the iteration expression and the body, and stops existing when the loop ends.
+_Avoid_: For loop header, C-style loop, counted loop
+
+**Init clause**:
+The first part of a for statement: a declaration, an assignment, a compound assignment, an increment or
+decrement statement, or an expression. It runs exactly once, before the condition is first checked.
+_Avoid_: Initializer — that word names the value on the right of a declaration
+
+**Iteration expression**:
+The third part of a for statement: anything an init clause may be except a declaration. It runs after
+every pass through the body, whether the pass ended at the closing brace or at a `continue`.
+_Avoid_: Increment, step, update — `increment` is already the increment statement, and the iteration
+expression need not increment anything
+
 **Loop control statement**:
 `break` or `continue` — a statement that transfers control within the innermost enclosing loop, ending
 it or starting its next iteration. Legal anywhere inside a loop body, however deeply nested in blocks
