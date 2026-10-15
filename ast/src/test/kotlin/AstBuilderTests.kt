@@ -10,6 +10,7 @@ import me.eriknikli.rhenium.ast.tree.statements.BlockStatement
 import me.eriknikli.rhenium.ast.tree.statements.BreakStatement
 import me.eriknikli.rhenium.ast.tree.statements.ContinueStatement
 import me.eriknikli.rhenium.ast.tree.statements.ExpressionStatement
+import me.eriknikli.rhenium.ast.tree.statements.ForStatement
 import me.eriknikli.rhenium.ast.tree.statements.IfStatement
 import me.eriknikli.rhenium.ast.tree.statements.PrintStatement
 import me.eriknikli.rhenium.ast.tree.statements.WhileStatement
@@ -204,6 +205,17 @@ class AstBuilderTests {
                     "(root (if (boolean true) (block) (if (boolean false) (block) (block))))"
                 ),
                 Arguments.of(
+                    "a for statement holds its init clause, condition, iteration expression and body",
+                    "for (let i = 0; i < 3; i++) { println i; }",
+                    "(root (for (let i (i32 0)) (< i (i32 3)) (++ i) (block (println i))))"
+                ),
+                Arguments.of(
+                    "an iteration expression may be an assignment or a compound assignment",
+                    "for (let i = 0; i < 3; i = i + 1) { for (let j = 0; j < 3; j += 2) {} }",
+                    "(root (for (let i (i32 0)) (< i (i32 3)) (= i (+ i (i32 1))) " +
+                            "(block (for (let j (i32 0)) (< j (i32 3)) (+= j (i32 2)) (block)))))"
+                ),
+                Arguments.of(
                     "ifs and while loops nest",
                     "if (true) { while (false) { if (false) {} } }",
                     "(root (if (boolean true) (block (while (boolean false) (block (if (boolean false) (block)))))))"
@@ -237,7 +249,11 @@ class AstBuilderTests {
                 Arguments.of("an increment is not an operand", "x++ + 1;", 5),
                 Arguments.of("there is no prefix increment", "++x;", 1),
                 Arguments.of("break is not a variable name", "let break = 1;", 5),
-                Arguments.of("break takes no label", "while (true) { break outer; }", 22)
+                Arguments.of("break takes no label", "while (true) { break outer; }", 22),
+                Arguments.of("a for statement has no empty init clause", "for (; true; i++) {}", 6),
+                Arguments.of("a for statement has no empty condition", "for (let i = 0; ; i++) {}", 17),
+                Arguments.of("a for statement has no empty iteration expression", "for (let i = 0; true; ) {}", 23),
+                Arguments.of("a for body is braced", "for (let i = 0; true; i++) i++;", 28)
             )
         }
 
@@ -302,6 +318,8 @@ class AstBuilderTests {
                 (listOf("block") + statements.map { it.sexpr() }).joinToString(" ", "(", ")")
 
             is WhileStatement -> "(while ${condition.sexpr()} ${body.sexpr()})"
+            is ForStatement ->
+                "(for ${initClause.sexpr()} ${condition.sexpr()} ${iterationExpression.sexpr()} ${body.sexpr()})"
             is BreakStatement -> "(break)"
             is ContinueStatement -> "(continue)"
 

@@ -13,6 +13,7 @@ import me.eriknikli.rhenium.ast.tree.statements.BreakStatement
 import me.eriknikli.rhenium.ast.tree.statements.ContinueStatement
 import me.eriknikli.rhenium.ast.tree.statements.ElseBranch
 import me.eriknikli.rhenium.ast.tree.statements.ExpressionStatement
+import me.eriknikli.rhenium.ast.tree.statements.ForStatement
 import me.eriknikli.rhenium.ast.tree.statements.IfStatement
 import me.eriknikli.rhenium.ast.tree.statements.PrintStatement
 import me.eriknikli.rhenium.ast.tree.statements.Statement
@@ -63,6 +64,10 @@ class StatementVisitor
 
     override fun visitVarAssignmentStatement(
         ctx: RheniumParser.VarAssignmentStatementContext
+    ): Diagnosed<Statement> = visitVarAssignment(ctx.varAssignment())
+
+    override fun visitVarAssignment(
+        ctx: RheniumParser.VarAssignmentContext
     ): Diagnosed<Statement> = either {
         zipOrAccumulate(
             { leftValueVisitor.get().visitLeftValue(ctx.leftValue()).bindNel() },
@@ -74,6 +79,10 @@ class StatementVisitor
 
     override fun visitCompoundAssignmentStatement(
         ctx: RheniumParser.CompoundAssignmentStatementContext
+    ): Diagnosed<Statement> = visitCompoundAssignment(ctx.compoundAssignment())
+
+    override fun visitCompoundAssignment(
+        ctx: RheniumParser.CompoundAssignmentContext
     ): Diagnosed<Statement> = either {
         zipOrAccumulate(
             { leftValueVisitor.get().visitLeftValue(ctx.leftValue()).bindNel() },
@@ -96,6 +105,10 @@ class StatementVisitor
 
     override fun visitIncrementStatement(
         ctx: RheniumParser.IncrementStatementContext
+    ): Diagnosed<Statement> = visitIncrement(ctx.increment())
+
+    override fun visitIncrement(
+        ctx: RheniumParser.IncrementContext
     ): Diagnosed<Statement> = leftValueVisitor.get()
         .visitLeftValue(ctx.leftValue())
         .map { IncrementStatement(ctx, it, stepOf(ctx.op)) }
@@ -124,6 +137,19 @@ class StatementVisitor
             { blockStatementOf(ctx.body).bindNel() }
         ) { condition, body ->
             WhileStatement(ctx, condition, body)
+        }
+    }
+
+    override fun visitForStatement(
+        ctx: RheniumParser.ForStatementContext
+    ): Diagnosed<Statement> = either {
+        zipOrAccumulate(
+            { visitVarDeclarationStatement(ctx.initClause).bindNel() },
+            { expressionVisitor.get().visitExpression(ctx.condition).bindNel() },
+            { visitIterationExpression(ctx.iterationExpression()).bindNel() },
+            { blockStatementOf(ctx.body).bindNel() }
+        ) { initClause, condition, iterationExpression, body ->
+            ForStatement(ctx, initClause, condition, iterationExpression, body)
         }
     }
 

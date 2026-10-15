@@ -64,6 +64,9 @@ interface SemanticAnalyzerModule {
     fun bindWhileStatementDecorator(instance: WhileStatementDecorator): IWhileStatementDecorator
 
     @Binds
+    fun bindForStatementDecorator(instance: ForStatementDecorator): IForStatementDecorator
+
+    @Binds
     fun bindConditionDecorator(instance: ConditionDecorator): IConditionDecorator
 
     @Binds

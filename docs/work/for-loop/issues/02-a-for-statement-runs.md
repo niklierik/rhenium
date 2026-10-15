@@ -13,27 +13,27 @@ assignment or increment or decrement statement as the iteration expression. Tick
 
 **Blocked by:** 01
 
-**Status:** ready-for-agent
+**Status:** resolved
 
-- [ ] `for` lexes as its own token, named consistently with the existing keyword tokens
-- [ ] A for statement is a parser rule listed as an alternative of `statement`, holding the init clause,
+- [x] `for` lexes as its own token, named consistently with the existing keyword tokens
+- [x] A for statement is a parser rule listed as an alternative of `statement`, holding the init clause,
       the condition, the iteration expression and the existing `block` rule; every part is required
-- [ ] A for statement node exists, with its own semantic context, built by the statement visitor
-- [ ] Its decorator creates a loop scope as a child of the enclosing one and decorates all four parts in
+- [x] A for statement node exists, with its own semantic context, built by the statement visitor
+- [x] Its decorator creates a loop scope as a child of the enclosing one and decorates all four parts in
       it, the init clause first and the other three accumulating as siblings; the condition goes through
       the shared condition decorator
-- [ ] A for action exists, lowered from the node, holding the init clause as a statement action, the
+- [x] A for action exists, lowered from the node, holding the init clause as a statement action, the
       iteration expression as a bare action, and the body as a block action
-- [ ] The action prints as `for(`, the init clause with its own `;`, the condition, `;`, the iteration
+- [x] The action prints as `for(`, the init clause with its own `;`, the condition, `;`, the iteration
       expression, `)`, then the body; it has its branch in the transpiler's exhaustive dispatch
-- [ ] The Dagger bindings exist in each module the for statement was added to
-- [ ] Semantic analyzer seam: the init variable used in all four parts; used after the loop; sibling
+- [x] The Dagger bindings exist in each module the for statement was added to
+- [x] Semantic analyzer seam: the init variable used in all four parts; used after the loop; sibling
       loops; shadowing in the body and in a nested loop; `break` and `continue` in the body; an
       unreachable statement after `continue`; an integer condition; a poisoned condition; a `const`
       counter incremented; a failed init declaration; faults in several parts at once
-- [ ] Lowering seam: the for action's shape, `break` and `continue` in the body, nesting
-- [ ] Transpiler seam: a hand-built for action prints the full C header
-- [ ] AST seam: the new node kind renders, with the renderer taught it
-- [ ] Verified by hand: a counting loop prints what it should, and a loop whose `continue` skips one pass
+- [x] Lowering seam: the for action's shape, `break` and `continue` in the body, nesting
+- [x] Transpiler seam: a hand-built for action prints the full C header
+- [x] AST seam: the new node kind renders, with the renderer taught it
+- [x] Verified by hand: a counting loop prints what it should, and a loop whose `continue` skips one pass
       still advances
-- [ ] The build is green
+- [x] The build is green

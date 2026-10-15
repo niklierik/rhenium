@@ -23,6 +23,9 @@ interface LoweringModule {
     fun bindWhileStatement(whileStatementLowerer: WhileStatementLowerer): IWhileStatementLowerer
 
     @Binds
+    fun bindForStatement(forStatementLowerer: ForStatementLowerer): IForStatementLowerer
+
+    @Binds
     fun bindIfStatement(ifStatementLowerer: IfStatementLowerer): IIfStatementLowerer
 
     @Binds

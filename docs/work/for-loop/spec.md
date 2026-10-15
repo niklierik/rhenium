@@ -153,7 +153,8 @@ the same exception to the poison-type convention as `while` and `if`
 expression and the body all resolve its variable. The other three are sibling branches of one
 accumulation, so a broken condition does not hide a broken body. A failed init declaration still
 declares its variable, poisoned, through the existing declaration decorator, so the uses of it in the
-other three parts are not reported again.
+iteration expression and the body are not reported again. A condition using it still restates that it
+must be a `Boolean`, as ADR 0003 has every poisoned condition do.
 
 **The emitted C is `for(`, the init clause with its own `;`, the condition, `;`, the iteration
 expression, `)`, then the body's braces**, inline in the dense style of the existing output. The `for`
@@ -181,7 +182,8 @@ test states something about Rhenium or about emitted C, never about which class 
 - an integer condition: the type mismatch naming `I32` and `Boolean`
 - a poisoned condition: both diagnostics
 - `const i` with `i++`: the existing constant-assignment error
-- a failed init declaration: one diagnostic, none for its uses
+- a failed init declaration: its own diagnostic and the condition's requirement, nothing for its other
+  uses
 - faults in the condition, the iteration expression and the body at once: all reported
 
 **Lowering seam — source text in, action tree as an s-expression out.** Cases:

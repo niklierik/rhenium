@@ -282,6 +282,31 @@ class LoweringTests {
                     "(decl int32_t re_a (cast int32_t 0)) (while (< re_a (cast int32_t 3)) (block))"
                 ),
                 Arguments.of(
+                    "a for statement lowers its init clause as a statement and its iteration expression bare",
+                    "for (let a = 0; a < 3; a++) {}",
+                    "(for (decl int32_t re_a (cast int32_t 0)) (< re_a (cast int32_t 3)) " +
+                            "(= re_a (cast int32_t (+ (cast uint32_t re_a) (cast uint32_t (cast int32_t 1))))) (block))"
+                ),
+                Arguments.of(
+                    "a compound assignment as the iteration expression is a bare assignment action",
+                    "for (let a = 0; a < 3; a += 2) {}",
+                    "(for (decl int32_t re_a (cast int32_t 0)) (< re_a (cast int32_t 3)) " +
+                            "(= re_a (cast int32_t (+ (cast uint32_t re_a) (cast uint32_t (cast int32_t 2))))) (block))"
+                ),
+                Arguments.of(
+                    "break and continue lower inside a for body",
+                    "for (let a = 0; a < 3; a = a + 1) { if (a == 1) { continue; } break; }",
+                    "(for (decl int32_t re_a (cast int32_t 0)) (< re_a (cast int32_t 3)) " +
+                            "(= re_a (cast int32_t (+ (cast uint32_t re_a) (cast uint32_t (cast int32_t 1))))) " +
+                            "(block (if (== re_a (cast int32_t 1)) (block (continue))) (break)))"
+                ),
+                Arguments.of(
+                    "loops nest inside a for body as the source does",
+                    "for (let a = 0; a < 3; a++) { while (false) {} }",
+                    "(for (decl int32_t re_a (cast int32_t 0)) (< re_a (cast int32_t 3)) " +
+                            "(= re_a (cast int32_t (+ (cast uint32_t re_a) (cast uint32_t (cast int32_t 1))))) (block (while false (block))))"
+                ),
+                Arguments.of(
                     "an if without an else lowers to an if action with no else side",
                     "if (true) { let a = 1; }",
                     "(if true (block (decl int32_t re_a (cast int32_t 1))))"
@@ -386,6 +411,8 @@ class LoweringTests {
             is BlockAction ->
                 (listOf("block") + body.actions.map { it.sexpr() }).joinToString(" ", "(", ")")
             is WhileAction -> "(while ${condition.sexpr()} ${body.sexpr()})"
+            is ForAction ->
+                "(for ${initClause.sexpr()} ${condition.sexpr()} ${iterationExpression.sexpr()} ${body.sexpr()})"
             is IfAction -> {
                 val elseSide = elseBranch?.let { " ${it.sexpr()}" } ?: ""
                 "(if ${condition.sexpr()} ${thenBranch.sexpr()}$elseSide)"

@@ -13,6 +13,7 @@ FALSE: 'false';
 IF: 'if';
 ELSE: 'else';
 WHILE: 'while';
+FOR: 'for';
 BREAK: 'break';
 CONTINUE: 'continue';
 

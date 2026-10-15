@@ -23,6 +23,9 @@ constructor() : IActionTranspiler {
     lateinit var whileTranspilerProvider: Lazy<IWhileTranspiler>
 
     @Inject
+    lateinit var forTranspilerProvider: Lazy<IForTranspiler>
+
+    @Inject
     lateinit var ifTranspilerProvider: Lazy<IIfTranspiler>
 
     @Inject
@@ -70,6 +73,7 @@ constructor() : IActionTranspiler {
     private val blockTranspiler by lazy { blockTranspilerProvider.get() }
     private val blockActionTranspiler by lazy { blockActionTranspilerProvider.get() }
     private val whileTranspiler by lazy { whileTranspilerProvider.get() }
+    private val forTranspiler by lazy { forTranspilerProvider.get() }
     private val ifTranspiler by lazy { ifTranspilerProvider.get() }
     private val breakTranspiler by lazy { breakTranspilerProvider.get() }
     private val continueTranspiler by lazy { continueTranspilerProvider.get() }
@@ -91,6 +95,7 @@ constructor() : IActionTranspiler {
             is Block -> blockTranspiler.transpile(action, output)
             is BlockAction -> blockActionTranspiler.transpile(action, output)
             is WhileAction -> whileTranspiler.transpile(action, output)
+            is ForAction -> forTranspiler.transpile(action, output)
             is IfAction -> ifTranspiler.transpile(action, output)
             is BreakAction -> breakTranspiler.transpile(action, output)
             is ContinueAction -> continueTranspiler.transpile(action, output)

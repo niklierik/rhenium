@@ -236,6 +236,16 @@ class TranspilerTests {
                     "if(1){}else if(2){}else {}"
                 ),
                 Arguments.of(
+                    "a for writes its init clause with its own semicolon, then the condition, a semicolon and the bare iteration expression",
+                    ForAction(
+                        VarDeclarationAction(SignedIntType.I32, "re_i_1", ConstantAction("0")),
+                        BinaryAction("<", VarRefAction("re_i_1"), ConstantAction("3")),
+                        AssignmentAction(VarRefAction("re_i_1"), BinaryAction("+", VarRefAction("re_i_1"), ConstantAction("1"))),
+                        BlockAction(Block(mutableListOf(ContinueAction)))
+                    ),
+                    "for(int32_t re_i_1=0;(re_i_1<3);re_i_1=(re_i_1+1)){continue;}"
+                ),
+                Arguments.of(
                     "a function writes its return type before its name",
                     FunctionAction("main", "int32_t", Block(mutableListOf(ReturnAction(ConstantAction("0"))))),
                     "int32_t main(){return 0;}"

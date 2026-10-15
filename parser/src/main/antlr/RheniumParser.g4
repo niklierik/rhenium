@@ -15,6 +15,7 @@ statement:
     | printStatement
     | expressionStatement
     | whileStatement
+    | forStatement
     | ifStatement
     | breakStatement
     | continueStatement
@@ -25,6 +26,17 @@ block:
 
 whileStatement:
     WHILE OPEN_BRACKET condition=expression CLOSE_BRACKET body=block;
+
+forStatement:
+    FOR OPEN_BRACKET initClause=varDeclarationStatement
+    condition=expression SEMICOLON
+    iterationExpression
+    CLOSE_BRACKET body=block;
+
+iterationExpression:
+    varAssignment
+    | compoundAssignment
+    | increment;
 
 breakStatement:
     BREAK SEMICOLON;
@@ -45,15 +57,24 @@ typeName:
     | floatTypes;
 
 varAssignmentStatement:
-    leftValue EQUALS expression SEMICOLON;
+    varAssignment SEMICOLON;
+
+varAssignment:
+    leftValue EQUALS expression;
 
 compoundAssignmentStatement:
+    compoundAssignment SEMICOLON;
+
+compoundAssignment:
     leftValue
     op=(PLUS_EQUALS | MINUS_EQUALS | STAR_EQUALS | SLASH_EQUALS | PERCENT_EQUALS | AND_EQUALS | OR_EQUALS)
-    expression SEMICOLON;
+    expression;
 
 incrementStatement:
-    leftValue op=(PLUSPLUS | MINUSMINUS) SEMICOLON;
+    increment SEMICOLON;
+
+increment:
+    leftValue op=(PLUSPLUS | MINUSMINUS);
 
 printStatement:
     PRINT expression SEMICOLON

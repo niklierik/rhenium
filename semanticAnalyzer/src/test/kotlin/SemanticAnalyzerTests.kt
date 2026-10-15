@@ -175,6 +175,84 @@ class SemanticAnalyzerTests {
                             "2:8: error: type mismatch, found I32 but expected Boolean."
                 ),
                 Arguments.of(
+                    "a for statement's init variable is visible in its condition, iteration expression and body",
+                    "for (let i = 0; i < 3; i++) {\n    println i;\n}",
+                    ""
+                ),
+                Arguments.of(
+                    "a for statement's init variable does not outlive the loop",
+                    "for (let i = 0; i < 3; i++) {}\nprintln i;",
+                    "2:9: error: unknown symbol 'i'."
+                ),
+                Arguments.of(
+                    "sibling for statements may each declare the same init variable",
+                    "for (let i = 0; i < 3; i++) {}\nfor (let i = 0; i < 3; i++) {}",
+                    ""
+                ),
+                Arguments.of(
+                    "a for body may not shadow the init variable",
+                    "for (let i = 0; i < 3; i++) {\n    let i = 1;\n}",
+                    "2:5: error: variable 'i' shadows variable 'i' declared at 1:6."
+                ),
+                Arguments.of(
+                    "a nested for statement may not shadow the outer init variable",
+                    "for (let i = 0; i < 3; i++) {\n    for (let i = 0; i < 3; i++) {}\n}",
+                    "2:10: error: variable 'i' shadows variable 'i' declared at 1:6." + System.lineSeparator() +
+                            "2:21: error: type mismatch, found <invalid> but expected Boolean."
+                ),
+                Arguments.of(
+                    "an init variable may not shadow a declaration from around the loop",
+                    "let i = 0;\nfor (let i = 0; i < 3; i++) {}",
+                    "2:6: error: variable 'i' shadows variable 'i' declared at 1:1." + System.lineSeparator() +
+                            "2:17: error: type mismatch, found <invalid> but expected Boolean."
+                ),
+                Arguments.of(
+                    "break and continue in a for body are not diagnostics",
+                    "for (let i = 0; i < 3; i++) {\n    if (i == 1) {\n        continue;\n    }\n    break;\n}",
+                    ""
+                ),
+                Arguments.of(
+                    "a statement after continue in a for body is unreachable",
+                    "for (let i = 0; i < 3; i++) {\n    continue;\n    println i;\n}",
+                    "3:5: warning: unreachable statement after 'continue' at 2:5."
+                ),
+                Arguments.of(
+                    "a for statement does not make break legal after it ends",
+                    "for (let i = 0; i < 3; i++) {}\nbreak;",
+                    "2:1: error: 'break' is not inside a loop."
+                ),
+                Arguments.of(
+                    "an integer for condition is rejected in the same words as a while condition",
+                    "for (let i = 0; 1; i++) {}",
+                    "1:17: error: type mismatch, found I32 but expected Boolean."
+                ),
+                Arguments.of(
+                    "a broken for condition reports its own fault and the loop's requirement (ADR 0003)",
+                    "for (let i = 0; i + true; i++) {}",
+                    "1:17: error: illegal binary operation 'I32 + Boolean'." + System.lineSeparator() +
+                            "1:17: error: type mismatch, found <invalid> but expected Boolean."
+                ),
+                Arguments.of(
+                    "a const init variable cannot be stepped",
+                    "for (const i = 0; i < 3; i++) {}",
+                    "1:26: error: cannot assign to 'i', it is not mutable. Declare it with 'let'."
+                ),
+                Arguments.of(
+                    "a failed init declaration still declares its variable, so only the condition's requirement is restated (ADR 0003)",
+                    "for (let i: Foo = 0; i < 3; i++) {\n    println i;\n}",
+                    "1:13: error: unknown type 'Foo'." + System.lineSeparator() +
+                            "1:22: error: type mismatch, found <invalid> but expected Boolean."
+                ),
+                Arguments.of(
+                    "faults in a for condition, iteration expression and body are all reported",
+                    "for (let i = 0; 1; j++) {\n    k + 1;\n}",
+                    """
+                    1:17: error: type mismatch, found I32 but expected Boolean.
+                    1:20: error: unknown symbol 'j'.
+                    2:5: error: unknown symbol 'k'.
+                    """.trimIndent()
+                ),
+                Arguments.of(
                     "an if decorates its condition and both branches",
                     "let a = 1;\nif (a < 3) {\n    println a;\n} else {\n    println 0;\n}",
                     ""

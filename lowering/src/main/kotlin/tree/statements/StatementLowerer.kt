@@ -5,6 +5,7 @@ import me.eriknikli.rhenium.ast.tree.statements.BlockStatement
 import me.eriknikli.rhenium.ast.tree.statements.BreakStatement
 import me.eriknikli.rhenium.ast.tree.statements.ContinueStatement
 import me.eriknikli.rhenium.ast.tree.statements.ExpressionStatement
+import me.eriknikli.rhenium.ast.tree.statements.ForStatement
 import me.eriknikli.rhenium.ast.tree.statements.IfStatement
 import me.eriknikli.rhenium.ast.tree.statements.PrintStatement
 import me.eriknikli.rhenium.ast.tree.statements.Statement
@@ -50,6 +51,9 @@ constructor() : IStatementLowerer {
     lateinit var whileStatementLowerer: Lazy<IWhileStatementLowerer>
 
     @Inject
+    lateinit var forStatementLowerer: Lazy<IForStatementLowerer>
+
+    @Inject
     lateinit var ifStatementLowerer: Lazy<IIfStatementLowerer>
 
     @Inject
@@ -68,6 +72,7 @@ constructor() : IStatementLowerer {
             is PrintStatement -> printStatementLowerer.get().lower(node)
             is BlockStatement -> blockStatementLowerer.get().lower(node)
             is WhileStatement -> whileStatementLowerer.get().lower(node)
+            is ForStatement -> forStatementLowerer.get().lower(node)
             is IfStatement -> ifStatementLowerer.get().lower(node)
             is BreakStatement -> breakStatementLowerer.get().lower(node)
             is ContinueStatement -> continueStatementLowerer.get().lower(node)
