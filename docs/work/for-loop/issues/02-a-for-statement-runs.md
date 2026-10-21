@@ -3,12 +3,12 @@
 **Spec:** [../spec.md](../spec.md)
 
 **What to build:** A programmer can write `for (let i = 0; i < 5; i++) { println i; }` and the program
-compiles, links and prints `0` to `4`. The emitted C is a C `for` with the same header. `continue` runs
+compiles, links and prints `0` to `4`. The emitted C is a C `for` with the same three parts. `continue` runs
 the iteration expression; `break` leaves the loop. The init clause's variable lives in the loop scope:
 visible in the condition, the iteration expression and the body, gone after the loop, and shadowing it
 is an error.
 
-This ticket accepts one header shape: a declaration as the init clause, and an assignment, compound
+This ticket accepts one shape: a declaration as the init clause, and an assignment, compound
 assignment or increment or decrement statement as the iteration expression. Ticket 03 widens it.
 
 **Blocked by:** 01
@@ -32,8 +32,8 @@ assignment or increment or decrement statement as the iteration expression. Tick
       unreachable statement after `continue`; an integer condition; a poisoned condition; a `const`
       counter incremented; a failed init declaration; faults in several parts at once
 - [x] Lowering seam: the for action's shape, `break` and `continue` in the body, nesting
-- [x] Transpiler seam: a hand-built for action prints the full C header
+- [x] Transpiler seam: a hand-built for action prints its three parts in C's parentheses
 - [x] AST seam: the new node kind renders, with the renderer taught it
-- [x] Verified by hand: a counting loop prints what it should, and a loop whose `continue` skips one pass
+- [x] Verified by hand: a loop over a counter prints what it should, and a loop whose `continue` skips one pass
       still advances
 - [x] The build is green

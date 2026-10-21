@@ -244,11 +244,12 @@ class SemanticAnalyzerTests {
                             "1:22: error: type mismatch, found <invalid> but expected Boolean."
                 ),
                 Arguments.of(
-                    "faults in a for condition, iteration expression and body are all reported",
-                    "for (let i = 0; 1; j++) {\n    k + 1;\n}",
+                    "faults in a for init clause, condition, iteration expression and body are all reported",
+                    "for (let i: Foo = 0; 1; j++) {\n    k + 1;\n}",
                     """
-                    1:17: error: type mismatch, found I32 but expected Boolean.
-                    1:20: error: unknown symbol 'j'.
+                    1:13: error: unknown type 'Foo'.
+                    1:22: error: type mismatch, found I32 but expected Boolean.
+                    1:25: error: unknown symbol 'j'.
                     2:5: error: unknown symbol 'k'.
                     """.trimIndent()
                 ),

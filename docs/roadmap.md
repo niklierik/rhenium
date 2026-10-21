@@ -50,11 +50,11 @@ operation. See
 
 `for (init clause; condition; iteration expression) { body }` is C's `for`, with every part required.
 The init clause is a declaration, an assignment, a compound assignment, `x++`/`x--` or an expression,
-and the iteration expression is any of those but a declaration; anything else in the header is a syntax
-error. The iteration expression runs after every pass, including one ended by `continue`. The loop has a
-scope of its own enclosing the body, so a variable the init clause declares is visible in all four parts,
+and the iteration expression is any of those but a declaration; anything else between the parentheses
+is a syntax error. The iteration expression runs after every pass, including one ended by `continue`.
+The loop has a scope of its own enclosing the body, so a variable the init clause declares is visible in all four parts,
 gone after the loop, and cannot be shadowed in the body. The condition is checked as a `while` condition
-is. An assignment's action is a C expression so that it can sit in the header; see
+is. An assignment's action is a C expression so that it can serve as the iteration expression; see
 [ADR 0004](adr/0004-an-assignment-action-is-a-c-expression.md). There is no `foreach`. See
 [docs/work/for-loop/spec.md](work/for-loop/spec.md).
 
