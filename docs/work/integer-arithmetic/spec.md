@@ -1,5 +1,7 @@
 # Integer arithmetic width
 
+Status: resolved
+
 ## Why this exists
 
 `docs/roadmap.md` records the symptom: integer literals are emitted with C suffixes wider than their

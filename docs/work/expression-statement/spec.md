@@ -1,5 +1,7 @@
 # Expression statements
 
+Status: resolved
+
 ## Problem
 
 `expressionStatement: expression SEMICOLON;` has existed in the parser grammar since the grammar was

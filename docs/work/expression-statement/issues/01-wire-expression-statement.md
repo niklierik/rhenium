@@ -1,6 +1,6 @@
 # Wire expressionStatement through the statement pipeline
 
-Status: ready-for-agent
+Status: resolved
 
 `expressionStatement` parses but is unhandled in all three walkers, so valid input reaches
 `UnhandledParseRule` — an internal-error diagnostic reserved for compiler bugs.

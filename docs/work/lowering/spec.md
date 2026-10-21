@@ -1,6 +1,6 @@
 # Lowering: an action tree between the AST and the emitted C
 
-Status: ready-for-agent
+Status: resolved
 
 ## Problem Statement
 

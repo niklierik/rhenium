@@ -1,5 +1,7 @@
 # Temporary printing
 
+Status: resolved
+
 ## Why this exists
 
 The roadmap's current milestone lists *temporary printing*. Until then a Rhenium program can compute
