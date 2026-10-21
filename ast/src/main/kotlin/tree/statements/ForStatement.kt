@@ -9,7 +9,7 @@ data class ForStatement(
     override val parserContext: ParserRuleContext,
     val initClause: Statement,
     val condition: Expression,
-    val iterationExpression: Statement,
+    val iterationExpression: IterationExpression,
     val body: BlockStatement
 ) : Statement {
     override val context: StatementContext = ForStatementContext()

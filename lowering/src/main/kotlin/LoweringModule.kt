@@ -47,7 +47,7 @@ interface LoweringModule {
     fun bindIncrement(incrementLowerer: IncrementLowerer): IIncrementLowerer
 
     @Binds
-    fun bindExpressionStatement(expressionStatementLowerer: ExpressionStatementLowerer): IExpressionStatementLowerer
+    fun bindIterationExpression(iterationExpressionLowerer: IterationExpressionLowerer): IIterationExpressionLowerer
 
     @Binds
     fun bindExpression(expressionLowerer: ExpressionLowerer): IExpressionLowerer

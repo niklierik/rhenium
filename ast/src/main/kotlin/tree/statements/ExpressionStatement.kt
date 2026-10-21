@@ -8,6 +8,6 @@ import org.antlr.v4.runtime.ParserRuleContext
 data class ExpressionStatement(
     override val parserContext: ParserRuleContext,
     val expression: Expression
-) : Statement {
+) : IterationExpression {
     override val context: StatementContext = ExpressionStatementContext()
 }

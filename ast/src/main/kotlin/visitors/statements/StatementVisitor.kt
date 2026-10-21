@@ -15,6 +15,7 @@ import me.eriknikli.rhenium.ast.tree.statements.ElseBranch
 import me.eriknikli.rhenium.ast.tree.statements.ExpressionStatement
 import me.eriknikli.rhenium.ast.tree.statements.ForStatement
 import me.eriknikli.rhenium.ast.tree.statements.IfStatement
+import me.eriknikli.rhenium.ast.tree.statements.IterationExpression
 import me.eriknikli.rhenium.ast.tree.statements.PrintStatement
 import me.eriknikli.rhenium.ast.tree.statements.Statement
 import me.eriknikli.rhenium.ast.tree.statements.WhileStatement
@@ -28,6 +29,7 @@ import me.eriknikli.rhenium.ast.visitors.expressions.ILeftValueVisitor
 import me.eriknikli.rhenium.common.diagnostics.Diagnosed
 import me.eriknikli.rhenium.parser.RheniumParser
 import me.eriknikli.rhenium.parser.RheniumParserBaseVisitor
+import org.antlr.v4.runtime.ParserRuleContext
 import org.antlr.v4.runtime.Token
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -64,11 +66,11 @@ class StatementVisitor
 
     override fun visitVarAssignmentStatement(
         ctx: RheniumParser.VarAssignmentStatementContext
-    ): Diagnosed<Statement> = visitVarAssignment(ctx.varAssignment())
+    ): Diagnosed<Statement> = varAssignmentOf(ctx.varAssignment())
 
-    override fun visitVarAssignment(
+    private fun varAssignmentOf(
         ctx: RheniumParser.VarAssignmentContext
-    ): Diagnosed<Statement> = either {
+    ): Diagnosed<VarAssignmentStatement> = either {
         zipOrAccumulate(
             { leftValueVisitor.get().visitLeftValue(ctx.leftValue()).bindNel() },
             { expressionVisitor.get().visitExpression(ctx.expression()).bindNel() }
@@ -79,11 +81,11 @@ class StatementVisitor
 
     override fun visitCompoundAssignmentStatement(
         ctx: RheniumParser.CompoundAssignmentStatementContext
-    ): Diagnosed<Statement> = visitCompoundAssignment(ctx.compoundAssignment())
+    ): Diagnosed<Statement> = compoundAssignmentOf(ctx.compoundAssignment())
 
-    override fun visitCompoundAssignment(
+    private fun compoundAssignmentOf(
         ctx: RheniumParser.CompoundAssignmentContext
-    ): Diagnosed<Statement> = either {
+    ): Diagnosed<CompoundAssignmentStatement> = either {
         zipOrAccumulate(
             { leftValueVisitor.get().visitLeftValue(ctx.leftValue()).bindNel() },
             { expressionVisitor.get().visitExpression(ctx.expression()).bindNel() }
@@ -105,11 +107,11 @@ class StatementVisitor
 
     override fun visitIncrementStatement(
         ctx: RheniumParser.IncrementStatementContext
-    ): Diagnosed<Statement> = visitIncrement(ctx.increment())
+    ): Diagnosed<Statement> = incrementOf(ctx.increment())
 
-    override fun visitIncrement(
+    private fun incrementOf(
         ctx: RheniumParser.IncrementContext
-    ): Diagnosed<Statement> = leftValueVisitor.get()
+    ): Diagnosed<IncrementStatement> = leftValueVisitor.get()
         .visitLeftValue(ctx.leftValue())
         .map { IncrementStatement(ctx, it, stepOf(ctx.op)) }
 
@@ -121,8 +123,13 @@ class StatementVisitor
 
     override fun visitExpressionStatement(
         ctx: RheniumParser.ExpressionStatementContext
-    ): Diagnosed<Statement> = expressionVisitor.get()
-        .visitExpression(ctx.expression())
+    ): Diagnosed<Statement> = expressionStatementOf(ctx, ctx.expression())
+
+    private fun expressionStatementOf(
+        ctx: ParserRuleContext,
+        expression: RheniumParser.ExpressionContext
+    ): Diagnosed<ExpressionStatement> = expressionVisitor.get()
+        .visitExpression(expression)
         .map { ExpressionStatement(ctx, it) }
 
     override fun visitBlock(
@@ -144,24 +151,31 @@ class StatementVisitor
         ctx: RheniumParser.ForStatementContext
     ): Diagnosed<Statement> = either {
         zipOrAccumulate(
-            { visitInitClause(ctx.initClause()).bindNel() },
+            { initClauseOf(ctx.initClause()).bindNel() },
             { expressionVisitor.get().visitExpression(ctx.condition).bindNel() },
-            { visitIterationExpression(ctx.iterationExpression()).bindNel() },
+            { iterationExpressionOf(ctx.iterationExpression()).bindNel() },
             { blockStatementOf(ctx.body).bindNel() }
         ) { initClause, condition, iterationExpression, body ->
             ForStatement(ctx, initClause, condition, iterationExpression, body)
         }
     }
 
-    override fun visitIterationExpression(
-        ctx: RheniumParser.IterationExpressionContext
-    ): Diagnosed<Statement> {
-        val expressionNode = ctx.expression() ?: return visitChildren(ctx)
+    private fun initClauseOf(
+        ctx: RheniumParser.InitClauseContext
+    ): Diagnosed<Statement> =
+        ctx.varDeclarationStatement()?.let { visitVarDeclarationStatement(it) }
+            ?: ctx.varAssignmentStatement()?.let { visitVarAssignmentStatement(it) }
+            ?: ctx.compoundAssignmentStatement()?.let { visitCompoundAssignmentStatement(it) }
+            ?: ctx.incrementStatement()?.let { visitIncrementStatement(it) }
+            ?: visitExpressionStatement(ctx.expressionStatement())
 
-        return expressionVisitor.get()
-            .visitExpression(expressionNode)
-            .map { ExpressionStatement(ctx, it) }
-    }
+    private fun iterationExpressionOf(
+        ctx: RheniumParser.IterationExpressionContext
+    ): Diagnosed<IterationExpression> =
+        ctx.varAssignment()?.let { varAssignmentOf(it) }
+            ?: ctx.compoundAssignment()?.let { compoundAssignmentOf(it) }
+            ?: ctx.increment()?.let { incrementOf(it) }
+            ?: expressionStatementOf(ctx, ctx.expression())
 
     override fun visitBreakStatement(
         ctx: RheniumParser.BreakStatementContext

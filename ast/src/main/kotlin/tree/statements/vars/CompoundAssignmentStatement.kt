@@ -3,7 +3,7 @@ package me.eriknikli.rhenium.ast.tree.statements.vars
 import me.eriknikli.rhenium.ast.tree.expressions.Expression
 import me.eriknikli.rhenium.ast.tree.expressions.LeftValue
 import me.eriknikli.rhenium.ast.tree.expressions.operators.Operator
-import me.eriknikli.rhenium.ast.tree.statements.Statement
+import me.eriknikli.rhenium.ast.tree.statements.IterationExpression
 import me.eriknikli.rhenium.semanticContext.tree.statements.CompoundAssignmentStatementContext
 import org.antlr.v4.runtime.ParserRuleContext
 
@@ -12,6 +12,6 @@ data class CompoundAssignmentStatement(
     val leftValue: LeftValue,
     val operator: Operator,
     val rightValue: Expression
-) : Statement {
+) : IterationExpression {
     override val context: CompoundAssignmentStatementContext = CompoundAssignmentStatementContext()
 }
