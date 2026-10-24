@@ -46,7 +46,7 @@ class TranspilerTests {
             "typedef _Bool boolean_t;"
         ).forEach { assertContains(c, it) }
 
-        assertTrue(c.endsWith("int32_t main(){return 0;}"), "expected the program to follow the prologue, got:\n$c")
+        assertTrue(c.endsWith("int32_t main(void){return 0;}"), "expected the program to follow the prologue, got:\n$c")
     }
 
     companion object {
@@ -62,9 +62,9 @@ class TranspilerTests {
                     "1"
                 ),
                 Arguments.of(
-                    "a function without parameters has empty parentheses",
+                    "a function without parameters says so with void, so c checks its calls before c23 too",
                     FunctionAction(FunctionSignature("re_f_1", VoidType, emptyList()), Block(mutableListOf())),
-                    "void re_f_1(){}"
+                    "void re_f_1(void){}"
                 ),
                 Arguments.of(
                     "a function lists its parameters with their c names, separated by commas",
@@ -101,7 +101,7 @@ class TranspilerTests {
                             FunctionAction(FunctionSignature("re_f_1", VoidType, emptyList()), Block(mutableListOf()))
                         )
                     ),
-                    "void re_f_1();" + System.lineSeparator() + "void re_f_1(){}" + System.lineSeparator()
+                    "void re_f_1(void);" + System.lineSeparator() + "void re_f_1(void){}" + System.lineSeparator()
                 ),
                 Arguments.of(
                     "a variable reference writes only its mangled name",
@@ -308,7 +308,7 @@ class TranspilerTests {
                         FunctionSignature("main", SignedIntType.I32, emptyList()),
                         Block(mutableListOf(ReturnAction(ConstantAction("0"))))
                     ),
-                    "int32_t main(){return 0;}"
+                    "int32_t main(void){return 0;}"
                 ),
                 Arguments.of(
                     "casts nest to arbitrary depth, each adding exactly one pair of parentheses",

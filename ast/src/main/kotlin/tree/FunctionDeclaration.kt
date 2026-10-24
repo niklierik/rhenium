@@ -7,10 +7,10 @@ import org.antlr.v4.runtime.ParserRuleContext
 
 data class FunctionDeclaration(
     override val parserContext: ParserRuleContext,
-    val name: String,
+    override val name: String,
     val parameters: List<Parameter>,
     val returnType: Identifier?,
-    val body: BlockStatement
+    override val body: BlockStatement
 ) : Declaration {
     val context: FunctionDeclarationContext = FunctionDeclarationContext()
 }

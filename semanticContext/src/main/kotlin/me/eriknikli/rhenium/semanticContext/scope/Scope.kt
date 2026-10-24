@@ -35,6 +35,9 @@ class Scope(
         return parent?.getSymbol(name)
     }
 
+    fun getType(name: String): ExpressionType? =
+        getDirectSymbol(name) as? ExpressionType ?: parent?.getType(name)
+
     fun getDirectSymbol(name: String): Symbol? {
         val symbol = symbolTable.getOrDefault(name, null)
         if (symbol != null) {

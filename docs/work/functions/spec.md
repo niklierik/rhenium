@@ -86,7 +86,7 @@ node holds the entries and the functions. Return and loop control statements sha
 carrying their keyword, which is what the unreachable-statement warning names.
 
 **Semantic model.** `Void` is an expression type seeded into the global scope, emitted as C `void`,
-assignable to nothing. A **function symbol** is a symbol, not a left value, holding a **signature**
+assignable only to the poison type, as every type is. A **function symbol** is a symbol, not a left value, holding a **signature**
 (parameter types and return type) and a C name `re_<name>_<uuid>`, generated once per declaration as
 variables' are. Calls reach a function through its resolved symbol, never by name, which is what keeps
 overloading open. There is no function expression type. A scope may belong to a function, in which

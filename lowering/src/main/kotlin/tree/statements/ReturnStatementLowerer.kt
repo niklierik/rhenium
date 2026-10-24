@@ -15,8 +15,10 @@ class ReturnStatementLowerer
 @Inject
 constructor() : IReturnStatementLowerer {
     @Inject
-    lateinit var expressionLowerer: Lazy<IExpressionLowerer>
+    lateinit var expressionLowererProvider: Lazy<IExpressionLowerer>
+
+    private val expressionLowerer by lazy { expressionLowererProvider.get() }
 
     override fun lower(node: ReturnStatement): ReturnAction =
-        ReturnAction(node.value?.let { expressionLowerer.get().lower(it) })
+        ReturnAction(node.value?.let { expressionLowerer.lower(it) })
 }

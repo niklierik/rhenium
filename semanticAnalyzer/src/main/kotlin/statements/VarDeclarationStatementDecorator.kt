@@ -98,10 +98,7 @@ class VarDeclarationStatementDecorator
         statement.context.typeToDeclare = type
         statement.context.symbolInfo = variable
 
-        val taken = scope.getSymbol(statement.name)
-        val takenByAType = taken != null && taken !is LeftValueSymbol
-
-        if (scope.getDirectSymbol(statement.name) == null && !takenByAType) {
+        if (scope.getDirectSymbol(statement.name) == null) {
             scope.insertSymbol(statement.name, variable)
         }
     }

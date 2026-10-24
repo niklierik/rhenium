@@ -38,7 +38,7 @@ import javax.inject.Singleton
 interface IStatementVisitor {
     fun visitStatement(ctx: RheniumParser.StatementContext): Diagnosed<Statement>
 
-    fun visitBlockStatement(ctx: RheniumParser.BlockContext): Diagnosed<BlockStatement>
+    fun blockStatementOf(ctx: RheniumParser.BlockContext): Diagnosed<BlockStatement>
 }
 
 @Singleton
@@ -139,10 +139,6 @@ class StatementVisitor
         ctx: RheniumParser.BlockContext
     ): Diagnosed<Statement> = blockStatementOf(ctx)
 
-    override fun visitBlockStatement(
-        ctx: RheniumParser.BlockContext
-    ): Diagnosed<BlockStatement> = blockStatementOf(ctx)
-
     override fun visitWhileStatement(
         ctx: RheniumParser.WhileStatementContext
     ): Diagnosed<Statement> = either {
@@ -224,7 +220,7 @@ class StatementVisitor
         ctx.elseIf?.let { ifStatementOf(it) }
             ?: ctx.elseBlock?.let { blockStatementOf(it) }
 
-    private fun blockStatementOf(
+    override fun blockStatementOf(
         ctx: RheniumParser.BlockContext
     ): Diagnosed<BlockStatement> = either {
         val statements = mapOrAccumulate(ctx.statement()) { visitStatement(it).bindNel() }

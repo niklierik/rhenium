@@ -170,6 +170,26 @@ class SemanticAnalyzerTests {
                     "1:6: error: variable 'f' is already declared at 1:1."
                 ),
                 Arguments.of(
+                    "a parameter named like a function is reported once, not again at its uses",
+                    "fn f(f: I32) {\n    println f;\n    f = 2;\n}",
+                    "1:6: error: variable 'f' is already declared at 1:1."
+                ),
+                Arguments.of(
+                    "a parameter named like a type is reported once, not again at its uses",
+                    "fn f(Boolean: I32) {\n    println Boolean;\n}",
+                    "1:6: error: variable 'Boolean' is already declared."
+                ),
+                Arguments.of(
+                    "a local named like a function is reported once, not again at its uses",
+                    "fn f() {}\nentry Main {\n    let f = 1;\n    println f;\n    f = 2;\n}",
+                    "3:5: error: variable 'f' is already declared at 1:1."
+                ),
+                Arguments.of(
+                    "a local named like a type is reported once, not again at its uses",
+                    "entry Main {\n    let Boolean = 1;\n    println Boolean;\n}",
+                    "2:5: error: variable 'Boolean' is already declared."
+                ),
+                Arguments.of(
                     "a local may not shadow a parameter",
                     "fn f(a: I32) {\n    let a = 1;\n}",
                     "2:5: error: variable 'a' shadows variable 'a' declared at 1:6."

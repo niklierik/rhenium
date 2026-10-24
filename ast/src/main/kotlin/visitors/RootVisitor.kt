@@ -50,7 +50,7 @@ constructor() : RheniumParserBaseVisitor<Diagnosed<RootNode>>(), IRootVisitor {
     }
 
     private fun entryOf(ctx: RheniumParser.EntryDeclarationContext): Diagnosed<Declaration> =
-        statementVisitor.visitBlockStatement(ctx.body).map { EntryDeclaration(ctx, ctx.name.text, it) }
+        statementVisitor.blockStatementOf(ctx.body).map { EntryDeclaration(ctx, ctx.name.text, it) }
 
     private fun functionOf(
         ctx: RheniumParser.FunctionDeclarationContext
@@ -60,7 +60,7 @@ constructor() : RheniumParserBaseVisitor<Diagnosed<RootNode>>(), IRootVisitor {
         zipOrAccumulate(
             { mapOrAccumulate(ctx.parameter()) { parameterOf(it).bindNel() } },
             { returnTypeNode?.let { expressionVisitor.typeNameOf(it).bindNel() } },
-            { statementVisitor.visitBlockStatement(ctx.body).bindNel() }
+            { statementVisitor.blockStatementOf(ctx.body).bindNel() }
         ) { parameters, returnType, body ->
             FunctionDeclaration(ctx, ctx.name.text, parameters, returnType, body)
         }

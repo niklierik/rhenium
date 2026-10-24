@@ -46,16 +46,15 @@ constructor() : IBlockStatementDecorator {
     }
 
     private fun checkReachable(statements: List<Statement>, scope: Scope): Diagnosed<Unit> = either {
-        val index = statements.indexOfFirst { leavesBlock(it, scope) }
+        val index = statements.indexOfFirst { it is ControlTransferStatement && leavesBlock(it, scope) }
         val transfer = statements.getOrNull(index) as? ControlTransferStatement ?: return@either
         val unreachable = statements.getOrNull(index + 1) ?: return@either
 
         raise(UnreachableStatement(unreachable.parserContext, transfer).nel())
     }
 
-    private fun leavesBlock(statement: Statement, scope: Scope): Boolean = when (statement) {
+    private fun leavesBlock(statement: ControlTransferStatement, scope: Scope): Boolean = when (statement) {
         is ReturnStatement -> true
         is LoopControlStatement -> scope.isInsideLoop()
-        else -> false
     }
 }

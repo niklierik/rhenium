@@ -6,8 +6,8 @@ import org.antlr.v4.runtime.ParserRuleContext
 
 data class EntryDeclaration(
     override val parserContext: ParserRuleContext,
-    val name: String,
-    val body: BlockStatement
+    override val name: String,
+    override val body: BlockStatement
 ) : Declaration {
     val context: EntryDeclarationContext = EntryDeclarationContext()
 }

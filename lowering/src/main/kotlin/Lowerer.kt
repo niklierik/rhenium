@@ -12,8 +12,7 @@ import me.eriknikli.rhenium.lowering.actions.FunctionSignature
 import me.eriknikli.rhenium.lowering.actions.ProgramAction
 import me.eriknikli.rhenium.lowering.actions.PrototypeAction
 import me.eriknikli.rhenium.lowering.actions.ReturnAction
-import me.eriknikli.rhenium.lowering.tree.declarations.IEntryDeclarationLowerer
-import me.eriknikli.rhenium.lowering.tree.declarations.IFunctionDeclarationLowerer
+import me.eriknikli.rhenium.lowering.tree.declarations.IDeclarationLowerer
 import me.eriknikli.rhenium.semanticContext.scope.types.SignedIntType
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -27,24 +26,20 @@ class Lowerer
 @Inject
 constructor() : ILowerer {
     @Inject
-    lateinit var functionDeclarationLowererProvider: Lazy<IFunctionDeclarationLowerer>
+    lateinit var declarationLowererProvider: Lazy<IDeclarationLowerer>
 
-    @Inject
-    lateinit var entryDeclarationLowererProvider: Lazy<IEntryDeclarationLowerer>
-
-    private val functionDeclarationLowerer by lazy { functionDeclarationLowererProvider.get() }
-    private val entryDeclarationLowerer by lazy { entryDeclarationLowererProvider.get() }
+    private val declarationLowerer by lazy { declarationLowererProvider.get() }
 
     override fun lower(node: RootNode, entry: EntryDeclaration): ProgramAction {
-        val prototypes = node.functions.map { PrototypeAction(functionDeclarationLowerer.signatureOf(it)) }
-        val functions = node.functions.map { functionDeclarationLowerer.lower(it) }
-        val entries = node.entries.map { entryDeclarationLowerer.lower(it) }
+        val prototypes = node.functions.map { PrototypeAction(declarationLowerer.signatureOf(it)) }
+        val functions = node.functions.map { declarationLowerer.lower(it) }
+        val entries = node.entries.map { declarationLowerer.lower(it) }
 
         return ProgramAction(prototypes + functions + entries + main(entry))
     }
 
     private fun main(entry: EntryDeclaration): FunctionAction {
-        val launch = CallAction(entryDeclarationLowerer.signatureOf(entry).cName, emptyList())
+        val launch = CallAction(declarationLowerer.signatureOf(entry).cName, emptyList())
         val body = Block(mutableListOf(ExpressionStatementAction(launch), ReturnAction(ConstantAction("0"))))
 
         return FunctionAction(FunctionSignature("main", SignedIntType.I32, emptyList()), body)

@@ -78,8 +78,5 @@ interface LoweringModule {
     fun bindCall(callLowerer: CallLowerer): ICallLowerer
 
     @Binds
-    fun bindFunctionDeclaration(functionDeclarationLowerer: FunctionDeclarationLowerer): IFunctionDeclarationLowerer
-
-    @Binds
-    fun bindEntryDeclaration(entryDeclarationLowerer: EntryDeclarationLowerer): IEntryDeclarationLowerer
+    fun bindDeclaration(declarationLowerer: DeclarationLowerer): IDeclarationLowerer
 }

@@ -12,7 +12,6 @@ import me.eriknikli.rhenium.semanticAnalyzer.diagnostics.TypeMismatch
 import me.eriknikli.rhenium.semanticAnalyzer.diagnostics.UnexpectedReturnValue
 import me.eriknikli.rhenium.semanticAnalyzer.expressions.ExpressionNodeDecoratorContext
 import me.eriknikli.rhenium.semanticAnalyzer.expressions.IExpressionNodeDecorator
-import me.eriknikli.rhenium.semanticContext.scope.types.InvalidType
 import me.eriknikli.rhenium.semanticContext.scope.types.VoidType
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -39,7 +38,7 @@ constructor() : IReturnStatementDecorator {
 
         val value = statement.value
         if (value == null) {
-            ensure(returnType is VoidType || returnType is InvalidType) {
+            ensure(returnType.allowsBareReturn()) {
                 MissingReturnValue(statement.parserContext, returnType).nel()
             }
             return@either

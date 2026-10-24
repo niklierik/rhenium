@@ -21,6 +21,7 @@ import me.eriknikli.rhenium.semanticAnalyzer.diagnostics.MissingReturn
 import me.eriknikli.rhenium.semanticAnalyzer.diagnostics.VariableAlreadyDeclared
 import me.eriknikli.rhenium.semanticAnalyzer.statements.IStatementNodeDecorator
 import me.eriknikli.rhenium.semanticAnalyzer.statements.StatementDecoratorContext
+import me.eriknikli.rhenium.semanticAnalyzer.statements.allowsBareReturn
 import me.eriknikli.rhenium.semanticContext.scope.Scope
 import me.eriknikli.rhenium.semanticContext.scope.functions.FunctionSymbol
 import me.eriknikli.rhenium.semanticContext.scope.functions.Signature
@@ -71,7 +72,7 @@ constructor() : IFunctionDeclarationDecorator {
             zipOrAccumulate(
                 { mapOrAccumulate(parameterTypes) { it.bindNel() } },
                 { returnType.bindNel() },
-                { ensure(existing == null) { FunctionAlreadyDeclared(function.parserContext, function.name, existing) } }
+                { ensure(existing == null) { FunctionAlreadyDeclared(function.parserContext, function.name, existing.declarationParserContext) } }
             ) { _, _, _ -> }
         }
     }
@@ -96,7 +97,7 @@ constructor() : IFunctionDeclarationDecorator {
     }
 
     private fun checkReturns(function: FunctionDeclaration, returnType: ExpressionType): Diagnosed<Unit> = either {
-        if (returnType is VoidType || returnType is InvalidType) {
+        if (returnType.allowsBareReturn()) {
             return@either
         }
 
@@ -111,16 +112,24 @@ constructor() : IFunctionDeclarationDecorator {
     }
 
     private fun declareParameter(parameter: Parameter, type: ExpressionType, scope: Scope): Diagnosed<Unit> {
-        val variable = Variable(parameter.name, type, parameter.mutable, parameter.parserContext)
+        val existing = scope.getSymbol(parameter.name)
+        val variable = Variable(
+            parameter.name,
+            if (existing == null) type else InvalidType,
+            parameter.mutable,
+            parameter.parserContext
+        )
         parameter.context.relevantScope = scope
         parameter.context.variable = variable
 
-        val existing = scope.getSymbol(parameter.name)
+        if (scope.getDirectSymbol(parameter.name) == null) {
+            scope.insertSymbol(parameter.name, variable)
+        }
+
         if (existing != null) {
             return VariableAlreadyDeclared(parameter.parserContext, parameter.name, existing).leftNel()
         }
 
-        scope.insertSymbol(parameter.name, variable)
         return Unit.right()
     }
 }
