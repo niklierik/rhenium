@@ -1,6 +1,8 @@
 import me.eriknikli.rhenium.lowering.actions.*
+import me.eriknikli.rhenium.semanticContext.scope.types.BooleanType
 import me.eriknikli.rhenium.semanticContext.scope.types.SignedIntType
 import me.eriknikli.rhenium.semanticContext.scope.types.UnsignedIntType
+import me.eriknikli.rhenium.semanticContext.scope.types.VoidType
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
@@ -25,7 +27,10 @@ class TranspilerTests {
 
     @Test
     fun `the prologue precedes the program and declares the c names the types rely on`() {
-        val program = FunctionAction("main", "int32_t", Block(mutableListOf(ReturnAction(ConstantAction("0")))))
+        val program = FunctionAction(
+            FunctionSignature("main", SignedIntType.I32, emptyList()),
+            Block(mutableListOf(ReturnAction(ConstantAction("0"))))
+        )
 
         val c = emit { transpiler.transpile(program, it) }
 
@@ -55,6 +60,48 @@ class TranspilerTests {
                     "a constant is written verbatim, because lowering already decided its c spelling",
                     ConstantAction("1"),
                     "1"
+                ),
+                Arguments.of(
+                    "a function without parameters has empty parentheses",
+                    FunctionAction(FunctionSignature("re_f_1", VoidType, emptyList()), Block(mutableListOf())),
+                    "void re_f_1(){}"
+                ),
+                Arguments.of(
+                    "a function lists its parameters with their c names, separated by commas",
+                    FunctionAction(
+                        FunctionSignature(
+                            "re_add_1",
+                            SignedIntType.I32,
+                            listOf(FunctionParameter(SignedIntType.I32, "re_a_1"), FunctionParameter(BooleanType, "re_b_1"))
+                        ),
+                        Block(mutableListOf(ReturnAction(VarRefAction("re_a_1"))))
+                    ),
+                    "int32_t re_add_1(int32_t re_a_1,boolean_t re_b_1){return re_a_1;}"
+                ),
+                Arguments.of(
+                    "a prototype is the signature followed by a semicolon",
+                    PrototypeAction(FunctionSignature("re_f_1", VoidType, listOf(FunctionParameter(SignedIntType.I8, "re_a_1")))),
+                    "void re_f_1(int8_t re_a_1);"
+                ),
+                Arguments.of(
+                    "a call writes its arguments separated by commas",
+                    CallAction("re_f_1", listOf(ConstantAction("1"), VarRefAction("re_a_1"))),
+                    "re_f_1(1,re_a_1)"
+                ),
+                Arguments.of(
+                    "a call without arguments",
+                    CallAction("re_f_1", emptyList()),
+                    "re_f_1()"
+                ),
+                Arguments.of(
+                    "a program writes each declaration on a line of its own, in order",
+                    ProgramAction(
+                        listOf(
+                            PrototypeAction(FunctionSignature("re_f_1", VoidType, emptyList())),
+                            FunctionAction(FunctionSignature("re_f_1", VoidType, emptyList()), Block(mutableListOf()))
+                        )
+                    ),
+                    "void re_f_1();" + System.lineSeparator() + "void re_f_1(){}" + System.lineSeparator()
                 ),
                 Arguments.of(
                     "a variable reference writes only its mangled name",
@@ -257,7 +304,10 @@ class TranspilerTests {
                 ),
                 Arguments.of(
                     "a function writes its return type before its name",
-                    FunctionAction("main", "int32_t", Block(mutableListOf(ReturnAction(ConstantAction("0"))))),
+                    FunctionAction(
+                        FunctionSignature("main", SignedIntType.I32, emptyList()),
+                        Block(mutableListOf(ReturnAction(ConstantAction("0"))))
+                    ),
                     "int32_t main(){return 0;}"
                 ),
                 Arguments.of(

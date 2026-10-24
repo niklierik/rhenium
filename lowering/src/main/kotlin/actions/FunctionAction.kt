@@ -1,7 +1,6 @@
 package me.eriknikli.rhenium.lowering.actions
 
 data class FunctionAction(
-    val cName: String,
-    val cReturnType: String,
+    val signature: FunctionSignature,
     val body: Block
 ) : Action

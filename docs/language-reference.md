@@ -8,7 +8,8 @@ entry Main {
 }
 ```
 
-Several `entry` blocks may live in one file. `Project.json` picks one with `"DefaultEntry"`, and a
+An entry is where a program starts, and a file needs none — a library is not runnable. Several `entry`
+blocks may live in one file. `Project.json` picks one with `"DefaultEntry"`, and a
 `#Default` pragma marks one in-file. `Project.json` also carries `Name`, `Version`, `Src`, `Res`,
 `Dependencies` and `AllowC`. Files declare a namespace with `namespace Rhenium.Examples.Game;`.
 
@@ -17,12 +18,20 @@ Several `entry` blocks may live in one file. `Project.json` picks one with `"Def
 Kotlin-shaped, and they need no enclosing class:
 
 ```
-fun Sum(a: I32, b: I32): I32 {
+fn Sum(a: I32, b: I32): I32 {
     return a + b;
 }
 ```
 
-Omitting `: ReturnType`, or writing `Void`, means the function returns no value.
+Omitting `: ReturnType` means `: Void`, as Kotlin's omitted return type means `Unit`: the function
+returns no value, and its call cannot be used as one. There is no lowercase `void`.
+
+Parameters are mutable unless declared `const`:
+
+```
+fn Add(a: I32, b: I32): I32            // a and b are mutable
+fn Add(const a: I32, const b: I32): I32 // a and b are immutable
+```
 
 ## Variables
 
@@ -125,7 +134,7 @@ heap and their ownership must be managed — see the [memory model](memory-model
 **There is no inheritance**, by the composition-over-inheritance principle; interfaces provide
 polymorphism. Classes take constructor-style parameters and may declare fields, methods,
 `property` / `readonly property`, an `init { }` block and a `delete { }` block. `mutable` marks a
-mutable field, `mutate fun` a method that mutates the receiver, and `group` groups statics.
+mutable field, `mutate fn` a method that mutates the receiver, and `group` groups statics.
 
 Generics are planned as bare type parameters with no constraints. Union types and pattern matching
 are explicitly optional, only if time allows.

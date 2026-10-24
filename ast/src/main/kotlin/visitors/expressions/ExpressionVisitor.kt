@@ -2,9 +2,11 @@ package me.eriknikli.rhenium.ast.visitors.expressions
 
 import arrow.core.leftNel
 import arrow.core.raise.either
+import arrow.core.raise.mapOrAccumulate
 import arrow.core.raise.zipOrAccumulate
 import arrow.core.right
 import me.eriknikli.rhenium.ast.diagnostics.UnhandledParseRule
+import me.eriknikli.rhenium.ast.tree.expressions.CallExpression
 import me.eriknikli.rhenium.ast.tree.expressions.Expression
 import me.eriknikli.rhenium.ast.tree.expressions.Identifier
 import me.eriknikli.rhenium.ast.tree.expressions.operators.BinaryOpExpression
@@ -65,6 +67,12 @@ class ExpressionVisitor
 
     override fun visitGroupPrimitive(ctx: RheniumParser.GroupPrimitiveContext): Diagnosed<Expression> {
         return visit(ctx.expression())
+    }
+
+    override fun visitCallPrimitive(ctx: RheniumParser.CallPrimitiveContext): Diagnosed<Expression> = either {
+        val arguments = mapOrAccumulate(ctx.expression()) { visit(it).bindNel() }
+
+        CallExpression(ctx, identifierOf(ctx.callee), arguments)
     }
 
     override fun visitLiteral(ctx: RheniumParser.LiteralContext): Diagnosed<Expression> {

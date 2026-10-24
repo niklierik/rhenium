@@ -3,6 +3,7 @@ import me.eriknikli.rhenium.semanticContext.scope.types.BooleanType
 import me.eriknikli.rhenium.semanticContext.scope.types.FloatType
 import me.eriknikli.rhenium.semanticContext.scope.types.SignedIntType
 import me.eriknikli.rhenium.semanticContext.scope.types.UnsignedIntType
+import me.eriknikli.rhenium.semanticContext.scope.types.VoidType
 import me.eriknikli.rhenium.semanticContext.scope.Symbol
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.Arguments
@@ -30,7 +31,8 @@ class GlobalScopeTests {
             Arguments.of("U64", UnsignedIntType.U64),
             Arguments.of("F32", FloatType.F32),
             Arguments.of("F64", FloatType.F64),
-            Arguments.of("Boolean", BooleanType)
+            Arguments.of("Boolean", BooleanType),
+            Arguments.of("Void", VoidType)
         )
     }
 }

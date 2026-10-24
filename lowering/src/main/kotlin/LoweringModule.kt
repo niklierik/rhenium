@@ -2,6 +2,7 @@ package me.eriknikli.rhenium.lowering
 
 import dagger.Binds
 import dagger.Module
+import me.eriknikli.rhenium.lowering.tree.declarations.*
 import me.eriknikli.rhenium.lowering.tree.expressions.*
 import me.eriknikli.rhenium.lowering.tree.statements.*
 
@@ -69,4 +70,16 @@ interface LoweringModule {
 
     @Binds
     fun bindUnaryOp(unaryOpLowerer: UnaryOpLowerer): IUnaryOpLowerer
+
+    @Binds
+    fun bindReturnStatement(returnStatementLowerer: ReturnStatementLowerer): IReturnStatementLowerer
+
+    @Binds
+    fun bindCall(callLowerer: CallLowerer): ICallLowerer
+
+    @Binds
+    fun bindFunctionDeclaration(functionDeclarationLowerer: FunctionDeclarationLowerer): IFunctionDeclarationLowerer
+
+    @Binds
+    fun bindEntryDeclaration(entryDeclarationLowerer: EntryDeclarationLowerer): IEntryDeclarationLowerer
 }

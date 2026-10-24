@@ -2,6 +2,7 @@ package me.eriknikli.rhenium.semanticAnalyzer
 
 import dagger.Binds
 import dagger.Module
+import me.eriknikli.rhenium.semanticAnalyzer.declarations.*
 import me.eriknikli.rhenium.semanticAnalyzer.expressions.*
 import me.eriknikli.rhenium.semanticAnalyzer.statements.*
 
@@ -74,4 +75,16 @@ interface SemanticAnalyzerModule {
 
     @Binds
     fun bindLoopControlStatementDecorator(instance: LoopControlStatementDecorator): ILoopControlStatementDecorator
+
+    @Binds
+    fun bindReturnStatementDecorator(instance: ReturnStatementDecorator): IReturnStatementDecorator
+
+    @Binds
+    fun bindTypeNameDecorator(instance: TypeNameDecorator): ITypeNameDecorator
+
+    @Binds
+    fun bindFunctionDeclarationDecorator(instance: FunctionDeclarationDecorator): IFunctionDeclarationDecorator
+
+    @Binds
+    fun bindCallNodeDecorator(instance: CallNodeDecorator): ICallNodeDecorator
 }

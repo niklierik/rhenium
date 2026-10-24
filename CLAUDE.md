@@ -18,7 +18,7 @@ Rhenium is a compiler for a small statically-typed language that **transpiles to
 
 The daemon JVM is pinned by [gradle/gradle-daemon-jvm.properties](gradle/gradle-daemon-jvm.properties); on a mismatch Gradle says so and names the version it wants.
 
-`run` takes a path to a `.re` file, resolved against the `app/` project directory. Output lands next to the source: `<path>.c`, then the binary, which is executed immediately. `clang` must be on PATH. To work from the repo root instead, `./gradlew :app:installDist` and run `app/build/install/app/bin/app`.
+`run` takes a path to a `.re` file, resolved against the `app/` project directory, and optionally the name of the entry to run (`--args="prog.re Main"`); the name may be left out when the file holds one entry. Output lands next to the source: `<path>.c`, then the binary, which is executed immediately. `clang` must be on PATH. To work from the repo root instead, `./gradlew :app:installDist` and run `app/build/install/app/bin/app`.
 
 `src/` is gitignored — it holds scratch `.re` programs, not shipped code.
 
@@ -52,11 +52,11 @@ find yourself wanting it back, the lowering is incomplete.
 
 1. `CharStreams.fromFileName` → `IAstBuilder.parse` → `ParseTreeFactory` (lexer/parser) → `RootVisitor` → `RootNode`.
 2. `ISemanticAnalyzer.decorateSemanticContext(ast)` — mutates the AST in place: sets `relevantScope`, resolves types, registers symbols.
-3. `ILowerer.lower(ast)` — builds the action tree. Cannot fail: everything the user can get wrong was already reported, so it returns a `FunctionAction` rather than a `Diagnosed`, and an unhandled node kind is an `IllegalStateException` like any other compiler bug.
+3. `ILowerer.lower(ast, entry)` — builds the action tree for the entry the driver picked (the one entry, or the one named on the command line). Cannot fail: everything the user can get wrong was already reported, so it returns a `ProgramAction` — prototypes, every function and entry as a C function, then a `main` that calls the picked entry — rather than a `Diagnosed`, and an unhandled node kind is an `IllegalStateException` like any other compiler bug.
 4. `ITranspiler.transpile(actions, outputStream)` — emits a C prologue (the includes and typedefs the `cName`s rely on) then concatenates the tree.
 5. Shells out to `clang` via `String.runCommand()` in **common**. `Main` executes the produced binary the same way.
 
-Steps 1 and 2 each return `Diagnosed<T>`. `compile` hands back a `Compilation`: every diagnostic they produced, plus the binary's path, or none when a diagnostic is an error or clang exits non-zero. Steps 3 to 5 are only reached when no diagnostic is an error — nothing is written next to the source until then. `Main` prints every diagnostic, exits non-zero when there is no binary, and otherwise runs it, so warnings precede the program's output.
+Steps 1 and 2 each return `Diagnosed<T>`. `compile` hands back a `Compilation`: every diagnostic they produced, plus the binary's path, or none when a diagnostic is an error or clang exits non-zero. Steps 3 to 5 are only reached when no diagnostic is an error and an entry could be picked — nothing is written next to the source until then. A file with no entry, several entries and none named, or an unknown name stops with a `problem` message instead, which has no source position and so is not a diagnostic. `Main` prints every diagnostic, exits non-zero when there is no binary, and otherwise runs it, so warnings precede the program's output.
 
 Each stage is a parallel tree of small classes, one per kind: `visitors/` (ast) ↔ `tree/` (ast) ↔ decorators (semanticAnalyzer) ↔ lowerers (lowering) ↔ action transpilers (transpiler). Adding syntax means touching all five, in that order, plus a `@Binds` in the relevant Dagger module. A new binary operator also has to decide whether it gets a [compound assignment](CONTEXT.md) (`op=`) — every operator that makes sense to accumulate into does, and the compound form shares the binary operator's type rule and lowering rather than restating them. The printer has one extra layer the others do not: its per-kind classes are reached through a dispatcher holding one `when` over the sealed action set, so a new action kind fails to compile until it is printed — which is the enforcement a per-kind `@Binds` cannot give you, since a forgotten binding is only found by kapt.
 

@@ -1,9 +1,14 @@
 package me.eriknikli.rhenium.ast.tree
 
-import me.eriknikli.rhenium.ast.tree.statements.Statement
 import org.antlr.v4.runtime.ParserRuleContext
 
 data class RootNode(
     override val parserContext: ParserRuleContext,
-    val statements: List<Statement>,
-) : AstNode
+    val declarations: List<Declaration>,
+) : AstNode {
+    val entries: List<EntryDeclaration>
+        get() = declarations.filterIsInstance<EntryDeclaration>()
+
+    val functions: List<FunctionDeclaration>
+        get() = declarations.filterIsInstance<FunctionDeclaration>()
+}

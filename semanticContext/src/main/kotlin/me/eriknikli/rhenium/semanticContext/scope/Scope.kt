@@ -1,6 +1,11 @@
 package me.eriknikli.rhenium.semanticContext.scope
 
-class Scope(private val isLoop: Boolean = false) {
+import me.eriknikli.rhenium.semanticContext.scope.types.ExpressionType
+
+class Scope(
+    private val isLoop: Boolean = false,
+    private val returnType: ExpressionType? = null
+) {
     private var parent: Scope? = null
 
     private val symbolTable = HashMap<String, Symbol>()
@@ -10,6 +15,14 @@ class Scope(private val isLoop: Boolean = false) {
         child.parent = this
         return child
     }
+
+    fun createFunctionChild(returnType: ExpressionType): Scope {
+        val child = Scope(returnType = returnType)
+        child.parent = this
+        return child
+    }
+
+    fun enclosingReturnType(): ExpressionType? = returnType ?: parent?.enclosingReturnType()
 
     fun isInsideLoop(): Boolean = isLoop || parent?.isInsideLoop() == true
 

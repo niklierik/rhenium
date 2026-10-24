@@ -2,7 +2,7 @@ package me.eriknikli.rhenium.app
 
 import java.io.File
 
-data class CompilerOptions(val inputPath: String) {
+data class CompilerOptions(val inputPath: String, val entryName: String? = null) {
     val cPath: String
         get() = "$inputPath.c"
 

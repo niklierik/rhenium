@@ -8,11 +8,10 @@ import arrow.core.raise.ensure
 import arrow.core.raise.zipOrAccumulate
 import arrow.core.right
 import dagger.Lazy
-import me.eriknikli.rhenium.ast.tree.expressions.Identifier
 import me.eriknikli.rhenium.ast.tree.statements.vars.VarDeclarationStatement
 import me.eriknikli.rhenium.common.diagnostics.Diagnosed
+import me.eriknikli.rhenium.semanticAnalyzer.declarations.ITypeNameDecorator
 import me.eriknikli.rhenium.semanticAnalyzer.diagnostics.TypeMismatch
-import me.eriknikli.rhenium.semanticAnalyzer.diagnostics.UnknownType
 import me.eriknikli.rhenium.semanticAnalyzer.diagnostics.VariableAlreadyDeclared
 import me.eriknikli.rhenium.semanticAnalyzer.diagnostics.VariableShadowsOuter
 import me.eriknikli.rhenium.semanticAnalyzer.expressions.ExpressionNodeDecoratorContext
@@ -37,6 +36,11 @@ class VarDeclarationStatementDecorator
 
     private val expressionNodeDecorator by lazy { expressionNodeDecoratorProvider.get() }
 
+    @Inject
+    lateinit var typeNameDecoratorProvider: Lazy<ITypeNameDecorator>
+
+    private val typeNameDecorator by lazy { typeNameDecoratorProvider.get() }
+
     override fun decorate(statement: VarDeclarationStatement): Diagnosed<Unit> {
         val scope = statement.context.relevantScope
         val name = statement.name
@@ -49,7 +53,7 @@ class VarDeclarationStatementDecorator
                         .bindNel()
                 },
                 {
-                    statement.expectedType?.let { declaredTypeOf(it, scope).bindNel() }
+                    statement.expectedType?.let { typeNameDecorator.valueTypeOf(it, scope).bindNel() }
                 },
                 {
                     nameIsFree(statement, scope, name).bindNel()
@@ -86,17 +90,6 @@ class VarDeclarationStatementDecorator
         } else {
             VariableAlreadyDeclared(statement.parserContext, name, outer).leftNel()
         }
-    }
-
-    private fun declaredTypeOf(expectedType: Identifier, scope: Scope): Diagnosed<ExpressionType> {
-        val name = expectedType.toString()
-        val symbol = scope.getSymbol(name)
-
-        if (symbol !is ExpressionType) {
-            return UnknownType(expectedType.parserContext, name).leftNel()
-        }
-
-        return symbol.right()
     }
 
     private fun declare(statement: VarDeclarationStatement, scope: Scope, type: ExpressionType) {

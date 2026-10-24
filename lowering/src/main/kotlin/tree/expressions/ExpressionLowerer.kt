@@ -1,6 +1,7 @@
 package me.eriknikli.rhenium.lowering.tree.expressions
 
 import dagger.Lazy
+import me.eriknikli.rhenium.ast.tree.expressions.CallExpression
 import me.eriknikli.rhenium.ast.tree.expressions.Expression
 import me.eriknikli.rhenium.ast.tree.expressions.LeftValue
 import me.eriknikli.rhenium.ast.tree.expressions.literals.Literal
@@ -29,12 +30,16 @@ constructor() : IExpressionLowerer {
     @Inject
     lateinit var unaryOpLowerer: Lazy<IUnaryOpLowerer>
 
+    @Inject
+    lateinit var callLowerer: Lazy<ICallLowerer>
+
     override fun lower(node: Expression): Action {
         return when (node) {
             is Literal<*> -> literalLowerer.get().lower(node)
             is UnaryOpExpression -> unaryOpLowerer.get().lower(node)
             is BinaryOpExpression -> binaryOpLowerer.get().lower(node)
             is LeftValue -> leftValueLowerer.get().lower(node)
+            is CallExpression -> callLowerer.get().lower(node)
             else -> throw IllegalStateException("Unhandled node ${node.javaClass} and cannot lower it as expression.")
         }
     }

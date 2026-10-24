@@ -7,6 +7,7 @@ import me.eriknikli.rhenium.ast.tree.statements.ForStatement
 import me.eriknikli.rhenium.ast.tree.statements.IfStatement
 import me.eriknikli.rhenium.ast.tree.statements.LoopControlStatement
 import me.eriknikli.rhenium.ast.tree.statements.PrintStatement
+import me.eriknikli.rhenium.ast.tree.statements.ReturnStatement
 import me.eriknikli.rhenium.ast.tree.statements.Statement
 import me.eriknikli.rhenium.ast.tree.statements.WhileStatement
 import me.eriknikli.rhenium.ast.tree.statements.vars.CompoundAssignmentStatement
@@ -80,6 +81,10 @@ constructor(
     lateinit var loopControlStatementDecoratorProvider: Lazy<ILoopControlStatementDecorator>
     private val loopControlStatementDecorator by lazy { loopControlStatementDecoratorProvider.get() }
 
+    @Inject
+    lateinit var returnStatementDecoratorProvider: Lazy<IReturnStatementDecorator>
+    private val returnStatementDecorator by lazy { returnStatementDecoratorProvider.get() }
+
     override fun decorateStatement(
         statement: Statement,
         statementDecoratorContext: StatementDecoratorContext
@@ -135,6 +140,11 @@ constructor(
             )
 
             is LoopControlStatement -> loopControlStatementDecorator.decorate(
+                statement,
+                StatementDecoratorContext(scope)
+            )
+
+            is ReturnStatement -> returnStatementDecorator.decorate(
                 statement,
                 StatementDecoratorContext(scope)
             )

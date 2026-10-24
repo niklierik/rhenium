@@ -5,7 +5,16 @@ options {
 }
 
 root:
-    statement* EOF;
+    (entryDeclaration | functionDeclaration)* EOF;
+
+entryDeclaration:
+    ENTRY name=ID body=block;
+
+functionDeclaration:
+    FN name=ID OPEN_BRACKET (parameter (COMMA parameter)*)? CLOSE_BRACKET (COLON returnType=typeName)? body=block;
+
+parameter:
+    CONST? name=ID COLON type=typeName;
 
 statement:
     varDeclarationStatement
@@ -19,6 +28,7 @@ statement:
     | ifStatement
     | breakStatement
     | continueStatement
+    | returnStatement
     | block;
 
 block:
@@ -51,6 +61,9 @@ breakStatement:
 
 continueStatement:
     CONTINUE SEMICOLON;
+
+returnStatement:
+    RETURN expression? SEMICOLON;
 
 ifStatement:
     IF OPEN_BRACKET condition=expression CLOSE_BRACKET thenBranch=block (ELSE (elseIf=ifStatement | elseBlock=block))?;
@@ -103,6 +116,7 @@ expression:
 
 primary:
     OPEN_BRACKET expression CLOSE_BRACKET #groupPrimitive
+    | callee=identifier OPEN_BRACKET (expression (COMMA expression)*)? CLOSE_BRACKET #callPrimitive
     | literal #literalPrimitive;
 
 leftValue:

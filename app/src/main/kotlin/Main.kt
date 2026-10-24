@@ -6,10 +6,8 @@ import java.io.File
 import kotlin.system.exitProcess
 
 fun main(args: Array<String>) {
-    var path = args.joinToString(" ")
-    if (path.isEmpty()) {
-        path = "main.re"
-    }
+    val path = args.getOrElse(0) { "main.re" }
+    val entryName = args.getOrNull(1)
 
     if (!File(path).exists()) {
         System.err.println("Input file '$path' not found.")
@@ -19,11 +17,13 @@ fun main(args: Array<String>) {
     val factory = DaggerRheniumCompilerFactory.create()
     val compiler = factory.makeCompiler()
 
-    val compilation = compiler.compile(CompilerOptions(path))
+    val compilation = compiler.compile(CompilerOptions(path, entryName))
 
     if (compilation.diagnostics.isNotEmpty()) {
         System.err.println(compilation.diagnostics.render())
     }
+
+    compilation.problem?.let { System.err.println(it) }
 
     val binaryPath = compilation.binaryPath ?: exitProcess(1)
     binaryPath.runCommand()

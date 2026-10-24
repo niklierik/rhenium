@@ -16,6 +16,10 @@ WHILE: 'while';
 FOR: 'for';
 BREAK: 'break';
 CONTINUE: 'continue';
+RETURN: 'return';
+
+ENTRY: 'entry';
+FN: 'fn';
 
 EQUALSEQUALS: '==';
 NOTEQUALS: '!=';
@@ -44,6 +48,7 @@ AND: '&&';
 OR: '||';
 
 COLON: ':';
+COMMA: ',';
 SEMICOLON: ';';
 
 OPEN_BRACKET: '(';

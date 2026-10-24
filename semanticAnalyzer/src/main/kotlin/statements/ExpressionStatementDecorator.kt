@@ -29,7 +29,7 @@ constructor() : IExpressionStatementDecorator {
         statement.context.relevantScope = scope
 
         return expressionNodeDecorator
-            .decorateExpression(statement.expression, ExpressionNodeDecoratorContext(scope))
+            .decorateDiscardedExpression(statement.expression, ExpressionNodeDecoratorContext(scope))
             .map { }
     }
 }

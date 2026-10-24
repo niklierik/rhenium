@@ -1,7 +1,10 @@
 package me.eriknikli.rhenium.semanticAnalyzer.expressions
 
+import arrow.core.flatMap
+import arrow.core.leftNel
 import arrow.core.right
 import dagger.Lazy
+import me.eriknikli.rhenium.ast.tree.expressions.CallExpression
 import me.eriknikli.rhenium.ast.tree.expressions.Expression
 import me.eriknikli.rhenium.ast.tree.expressions.Identifier
 import me.eriknikli.rhenium.ast.tree.expressions.literals.Literal
@@ -9,7 +12,9 @@ import me.eriknikli.rhenium.ast.tree.expressions.operators.BinaryOpExpression
 import me.eriknikli.rhenium.ast.tree.expressions.operators.UnaryOpExpression
 import me.eriknikli.rhenium.common.diagnostics.Diagnosed
 import me.eriknikli.rhenium.semanticContext.scope.Scope
+import me.eriknikli.rhenium.semanticAnalyzer.diagnostics.VoidHasNoValue
 import me.eriknikli.rhenium.semanticContext.scope.types.ExpressionType
+import me.eriknikli.rhenium.semanticContext.scope.types.VoidType
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -17,6 +22,11 @@ data class ExpressionNodeDecoratorContext(val scope: Scope)
 
 interface IExpressionNodeDecorator {
     fun decorateExpression(
+        expression: Expression,
+        expressionNodeDecoratorContext: ExpressionNodeDecoratorContext
+    ): Diagnosed<ExpressionType>
+
+    fun decorateDiscardedExpression(
         expression: Expression,
         expressionNodeDecoratorContext: ExpressionNodeDecoratorContext
     ): Diagnosed<ExpressionType>
@@ -44,7 +54,17 @@ constructor() : IExpressionNodeDecorator {
     @Inject
     lateinit var identifierNodeDecorator: Lazy<IIdentifierNodeDecorator>
 
+    @Inject
+    lateinit var callNodeDecorator: Lazy<ICallNodeDecorator>
+
     override fun decorateExpression(
+        expression: Expression,
+        expressionNodeDecoratorContext: ExpressionNodeDecoratorContext
+    ): Diagnosed<ExpressionType> = decorateDiscardedExpression(expression, expressionNodeDecoratorContext).flatMap {
+        if (it is VoidType) VoidHasNoValue(expression.parserContext).leftNel() else it.right()
+    }
+
+    override fun decorateDiscardedExpression(
         expression: Expression,
         expressionNodeDecoratorContext: ExpressionNodeDecoratorContext
     ): Diagnosed<ExpressionType> {
@@ -56,6 +76,8 @@ constructor() : IExpressionNodeDecorator {
             is Literal<*> -> literalNodeDecorator.decorateLiteral(expression).right()
             is Identifier -> identifierNodeDecorator.get()
                 .decorateIdentifier(expression, expressionNodeDecoratorContext)
+
+            is CallExpression -> callNodeDecorator.get().decorate(expression, expressionNodeDecoratorContext)
 
             else -> throw IllegalStateException(
                 "Unhandled expression node ${expression.javaClass.simpleName} cannot be decorated."

@@ -19,6 +19,16 @@ class LoweringTests {
     @ParameterizedTest(name = "Run {index}, name {0}")
     @MethodSource("provideData")
     fun `test lowered actions`(name: String, sourceCode: String, expectedActions: String) {
+        assertEquals(expectedActions, lower("entry Main {\n$sourceCode\n}").entryBody())
+    }
+
+    @ParameterizedTest(name = "Run {index}, name {0}")
+    @MethodSource("providePrograms")
+    fun `test lowered programs`(name: String, sourceCode: String, entry: String, expectedActions: String) {
+        assertEquals(expectedActions, lower(sourceCode, entry).sexpr().withoutUuids())
+    }
+
+    private fun lower(sourceCode: String, entry: String = "Main"): ProgramAction {
         val ast = astBuilder.parse(CharStreams.fromString(sourceCode))
             .getOrElse { fail("expected the source to parse, got:\n${it.render()}") }
 
@@ -28,10 +38,63 @@ class LoweringTests {
             }
         }
 
-        assertEquals(expectedActions, lowerer.lower(ast).body())
+        return lowerer.lower(ast, ast.entries.single { it.name == entry })
     }
 
     companion object {
+        @JvmStatic
+        fun providePrograms(): Stream<Arguments> {
+            return Stream.of(
+                Arguments.of(
+                    "an entry is a function that main calls",
+                    "entry Main { println; }",
+                    "Main",
+                    """(program (fn void re_entry_Main () (block (print "\n"))) """ +
+                        "(fn int32_t main () (block (expr (call re_entry_Main)) (return 0))))"
+                ),
+                Arguments.of(
+                    "a function gets a prototype before every definition, and a call names its c name",
+                    "entry Main { f(); }\nfn f() { return; }",
+                    "Main",
+                    "(program (proto void re_f ()) (fn void re_f () (block (return))) " +
+                        "(fn void re_entry_Main () (block (expr (call re_f)))) " +
+                        "(fn int32_t main () (block (expr (call re_entry_Main)) (return 0))))"
+                ),
+                Arguments.of(
+                    "parameters carry their type and c name, and arguments are lowered as expressions",
+                    "fn f(a: I8, const b: Boolean) {}\nentry Main { f(I8(1), true); }",
+                    "Main",
+                    "(program (proto void re_f ((int8_t re_a) (boolean_t re_b))) " +
+                        "(fn void re_f ((int8_t re_a) (boolean_t re_b)) (block)) " +
+                        "(fn void re_entry_Main () (block (expr (call re_f (cast int8_t 1) true)))) " +
+                        "(fn int32_t main () (block (expr (call re_entry_Main)) (return 0))))"
+                ),
+                Arguments.of(
+                    "a function returns a value and its call is an operand",
+                    "fn one(): I32 { return 1; }\nentry Main { println one() + 1; }",
+                    "Main",
+                    "(program (proto int32_t re_one ()) (fn int32_t re_one () (block (return (cast int32_t 1)))) " +
+                        "(fn void re_entry_Main () (block (print \"%\" PRId32 \"\\n\" (cast int32_t " +
+                        "(cast int32_t (+ (cast uint32_t (call re_one)) (cast uint32_t (cast int32_t 1)))))))) " +
+                        "(fn int32_t main () (block (expr (call re_entry_Main)) (return 0))))"
+                ),
+                Arguments.of(
+                    "every entry is emitted and main calls the chosen one",
+                    "entry A {}\nentry B {}",
+                    "B",
+                    "(program (fn void re_entry_A () (block)) (fn void re_entry_B () (block)) " +
+                        "(fn int32_t main () (block (expr (call re_entry_B)) (return 0))))"
+                ),
+                Arguments.of(
+                    "a bare return in an entry",
+                    "entry Main { return; }",
+                    "Main",
+                    "(program (fn void re_entry_Main () (block (return))) " +
+                        "(fn int32_t main () (block (expr (call re_entry_Main)) (return 0))))"
+                )
+            )
+        }
+
         @JvmStatic
         fun provideData(): Stream<Arguments> {
             return Stream.of(
@@ -420,10 +483,18 @@ class LoweringTests {
             )
         }
 
-        private fun FunctionAction.body(): String = body.actions
-            .dropLast(1)
+        private fun ProgramAction.entryBody(): String = declarations
+            .filterIsInstance<FunctionAction>()
+            .single { it.signature.cName == "re_entry_Main" }
+            .body.actions
             .joinToString(" ") { it.sexpr() }
             .replace(Regex("re_a_[0-9a-f_]+"), "re_a")
+
+        private fun String.withoutUuids(): String =
+            replace(Regex("(re_[A-Za-z0-9]+?)_[0-9a-f]{8}_[0-9a-f]{4}_[0-9a-f]{4}_[0-9a-f]{4}_[0-9a-f]{12}"), "$1")
+
+        private fun FunctionSignature.sexpr(): String =
+            "${returnType.cName} $cName ${parameters.joinToString(" ", "(", ")") { "(${it.type.cName} ${it.cName})" }}"
 
         private fun Action.sexpr(): String = when (this) {
             is Block -> (listOf("block") + actions.map { it.sexpr() }).joinToString(" ", "(", ")")
@@ -436,7 +507,10 @@ class LoweringTests {
                 val elseSide = elseBranch?.let { " ${it.sexpr()}" } ?: ""
                 "(if ${condition.sexpr()} ${thenBranch.sexpr()}$elseSide)"
             }
-            is FunctionAction -> "(fn $cReturnType $cName ${body.sexpr()})"
+            is ProgramAction -> (listOf("program") + declarations.map { it.sexpr() }).joinToString(" ", "(", ")")
+            is PrototypeAction -> "(proto ${signature.sexpr()})"
+            is FunctionAction -> "(fn ${signature.sexpr()} ${body.sexpr()})"
+            is CallAction -> (listOf("call", cName) + arguments.map { it.sexpr() }).joinToString(" ", "(", ")")
             is ReturnAction -> value?.let { "(return ${it.sexpr()})" } ?: "(return)"
             is PrintAction -> value?.let { "(print $cFormat ${it.sexpr()})" } ?: "(print $cFormat)"
             is CastAction -> "(cast ${type.cName} ${operand.sexpr()})"

@@ -1,7 +1,11 @@
 package me.eriknikli.rhenium.app
 
+import arrow.core.Either
 import arrow.core.getOrElse
+import arrow.core.left
+import arrow.core.right
 import me.eriknikli.rhenium.ast.IAstBuilder
+import me.eriknikli.rhenium.ast.tree.EntryDeclaration
 import me.eriknikli.rhenium.common.diagnostics.hasErrors
 import me.eriknikli.rhenium.common.runCommand
 import me.eriknikli.rhenium.lowering.ILowerer
@@ -35,7 +39,8 @@ constructor(
             return Compilation(diagnostics, null)
         }
 
-        val actions = lowerer.lower(ast)
+        val entry = selectEntry(ast.entries, options).getOrElse { return Compilation(diagnostics, null, it) }
+        val actions = lowerer.lower(ast, entry)
 
         val output = Path(options.cPath).outputStream()
         output.use {
@@ -49,5 +54,17 @@ constructor(
         }
 
         return Compilation(diagnostics, options.binaryPath)
+    }
+
+    private fun selectEntry(entries: List<EntryDeclaration>, options: CompilerOptions): Either<String, EntryDeclaration> {
+        val path = options.inputPath
+        val name = options.entryName
+
+        return when {
+            entries.isEmpty() -> "nothing to run: no entry in $path.".left()
+            name != null -> entries.find { it.name == name }?.right() ?: "no entry named '$name' in $path.".left()
+            entries.size == 1 -> entries.single().right()
+            else -> "several entries in $path, choose one: ${entries.joinToString(", ") { it.name }}.".left()
+        }
     }
 }

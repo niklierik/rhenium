@@ -8,6 +8,7 @@ import me.eriknikli.rhenium.ast.tree.statements.ForStatement
 import me.eriknikli.rhenium.ast.tree.statements.IfStatement
 import me.eriknikli.rhenium.ast.tree.statements.IterationExpression
 import me.eriknikli.rhenium.ast.tree.statements.PrintStatement
+import me.eriknikli.rhenium.ast.tree.statements.ReturnStatement
 import me.eriknikli.rhenium.ast.tree.statements.Statement
 import me.eriknikli.rhenium.ast.tree.statements.WhileStatement
 import me.eriknikli.rhenium.ast.tree.statements.vars.VarDeclarationStatement
@@ -50,6 +51,9 @@ constructor() : IStatementLowerer {
     @Inject
     lateinit var continueStatementLowerer: Lazy<IContinueStatementLowerer>
 
+    @Inject
+    lateinit var returnStatementLowerer: Lazy<IReturnStatementLowerer>
+
     override fun lower(node: Statement): Action {
         return when (node) {
             is VarDeclarationStatement -> varDeclarationLowerer.get().lower(node)
@@ -61,6 +65,7 @@ constructor() : IStatementLowerer {
             is IfStatement -> ifStatementLowerer.get().lower(node)
             is BreakStatement -> breakStatementLowerer.get().lower(node)
             is ContinueStatement -> continueStatementLowerer.get().lower(node)
+            is ReturnStatement -> returnStatementLowerer.get().lower(node)
             else -> throw IllegalStateException("Unhandled node ${node.javaClass} and cannot lower it as statement.")
         }
     }

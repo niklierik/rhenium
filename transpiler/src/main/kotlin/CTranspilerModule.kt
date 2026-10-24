@@ -68,4 +68,13 @@ interface CTranspilerModule {
 
     @Binds
     fun bindConstantTranspiler(transpiler: CConstantTranspiler): IConstantTranspiler
+
+    @Binds
+    fun bindProgramTranspiler(transpiler: CProgramTranspiler): IProgramTranspiler
+
+    @Binds
+    fun bindPrototypeTranspiler(transpiler: CPrototypeTranspiler): IPrototypeTranspiler
+
+    @Binds
+    fun bindCallTranspiler(transpiler: CCallTranspiler): ICallTranspiler
 }

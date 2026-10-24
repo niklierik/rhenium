@@ -12,11 +12,11 @@ every resource has an owner, and destroying an owner destroys its resources — 
   Comparable to `using` in C# or `try`-with-resources in Java.
 
 ```
-fun CreateCar(model: String): gives Car {
+fn CreateCar(model: String): gives Car {
     return Car(brand, model);
 }
 
-fun Store(take car: Car): void {
+fn Store(take car: Car): Void {
     optionalCar.Store(car);
 }
 

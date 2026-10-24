@@ -136,10 +136,43 @@ _Avoid_: Jump statement, escape, exit — `jump` would also take in `return` and
 than a loop
 
 **Unreachable statement**:
-A statement that follows a loop control statement in the same block, so control can never arrive at it.
-Only that local case counts; nothing is inferred from an if statement whose every branch leaves the
-loop.
+A statement that follows a `return`, or a loop control statement inside a loop, in the same block, so
+control can never arrive at it. Only that local case counts; nothing is inferred from an if statement
+whose every branch leaves.
 _Avoid_: Dead code, unused code — `unused` is about values and variables, not control
+
+### Functions
+
+**Entry**:
+A named, top-level `entry <name> { ... }` block where a program starts. A source file may hold none —
+a library is not runnable — or several;
+which one the program starts from is chosen when compiling, not in the source. An entry is identified
+by its name but is not a symbol: it cannot be called or referred to from code.
+_Avoid_: Main, entry point, exec — `main` is the C wrapper that launches the chosen entry
+
+**Function**:
+A named, top-level `fn` declaration with parameters, a return type and a body. It can be called from
+anywhere in the program, before or after its declaration.
+_Avoid_: Procedure, routine, method — `method` is reserved for functions that belong to a type
+
+**Parameter**:
+A variable a function declares in its signature, bound to an argument on each call. Mutable unless
+declared `const`.
+_Avoid_: Argument, formal — the declaration side is the parameter, the call side is the argument
+
+**Argument**:
+An expression passed in a call, checked against its parameter as an assigned value is checked against
+its variable.
+_Avoid_: Parameter, actual
+
+**Return type**:
+The expression type a function's calls evaluate to. Omitting it means `Void`.
+_Avoid_: Result type — `result` is reserved for the standard library's `Result`
+
+**Void**:
+The return type of a function that returns no value. A call to one is a statement only; its value
+cannot be used. There is no lowercase `void`.
+_Avoid_: Unit, void, nothing
 
 ### Types and values
 

@@ -6,7 +6,9 @@ import arrow.core.raise.mapOrAccumulate
 import arrow.core.raise.zipOrAccumulate
 import dagger.Lazy
 import me.eriknikli.rhenium.ast.tree.statements.BlockStatement
+import me.eriknikli.rhenium.ast.tree.statements.ControlTransferStatement
 import me.eriknikli.rhenium.ast.tree.statements.LoopControlStatement
+import me.eriknikli.rhenium.ast.tree.statements.ReturnStatement
 import me.eriknikli.rhenium.ast.tree.statements.Statement
 import me.eriknikli.rhenium.common.diagnostics.Diagnosed
 import me.eriknikli.rhenium.semanticAnalyzer.diagnostics.UnreachableStatement
@@ -44,14 +46,16 @@ constructor() : IBlockStatementDecorator {
     }
 
     private fun checkReachable(statements: List<Statement>, scope: Scope): Diagnosed<Unit> = either {
-        if (!scope.isInsideLoop()) {
-            return@either
-        }
-
-        val index = statements.indexOfFirst { it is LoopControlStatement }
-        val loopControl = statements.getOrNull(index) as? LoopControlStatement ?: return@either
+        val index = statements.indexOfFirst { leavesBlock(it, scope) }
+        val transfer = statements.getOrNull(index) as? ControlTransferStatement ?: return@either
         val unreachable = statements.getOrNull(index + 1) ?: return@either
 
-        raise(UnreachableStatement(unreachable.parserContext, loopControl).nel())
+        raise(UnreachableStatement(unreachable.parserContext, transfer).nel())
+    }
+
+    private fun leavesBlock(statement: Statement, scope: Scope): Boolean = when (statement) {
+        is ReturnStatement -> true
+        is LoopControlStatement -> scope.isInsideLoop()
+        else -> false
     }
 }

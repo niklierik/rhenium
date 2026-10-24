@@ -3,6 +3,7 @@ package me.eriknikli.rhenium.transpiler.actions
 import dagger.Lazy
 import me.eriknikli.rhenium.lowering.actions.FunctionAction
 import me.eriknikli.rhenium.transpiler.IKindTranspiler
+import me.eriknikli.rhenium.transpiler.utils.writeSignature
 import me.eriknikli.rhenium.transpiler.utils.writeText
 import java.io.OutputStream
 import javax.inject.Inject
@@ -20,7 +21,8 @@ constructor() : IFunctionTranspiler {
     private val blockTranspiler by lazy { blockTranspilerProvider.get() }
 
     override fun transpile(action: FunctionAction, output: OutputStream) {
-        output.writeText("${action.cReturnType} ${action.cName}(){")
+        output.writeSignature(action.signature)
+        output.writeText("{")
         blockTranspiler.transpile(action.body, output)
         output.writeText("}")
     }

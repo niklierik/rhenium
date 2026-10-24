@@ -18,8 +18,22 @@ From `plan.md` on the `plans` branch. MSc thesis project, defense planned for sp
 Literals, unary and binary arithmetic, relational and equality operators, grouping,
 `let` / `const` declarations with an optional declared type, assignment, compound assignment with
 `+=`, `-=`, `*=`, `/=`, `%=`, `&&=` and `||=`, `x++` and `x--`, expression statements,
-braced blocks with a scope of their own, `while` loops, `for` statements, `break` and `continue`, `if` / `else if` / `else`, the type rules over those, and a transpiler
-that emits every statement into a single C `main()`.
+braced blocks with a scope of their own, `while` loops, `for` statements, `break` and `continue`, `if` / `else if` / `else`,
+functions, `return` and `entry` blocks, the type rules over those, and a transpiler that emits every
+function and entry as a C function behind a `main` that calls the chosen entry.
+
+A source file is a list of `fn` declarations and `entry` blocks in any order; a statement outside them
+does not parse. `fn Name(a: T, const b: U): R { ... }` declares a function, callable from anywhere in the
+file whatever the order, recursively too. Leaving out `: R` means `Void`, and a `Void` call is a
+statement only — its value cannot be used, and nothing can be declared `Void`. Parameters are mutable
+unless `const`. Arguments are checked against parameters as assigned values are, `return` against the
+return type, and a function with a return type must return on every path: an if returns only with an
+else whose branches both do, and a loop never counts. A function body sees its parameters and the
+global scope, not the variables of whoever calls it, and `break` never crosses into a caller's loop.
+Functions share the global scope with types, so a function, a parameter or a local cannot take a name
+already there. A file may hold any number of uniquely named entries, including none; the command line
+names the one to run, and may leave the name out when there is only one. There is no overloading, no
+function value and no library build yet. See [docs/work/functions/spec.md](work/functions/spec.md).
 
 A block is a statement, so blocks nest and stand on their own. What a block declares stops existing at
 its closing brace, and a declaration may not shadow one from an enclosing block — the two collisions
@@ -74,7 +88,7 @@ postfix only and statements of their own, so `y = x++;` does not parse. See
 
 `print` and `println` write a value to standard output. They are a placeholder for the `Console` of
 [the standard library](standard-library.md), reserved keywords rather than calls because the language
-has neither functions nor strings yet, and they are removed when `Console` lands. See
+had no functions when they landed and still has no strings, and they are removed when `Console` lands. See
 [docs/work/print/spec.md](work/print/spec.md).
 
 Every diagnostic is an error or a warning, printed as `3:5: warning: message`. An error stops the
@@ -87,8 +101,10 @@ Everything else in these documents is unbuilt.
 
 - `^` (Pow) exists as a lexer token and has type rules in `BinaryOpNodeDecorator`, but **no parser
   rule** — it cannot be written in a program yet.
-- There is no `entry`, no `namespace` and no `Project.json` handling. The compiler takes a single
-  `.re` file path on the command line and compiles that.
+- There is no `namespace`, no import and no `Project.json` handling. The compiler takes a single
+  `.re` file path on the command line, plus optionally the name of the entry to run, and compiles that.
+- A file without an entry is checked and then reported as having nothing to run; building it into a
+  library is [issue 07](work/functions/issues/07-a-file-without-an-entry-builds-a-library.md).
 - Division by zero and `MIN / -1` are undefined. Diagnosing them needs a way to fail at runtime, and
   there is no panic and no `Result` yet. See
   [docs/work/integer-arithmetic/spec.md](work/integer-arithmetic/spec.md).

@@ -5,7 +5,7 @@ C is bound with `c_decl`, which always links a Rhenium name to a C symbol using 
 ```
 c_decl type I32 as int32_t;
 
-c_decl fun C_Write(text: Ref<String>) as rhenium_lib_console_write;
+c_decl fn C_Write(text: Ref<String>) as rhenium_lib_console_write;
 
 c_decl const C_EOL: Ref<String> as RHENIUM_LIB_EOL;
 

@@ -17,6 +17,7 @@ import me.eriknikli.rhenium.ast.tree.statements.ForStatement
 import me.eriknikli.rhenium.ast.tree.statements.IfStatement
 import me.eriknikli.rhenium.ast.tree.statements.IterationExpression
 import me.eriknikli.rhenium.ast.tree.statements.PrintStatement
+import me.eriknikli.rhenium.ast.tree.statements.ReturnStatement
 import me.eriknikli.rhenium.ast.tree.statements.Statement
 import me.eriknikli.rhenium.ast.tree.statements.WhileStatement
 import me.eriknikli.rhenium.ast.tree.statements.vars.CompoundAssignmentStatement
@@ -36,6 +37,8 @@ import javax.inject.Singleton
 
 interface IStatementVisitor {
     fun visitStatement(ctx: RheniumParser.StatementContext): Diagnosed<Statement>
+
+    fun visitBlockStatement(ctx: RheniumParser.BlockContext): Diagnosed<BlockStatement>
 }
 
 @Singleton
@@ -136,6 +139,10 @@ class StatementVisitor
         ctx: RheniumParser.BlockContext
     ): Diagnosed<Statement> = blockStatementOf(ctx)
 
+    override fun visitBlockStatement(
+        ctx: RheniumParser.BlockContext
+    ): Diagnosed<BlockStatement> = blockStatementOf(ctx)
+
     override fun visitWhileStatement(
         ctx: RheniumParser.WhileStatementContext
     ): Diagnosed<Statement> = either {
@@ -184,6 +191,16 @@ class StatementVisitor
     override fun visitContinueStatement(
         ctx: RheniumParser.ContinueStatementContext
     ): Diagnosed<Statement> = ContinueStatement(ctx).right()
+
+    override fun visitReturnStatement(
+        ctx: RheniumParser.ReturnStatementContext
+    ): Diagnosed<Statement> {
+        val valueNode = ctx.expression() ?: return ReturnStatement(ctx, null).right()
+
+        return expressionVisitor.get()
+            .visitExpression(valueNode)
+            .map { ReturnStatement(ctx, it) }
+    }
 
     override fun visitIfStatement(
         ctx: RheniumParser.IfStatementContext

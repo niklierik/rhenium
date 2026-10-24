@@ -4,9 +4,11 @@ import arrow.core.leftNel
 import arrow.core.right
 import me.eriknikli.rhenium.ast.tree.expressions.Identifier
 import me.eriknikli.rhenium.common.diagnostics.Diagnosed
+import me.eriknikli.rhenium.semanticAnalyzer.diagnostics.FunctionIsNotAValue
 import me.eriknikli.rhenium.semanticAnalyzer.diagnostics.InvalidLeftValueSymbol
 import me.eriknikli.rhenium.semanticAnalyzer.diagnostics.UnknownSymbol
 import me.eriknikli.rhenium.semanticContext.scope.LeftValueSymbol
+import me.eriknikli.rhenium.semanticContext.scope.functions.FunctionSymbol
 import me.eriknikli.rhenium.semanticContext.scope.types.ExpressionType
 import me.eriknikli.rhenium.semanticContext.scope.vars.ErrorSymbol
 import javax.inject.Inject
@@ -35,6 +37,11 @@ constructor() : IIdentifierNodeDecorator {
         if (symbol == null) {
             identifier.context.symbol = ErrorSymbol
             return UnknownSymbol(identifier.parserContext, identifier).leftNel()
+        }
+
+        if (symbol is FunctionSymbol) {
+            identifier.context.symbol = ErrorSymbol
+            return FunctionIsNotAValue(identifier.parserContext, identifier).leftNel()
         }
 
         if (symbol !is LeftValueSymbol) {

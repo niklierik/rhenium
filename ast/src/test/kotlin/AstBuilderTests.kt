@@ -1,7 +1,12 @@
 import arrow.core.getOrElse
 import me.eriknikli.rhenium.ast.IAstBuilder
 import me.eriknikli.rhenium.ast.tree.AstNode
+import me.eriknikli.rhenium.ast.tree.EntryDeclaration
+import me.eriknikli.rhenium.ast.tree.FunctionDeclaration
+import me.eriknikli.rhenium.ast.tree.Parameter
 import me.eriknikli.rhenium.ast.tree.RootNode
+import me.eriknikli.rhenium.ast.tree.expressions.CallExpression
+import me.eriknikli.rhenium.ast.tree.statements.ReturnStatement
 import me.eriknikli.rhenium.ast.tree.expressions.Identifier
 import me.eriknikli.rhenium.ast.tree.expressions.literals.Literal
 import me.eriknikli.rhenium.ast.tree.expressions.operators.BinaryOpExpression
@@ -35,18 +40,18 @@ class AstBuilderTests {
     @ParameterizedTest(name = "Run {index}, name {0}")
     @MethodSource("provideData")
     fun `test ast building`(name: String, sourceCode: String, expectedTree: String) {
-        val stream = CharStreams.fromString(sourceCode)
+        val stream = CharStreams.fromString(inEntry(sourceCode))
 
         val actualTree = astBuilder.parse(stream)
             .getOrElse { fail("expected a tree, got diagnostics:\n${it.render()}") }
 
-        assertEquals(expectedTree, actualTree.sexpr())
+        assertEquals(expectedTree, actualTree.entries.single().body.sexpr())
     }
 
     @ParameterizedTest(name = "Run {index}, name {0}")
     @MethodSource("provideDiagnostics")
     fun `test ast diagnostics`(name: String, sourceCode: String, expectedDiagnostics: String) {
-        val stream = CharStreams.fromString(sourceCode)
+        val stream = CharStreams.fromString(inEntry(sourceCode))
 
         val diagnostics = astBuilder.parse(stream).leftOrNull()
             ?: fail("expected diagnostics, but the source parsed successfully")
@@ -54,50 +59,68 @@ class AstBuilderTests {
         assertEquals(expectedDiagnostics, diagnostics.render())
     }
 
+    @ParameterizedTest(name = "Run {index}, name {0}")
+    @MethodSource("providePrograms")
+    fun `test program building`(name: String, sourceCode: String, expectedTree: String) {
+        val actualTree = astBuilder.parse(CharStreams.fromString(sourceCode))
+            .getOrElse { fail("expected a tree, got diagnostics:\n${it.render()}") }
+
+        assertEquals(expectedTree, actualTree.sexpr())
+    }
+
+    @Test
+    fun `a statement outside an entry or a function does not parse`() {
+        val diagnostics = astBuilder.parse(CharStreams.fromString("println 1;")).leftOrNull()
+            ?: fail("expected diagnostics, but the source parsed successfully")
+
+        assertEquals(1, diagnostics.head.line)
+        assertEquals(1, diagnostics.head.column)
+    }
+
     @Test
     fun `print without an operand does not parse`() {
-        val stream = CharStreams.fromString("print;")
+        val stream = CharStreams.fromString(inEntry("print;"))
 
         val diagnostics = astBuilder.parse(stream).leftOrNull()
             ?: fail("expected diagnostics, but the source parsed successfully")
 
         assertEquals(1, diagnostics.size)
-        assertEquals(1, diagnostics.head.line)
+        assertEquals(2, diagnostics.head.line)
         assertEquals(6, diagnostics.head.column)
     }
 
     @Test
     fun `else is followed by a block or an if and nothing else`() {
-        val stream = CharStreams.fromString("if (true) {} else while (true) {}")
+        val stream = CharStreams.fromString(inEntry("if (true) {} else while (true) {}"))
 
         val diagnostics = astBuilder.parse(stream).leftOrNull()
             ?: fail("expected diagnostics, but the source parsed successfully")
 
-        assertEquals(1, diagnostics.head.line)
+        assertEquals(2, diagnostics.head.line)
         assertEquals(19, diagnostics.head.column)
     }
 
     @ParameterizedTest(name = "Run {index}, name {0}")
     @MethodSource("provideSyntaxErrors")
     fun `test syntax errors`(name: String, sourceCode: String, expectedColumn: Int) {
-        val stream = CharStreams.fromString(sourceCode)
+        val stream = CharStreams.fromString(inEntry(sourceCode))
 
         val diagnostics = astBuilder.parse(stream).leftOrNull()
             ?: fail("expected diagnostics, but the source parsed successfully")
 
-        assertEquals(1, diagnostics.head.line)
+        assertEquals(2, diagnostics.head.line)
         assertEquals(expectedColumn, diagnostics.head.column)
     }
 
     @Test
     fun `syntax errors are reported instead of printed`() {
-        val stream = CharStreams.fromString("let a = ;")
+        val stream = CharStreams.fromString(inEntry("let a = ;"))
 
         val diagnostics = astBuilder.parse(stream).leftOrNull()
             ?: fail("expected diagnostics, but the source parsed successfully")
 
         assertEquals(1, diagnostics.size)
-        assertEquals(1, diagnostics.head.line)
+        assertEquals(2, diagnostics.head.line)
         assertEquals(9, diagnostics.head.column)
         assertTrue(diagnostics.head.message.isNotBlank())
     }
@@ -106,152 +129,187 @@ class AstBuilderTests {
         @JvmStatic
         fun provideData(): Stream<Arguments> {
             return Stream.of(
-                Arguments.of("mutable declaration", "let a = 1;", "(root (let a (i32 1)))"),
-                Arguments.of("immutable declaration", "const a = 1;", "(root (const a (i32 1)))"),
-                Arguments.of("declared type", "let a: I64 = I64(5);", "(root (let a : I64 (i64 5)))"),
-                Arguments.of("float literal", "let a = 1.5;", "(root (let a (f64 1.5)))"),
-                Arguments.of("typed float literal", "let a = F32(1.5);", "(root (let a (f32 1.5)))"),
-                Arguments.of("assignment", "a = false;", "(root (= a (boolean false)))"),
-                Arguments.of("compound addition", "a += 1;", "(root (+= a (i32 1)))"),
-                Arguments.of("compound subtraction", "a -= 1;", "(root (-= a (i32 1)))"),
-                Arguments.of("compound multiplication", "a *= 1;", "(root (*= a (i32 1)))"),
-                Arguments.of("compound division", "a /= 1;", "(root (/= a (i32 1)))"),
-                Arguments.of("compound remainder", "a %= 1;", "(root (%= a (i32 1)))"),
-                Arguments.of("compound and", "a &&= true;", "(root (&&= a (boolean true)))"),
-                Arguments.of("compound or", "a ||= true;", "(root (||= a (boolean true)))"),
-                Arguments.of("increment", "a++;", "(root (++ a))"),
-                Arguments.of("decrement", "a--;", "(root (-- a))"),
+                Arguments.of("mutable declaration", "let a = 1;", "(block (let a (i32 1)))"),
+                Arguments.of("immutable declaration", "const a = 1;", "(block (const a (i32 1)))"),
+                Arguments.of("declared type", "let a: I64 = I64(5);", "(block (let a : I64 (i64 5)))"),
+                Arguments.of("float literal", "let a = 1.5;", "(block (let a (f64 1.5)))"),
+                Arguments.of("typed float literal", "let a = F32(1.5);", "(block (let a (f32 1.5)))"),
+                Arguments.of("assignment", "a = false;", "(block (= a (boolean false)))"),
+                Arguments.of("compound addition", "a += 1;", "(block (+= a (i32 1)))"),
+                Arguments.of("compound subtraction", "a -= 1;", "(block (-= a (i32 1)))"),
+                Arguments.of("compound multiplication", "a *= 1;", "(block (*= a (i32 1)))"),
+                Arguments.of("compound division", "a /= 1;", "(block (/= a (i32 1)))"),
+                Arguments.of("compound remainder", "a %= 1;", "(block (%= a (i32 1)))"),
+                Arguments.of("compound and", "a &&= true;", "(block (&&= a (boolean true)))"),
+                Arguments.of("compound or", "a ||= true;", "(block (||= a (boolean true)))"),
+                Arguments.of("increment", "a++;", "(block (++ a))"),
+                Arguments.of("decrement", "a--;", "(block (-- a))"),
                 Arguments.of(
                     "multiplication binds tighter than addition",
                     "let a = 1 + 2 * 3;",
-                    "(root (let a (+ (i32 1) (* (i32 2) (i32 3)))))"
+                    "(block (let a (+ (i32 1) (* (i32 2) (i32 3)))))"
                 ),
                 Arguments.of(
                     "grouping overrides precedence",
                     "let a = (1 + 2) * 3;",
-                    "(root (let a (* (+ (i32 1) (i32 2)) (i32 3))))"
+                    "(block (let a (* (+ (i32 1) (i32 2)) (i32 3))))"
                 ),
-                Arguments.of("less than", "let a = 1 < 2;", "(root (let a (< (i32 1) (i32 2))))"),
-                Arguments.of("greater than", "let a = 1 > 2;", "(root (let a (> (i32 1) (i32 2))))"),
-                Arguments.of("not equals", "let a = 1 != 2;", "(root (let a (!= (i32 1) (i32 2))))"),
+                Arguments.of("less than", "let a = 1 < 2;", "(block (let a (< (i32 1) (i32 2))))"),
+                Arguments.of("greater than", "let a = 1 > 2;", "(block (let a (> (i32 1) (i32 2))))"),
+                Arguments.of("not equals", "let a = 1 != 2;", "(block (let a (!= (i32 1) (i32 2))))"),
                 Arguments.of(
                     "logical operators bind loosest",
                     "let a = 1 < 2 && true;",
-                    "(root (let a (&& (< (i32 1) (i32 2)) (boolean true))))"
+                    "(block (let a (&& (< (i32 1) (i32 2)) (boolean true))))"
                 ),
                 Arguments.of(
                     "unary negation",
                     "let a = !(2 + 3 == 4 + 1);",
-                    "(root (let a (! (== (+ (i32 2) (i32 3)) (+ (i32 4) (i32 1))))))"
+                    "(block (let a (! (== (+ (i32 2) (i32 3)) (+ (i32 4) (i32 1))))))"
                 ),
                 Arguments.of(
                     "multiple statements",
                     "let a = 1;\na = 2;",
-                    "(root (let a (i32 1)) (= a (i32 2)))"
+                    "(block (let a (i32 1)) (= a (i32 2)))"
                 ),
-                Arguments.of("expression statement", "1 + 2;", "(root (expr (+ (i32 1) (i32 2))))"),
+                Arguments.of("expression statement", "1 + 2;", "(block (expr (+ (i32 1) (i32 2))))"),
                 Arguments.of(
                     "an expression statement beside a declaration",
                     "let a = 1;\na + 1;",
-                    "(root (let a (i32 1)) (expr (+ a (i32 1))))"
+                    "(block (let a (i32 1)) (expr (+ a (i32 1))))"
                 ),
-                Arguments.of("print", "print 1;", "(root (print (i32 1)))"),
-                Arguments.of("println", "println 1;", "(root (println (i32 1)))"),
-                Arguments.of("bare println", "println;", "(root (println))"),
-                Arguments.of("an empty block", "{}", "(root (block))"),
+                Arguments.of("print", "print 1;", "(block (print (i32 1)))"),
+                Arguments.of("println", "println 1;", "(block (println (i32 1)))"),
+                Arguments.of("bare println", "println;", "(block (println))"),
+                Arguments.of("an empty block", "{}", "(block (block))"),
                 Arguments.of(
                     "a block holds statements",
                     "let a = 1;\n{\n    println a;\n}",
-                    "(root (let a (i32 1)) (block (println a)))"
+                    "(block (let a (i32 1)) (block (println a)))"
                 ),
                 Arguments.of(
                     "blocks nest",
                     "{ { let a = 1; } }",
-                    "(root (block (block (let a (i32 1)))))"
+                    "(block (block (block (let a (i32 1)))))"
                 ),
                 Arguments.of(
                     "a while loop holds its condition and its body",
                     "while (true) { println 1; }",
-                    "(root (while (boolean true) (block (println (i32 1)))))"
+                    "(block (while (boolean true) (block (println (i32 1)))))"
                 ),
                 Arguments.of(
                     "a while loop with an empty body still has one",
                     "while (true) {}",
-                    "(root (while (boolean true) (block)))"
+                    "(block (while (boolean true) (block)))"
                 ),
                 Arguments.of(
                     "while loops nest",
                     "while (true) { while (false) {} }",
-                    "(root (while (boolean true) (block (while (boolean false) (block)))))"
+                    "(block (while (boolean true) (block (while (boolean false) (block)))))"
                 ),
                 Arguments.of(
                     "an if holds its condition and its branch",
                     "if (true) { println 1; }",
-                    "(root (if (boolean true) (block (println (i32 1)))))"
+                    "(block (if (boolean true) (block (println (i32 1)))))"
                 ),
                 Arguments.of(
                     "an if with an else holds both branches",
                     "if (true) {} else { println 1; }",
-                    "(root (if (boolean true) (block) (block (println (i32 1)))))"
+                    "(block (if (boolean true) (block) (block (println (i32 1)))))"
                 ),
                 Arguments.of(
                     "an else if is an if nested in the else side",
                     "if (true) {} else if (false) { println 1; }",
-                    "(root (if (boolean true) (block) (if (boolean false) (block (println (i32 1))))))"
+                    "(block (if (boolean true) (block) (if (boolean false) (block (println (i32 1))))))"
                 ),
                 Arguments.of(
                     "an else if chain may end in an else",
                     "if (true) {} else if (false) {} else {}",
-                    "(root (if (boolean true) (block) (if (boolean false) (block) (block))))"
+                    "(block (if (boolean true) (block) (if (boolean false) (block) (block))))"
                 ),
                 Arguments.of(
                     "a for statement holds its init clause, condition, iteration expression and body",
                     "for (let i = 0; i < 3; i++) { println i; }",
-                    "(root (for (let i (i32 0)) (< i (i32 3)) (++ i) (block (println i))))"
+                    "(block (for (let i (i32 0)) (< i (i32 3)) (++ i) (block (println i))))"
                 ),
                 Arguments.of(
                     "an iteration expression may be an assignment or a compound assignment",
                     "for (let i = 0; i < 3; i = i + 1) { for (let j = 0; j < 3; j += 2) {} }",
-                    "(root (for (let i (i32 0)) (< i (i32 3)) (= i (+ i (i32 1))) " +
+                    "(block (for (let i (i32 0)) (< i (i32 3)) (= i (+ i (i32 1))) " +
                             "(block (for (let j (i32 0)) (< j (i32 3)) (+= j (i32 2)) (block)))))"
                 ),
                 Arguments.of(
                     "an init clause may be an assignment",
                     "for (i = 0; i < 3; i++) {}",
-                    "(root (for (= i (i32 0)) (< i (i32 3)) (++ i) (block)))"
+                    "(block (for (= i (i32 0)) (< i (i32 3)) (++ i) (block)))"
                 ),
                 Arguments.of(
                     "an init clause may be a compound assignment, and an iteration expression an expression",
                     "for (i += 1; i < 3; i) {}",
-                    "(root (for (+= i (i32 1)) (< i (i32 3)) (expr i) (block)))"
+                    "(block (for (+= i (i32 1)) (< i (i32 3)) (expr i) (block)))"
                 ),
                 Arguments.of(
                     "an init clause may be a decrement statement or an expression",
                     "for (i--; true; i + 1) { for (1; true; i++) {} }",
-                    "(root (for (-- i) (boolean true) (expr (+ i (i32 1))) " +
+                    "(block (for (-- i) (boolean true) (expr (+ i (i32 1))) " +
                             "(block (for (expr (i32 1)) (boolean true) (++ i) (block)))))"
                 ),
                 Arguments.of(
                     "ifs and while loops nest",
                     "if (true) { while (false) { if (false) {} } }",
-                    "(root (if (boolean true) (block (while (boolean false) (block (if (boolean false) (block)))))))"
+                    "(block (if (boolean true) (block (while (boolean false) (block (if (boolean false) (block)))))))"
                 ),
                 Arguments.of(
                     "break is a statement of its own",
                     "while (true) { break; }",
-                    "(root (while (boolean true) (block (break))))"
+                    "(block (while (boolean true) (block (break))))"
                 ),
                 Arguments.of(
                     "continue is a statement of its own",
                     "while (true) { continue; }",
-                    "(root (while (boolean true) (block (continue))))"
+                    "(block (while (boolean true) (block (continue))))"
                 ),
                 Arguments.of(
                     "println takes a whole expression",
                     "println 1 + 2;",
-                    "(root (println (+ (i32 1) (i32 2))))"
+                    "(block (println (+ (i32 1) (i32 2))))"
                 ),
-                Arguments.of("empty program", "", "(root)")
+                Arguments.of("empty program", "", "(block)")
+            )
+        }
+
+        @JvmStatic
+        fun providePrograms(): Stream<Arguments> {
+            return Stream.of(
+                Arguments.of("an empty file", "", "(root)"),
+                Arguments.of("an entry", "entry Main { println 1; }", "(root (entry Main (block (println (i32 1)))))"),
+                Arguments.of(
+                    "several entries",
+                    "entry A {}\nentry B {}",
+                    "(root (entry A (block)) (entry B (block)))"
+                ),
+                Arguments.of("a function without parameters or return type", "fn f() {}", "(root (fn f () (block)))"),
+                Arguments.of(
+                    "a function with parameters and a return type",
+                    "fn add(a: I32, const b: I32): I32 { return a + b; }",
+                    "(root (fn add ((a I32) (const b I32)) : I32 (block (return (+ a b)))))"
+                ),
+                Arguments.of("a bare return", "fn f() { return; }", "(root (fn f () (block (return))))"),
+                Arguments.of(
+                    "a call without arguments as a statement",
+                    "entry Main { f(); }",
+                    "(root (entry Main (block (expr (call f)))))"
+                ),
+                Arguments.of(
+                    "a call with arguments as an operand",
+                    "entry Main { println f(1, x + 2) * 3; }",
+                    "(root (entry Main (block (println (* (call f (i32 1) (+ x (i32 2))) (i32 3))))))"
+                ),
+                Arguments.of(
+                    "functions and entries in any order",
+                    "entry Main {}\nfn f() {}\nentry Other {}",
+                    "(root (entry Main (block)) (fn f () (block)) (entry Other (block)))"
+                )
             )
         }
 
@@ -284,44 +342,54 @@ class AstBuilderTests {
                 Arguments.of(
                     "integer literal out of range",
                     "let a = 99999999999999999999;",
-                    "1:9: error: '99999999999999999999' is not a valid I32 literal."
+                    "2:9: error: '99999999999999999999' is not a valid I32 literal."
                 ),
                 Arguments.of(
                     "typed literal out of range",
                     "let a = U8(300);",
-                    "1:9: error: '300' is not a valid U8 literal."
+                    "2:9: error: '300' is not a valid U8 literal."
                 ),
                 Arguments.of(
                     "both operands are reported, not just the first",
                     "let a = U8(300) + U8(400);",
                     """
-                    1:9: error: '300' is not a valid U8 literal.
-                    1:19: error: '400' is not a valid U8 literal.
+                    2:9: error: '300' is not a valid U8 literal.
+                    2:19: error: '400' is not a valid U8 literal.
                     """.trimIndent()
                 ),
                 Arguments.of(
                     "a float literal that overflows to infinity is not a valid literal",
                     "let a = F32(30000000000000000000000000000000000000000.0);",
-                    "1:9: error: '30000000000000000000000000000000000000000.0' is not a valid F32 literal."
+                    "2:9: error: '30000000000000000000000000000000000000000.0' is not a valid F32 literal."
                 ),
                 Arguments.of(
                     "the same holds for the wider float",
                     "let a = F64(10000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000.0);",
-                    "1:9: error: '10000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000.0' is not a valid F64 literal."
+                    "2:9: error: '10000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000.0' is not a valid F64 literal."
                 ),
                 Arguments.of(
                     "every statement is reported",
                     "let a = U8(300);\nlet b = U8(400);",
                     """
-                    1:9: error: '300' is not a valid U8 literal.
-                    2:9: error: '400' is not a valid U8 literal.
+                    2:9: error: '300' is not a valid U8 literal.
+                    3:9: error: '400' is not a valid U8 literal.
                     """.trimIndent()
                 )
             )
         }
 
+        private fun inEntry(statements: String): String = "entry Main {\n$statements\n}"
+
         private fun AstNode.sexpr(): String = when (this) {
-            is RootNode -> (listOf("root") + statements.map { it.sexpr() }).joinToString(" ", "(", ")")
+            is RootNode -> (listOf("root") + declarations.map { it.sexpr() }).joinToString(" ", "(", ")")
+            is EntryDeclaration -> "(entry $name ${body.sexpr()})"
+            is FunctionDeclaration -> {
+                val returns = returnType?.let { " : ${it.id}" } ?: ""
+                "(fn $name ${parameters.joinToString(" ", "(", ")") { it.sexpr() }}$returns ${body.sexpr()})"
+            }
+            is Parameter -> if (mutable) "($name ${type.id})" else "(const $name ${type.id})"
+            is CallExpression -> (listOf("call", callee.id) + arguments.map { it.sexpr() }).joinToString(" ", "(", ")")
+            is ReturnStatement -> value?.let { "(return ${it.sexpr()})" } ?: "(return)"
 
             is VarDeclarationStatement -> {
                 val keyword = if (mutable) "let" else "const"
